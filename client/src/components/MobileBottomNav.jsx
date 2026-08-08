@@ -1,0 +1,180 @@
+import React, { useState } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { LeaveApplyModal } from './LeaveApplyModal';
+import api from '../services/api';
+import {
+  LayoutDashboard,
+  FileCheck2,
+  Plus,
+  Users,
+  Menu,
+  CalendarPlus,
+  UserPlus,
+  ArrowUp,
+  Calendar,
+  FileText
+} from 'lucide-react';
+
+export const MobileBottomNav = ({ onToggleSidebar, sidebarOpen }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
+  const [leaveTypes, setLeaveTypes] = useState([]);
+  const [balance, setBalance] = useState(null);
+
+  const isEmployeePage = location.pathname === '/employees';
+  const isEmployeeRole = user?.role === 'EMPLOYEE';
+
+  const scrollToTop = () => {
+    // 1. Scroll main content container
+    const mainElement = document.querySelector('main');
+    if (mainElement) {
+      try {
+        mainElement.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        mainElement.scrollTop = 0;
+      }
+    }
+    // 2. Scroll window & document elements
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      document.body.scrollTop = 0;
+    }
+  };
+
+  const handleOpenApplyModal = async () => {
+    scrollToTop();
+
+    if (user?.role === 'CEO') {
+      return;
+    }
+    try {
+      const [leaveTypesRes, balanceRes] = await Promise.all([
+        api.get('/leave-types'),
+        api.get('/leaves/balance')
+      ]);
+      setLeaveTypes(leaveTypesRes.data.data.leaveTypes || []);
+      setBalance(balanceRes.data.data.balance);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsApplyModalOpen(true);
+    }
+  };
+
+  return (
+    <>
+      {/* Sleek Floating Action Radial Speed Dial Button on Mobile (Hidden when mobile sidebar drawer is open) */}
+      <div
+        className={`lg:hidden fixed bottom-6 right-6 z-30 transition-all duration-300 ${
+          sidebarOpen ? 'opacity-0 pointer-events-none scale-90 translate-y-4' : 'opacity-100 scale-100 translate-y-0'
+        }`}
+      >
+        <div className="speed-dial-wrapper">
+          <input
+            type="checkbox"
+            className="hidden-trigger"
+            id="mobile-speed-dial-toggle"
+            checked={isSpeedDialOpen}
+            onChange={(e) => setIsSpeedDialOpen(e.target.checked)}
+          />
+          <label className="circle" htmlFor="mobile-speed-dial-toggle" title="Quick Actions Menu">
+            <Plus className="plus-icon" />
+          </label>
+
+          <div className="subs">
+            {/* Action 1: Apply Leave */}
+            {user?.role !== 'CEO' && (
+              <button
+                type="button"
+                className="sub-circle bg-blue-600 hover:bg-blue-700"
+                title="Apply Leave"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenApplyModal();
+                  setTimeout(() => setIsSpeedDialOpen(false), 50);
+                }}
+              >
+                <CalendarPlus className="w-4 h-4 text-white" />
+              </button>
+            )}
+
+            {/* Action 2: Add Employee (CEO Only) */}
+            {!isEmployeePage && user?.role === 'CEO' && (
+              <button
+                type="button"
+                className="sub-circle bg-purple-600 hover:bg-purple-700"
+                title="Add Employee"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/employees');
+                  setTimeout(() => setIsSpeedDialOpen(false), 50);
+                }}
+              >
+                <UserPlus className="w-4 h-4 text-white" />
+              </button>
+            )}
+
+            {/* Action 3: Scroll to Top */}
+            <button
+              type="button"
+              className="sub-circle bg-amber-500 hover:bg-amber-600"
+              title="Scroll to Top"
+              onClick={(e) => {
+                e.stopPropagation();
+                scrollToTop();
+                setTimeout(() => setIsSpeedDialOpen(false), 50);
+              }}
+            >
+              <ArrowUp className="w-4 h-4 text-white" />
+            </button>
+
+            {/* Action 4: Add Holiday */}
+            <button
+              type="button"
+              className="sub-circle bg-emerald-500 hover:bg-emerald-600"
+              title="Holidays"
+              onClick={() => {
+                setIsSpeedDialOpen(false);
+                navigate('/holidays');
+              }}
+            >
+              <Calendar className="w-4 h-4 text-white" />
+            </button>
+
+            {/* Action 5: Generate Report */}
+            <button
+              type="button"
+              className="sub-circle bg-indigo-600 hover:bg-indigo-700"
+              title="Reports"
+              onClick={() => {
+                setIsSpeedDialOpen(false);
+                navigate('/reports');
+              }}
+            >
+              <FileText className="w-4 h-4 text-white" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Leave Application Modal triggered by center '+' button */}
+      <LeaveApplyModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        onSuccess={() => {
+          setIsApplyModalOpen(false);
+          navigate('/leaves');
+        }}
+        leaveTypes={leaveTypes}
+        balance={balance}
+      />
+    </>
+  );
+};

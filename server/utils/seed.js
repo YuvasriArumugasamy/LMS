@@ -1,0 +1,244 @@
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import { User } from '../models/User.js';
+import { Department } from '../models/Department.js';
+import { Designation } from '../models/Designation.js';
+import { LeaveType } from '../models/LeaveType.js';
+import { LeaveBalance } from '../models/LeaveBalance.js';
+import { LeaveRequest } from '../models/LeaveRequest.js';
+import { Holiday } from '../models/Holiday.js';
+import { Settings } from '../models/Settings.js';
+
+dotenv.config();
+
+const seedData = async () => {
+  try {
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/elms_enterprise';
+    await mongoose.connect(mongoUri);
+    console.log('[Seed Engine] Connected to MongoDB');
+
+    // Clear existing collections
+    await Promise.all([
+      User.deleteMany({}),
+      Department.deleteMany({}),
+      Designation.deleteMany({}),
+      LeaveType.deleteMany({}),
+      LeaveBalance.deleteMany({}),
+      LeaveRequest.deleteMany({}),
+      Holiday.deleteMany({}),
+      Settings.deleteMany({})
+    ]);
+
+    console.log('[Seed Engine] Cleared existing data');
+
+    // 1. Create Default Settings
+    await Settings.create({
+      companyName: 'Enterprise HR Global',
+      emergencyEscalationMinutes: 5,
+      workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      weekendDays: ['Saturday', 'Sunday']
+    });
+
+    // 2. Create Departments
+    const engineering = await Department.create({
+      name: 'Engineering',
+      code: 'ENG',
+      description: 'Software development, DevOps and R&D'
+    });
+
+    const hrDept = await Department.create({
+      name: 'Human Resources',
+      code: 'HR',
+      description: 'Talent management and employee welfare'
+    });
+
+    const salesDept = await Department.create({
+      name: 'Sales & Business',
+      code: 'SALES',
+      description: 'Enterprise client acquisition'
+    });
+
+    // 3. Create Designations
+    const techLead = await Designation.create({
+      name: 'Senior Tech Lead',
+      code: 'STL',
+      department: engineering._id,
+      grade: 'L4'
+    });
+
+    const dev = await Designation.create({
+      name: 'Full Stack Engineer',
+      code: 'FSE',
+      department: engineering._id,
+      grade: 'L2'
+    });
+
+    const hrManagerDesig = await Designation.create({
+      name: 'HR Business Partner',
+      code: 'HRBP',
+      department: hrDept._id,
+      grade: 'L3'
+    });
+
+    const salesManagerDesig = await Designation.create({
+      name: 'Sales Director',
+      code: 'SD',
+      department: salesDept._id,
+      grade: 'L4'
+    });
+
+    const accountExecDesig = await Designation.create({
+      name: 'Enterprise Account Executive',
+      code: 'EAE',
+      department: salesDept._id,
+      grade: 'L3'
+    });
+
+    // 4. Create Production Demo Accounts
+    const ceoUser = await User.create({
+      employeeId: 'EMP001',
+      firstName: 'Alexander',
+      lastName: 'Pierce',
+      email: 'ceo@enterprise.com',
+      password: 'CEO@123',
+      role: 'CEO',
+      department: engineering._id,
+      designation: techLead._id,
+      status: 'ACTIVE'
+    });
+
+    const hrUser = await User.create({
+      employeeId: 'EMP002',
+      firstName: 'Sarah',
+      lastName: 'Jenkins',
+      email: 'hr@enterprise.com',
+      password: 'Password@123',
+      role: 'HR',
+      department: hrDept._id,
+      designation: hrManagerDesig._id,
+      status: 'ACTIVE'
+    });
+
+    const managerUser = await User.create({
+      employeeId: 'EMP003',
+      firstName: 'David',
+      lastName: 'Miller',
+      email: 'manager@enterprise.com',
+      password: 'Password@123',
+      role: 'MANAGER',
+      department: engineering._id,
+      designation: techLead._id,
+      status: 'ACTIVE'
+    });
+
+    const employeeUser = await User.create({
+      employeeId: 'EMP004',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'employee@enterprise.com',
+      password: 'Password@123',
+      role: 'EMPLOYEE',
+      department: engineering._id,
+      designation: dev._id,
+      reportingManager: managerUser._id,
+      status: 'ACTIVE'
+    });
+
+    // Create Sales & Business Demo Employees
+    const salesManager = await User.create({
+      employeeId: 'EMP005',
+      firstName: 'Robert',
+      lastName: 'Vance',
+      email: 'sales.lead@enterprise.com',
+      password: 'Password@123',
+      role: 'MANAGER',
+      department: salesDept._id,
+      designation: salesManagerDesig._id,
+      status: 'ACTIVE'
+    });
+
+    await User.create({
+      employeeId: 'EMP006',
+      firstName: 'Emily',
+      lastName: 'Watson',
+      email: 'emily.watson@enterprise.com',
+      password: 'Password@123',
+      role: 'EMPLOYEE',
+      department: salesDept._id,
+      designation: accountExecDesig._id,
+      reportingManager: salesManager._id,
+      status: 'ACTIVE'
+    });
+
+    await User.create({
+      employeeId: 'EMP007',
+      firstName: 'Michael',
+      lastName: 'Chang',
+      email: 'michael.chang@enterprise.com',
+      password: 'Password@123',
+      role: 'EMPLOYEE',
+      department: salesDept._id,
+      designation: accountExecDesig._id,
+      reportingManager: salesManager._id,
+      status: 'ACTIVE'
+    });
+
+    console.log('[Seed Engine] Created default accounts: ceo@enterprise.com (CEO@123), hr@enterprise.com (Password@123)');
+
+    // 5. Create Leave Types
+    const casualLeave = await LeaveType.create({
+      name: 'Casual Leave',
+      code: 'CL',
+      maxDays: 12,
+      colorBadge: '#2563EB',
+      description: 'Regular planned personal time off'
+    });
+
+    const sickLeave = await LeaveType.create({
+      name: 'Sick Leave',
+      code: 'SL',
+      maxDays: 10,
+      colorBadge: '#EF4444',
+      documentRequired: true,
+      description: 'Medical and sick leave'
+    });
+
+    const earnedLeave = await LeaveType.create({
+      name: 'Earned Leave',
+      code: 'EL',
+      maxDays: 15,
+      colorBadge: '#22C55E',
+      carryForward: true,
+      description: 'Annual accrued leave entitlement'
+    });
+
+    const emergencyLeave = await LeaveType.create({
+      name: 'Emergency Leave',
+      code: 'EML',
+      maxDays: 5,
+      colorBadge: '#F59E0B',
+      description: 'Urgent unannounced family or emergency leave'
+    });
+
+    // 6. No default leave balances are created in this seed.
+
+    // 7. Create Sample Holidays
+    await Holiday.create([
+      { name: 'New Year Day', date: new Date('2026-01-01'), type: 'NATIONAL', description: 'Global holiday' },
+      { name: 'Labor Day', date: new Date('2026-05-01'), type: 'NATIONAL', description: 'International workers day' },
+      { name: 'Company Foundation Day', date: new Date('2026-08-15'), type: 'COMPANY', description: 'Enterprise celebration' },
+      { name: 'Christmas Day', date: new Date('2026-12-25'), type: 'NATIONAL', description: 'Christmas festival' }
+    ]);
+
+    // 8. No sample leave requests are created by default.
+
+    console.log('[Seed Engine] ✅ Enterprise database successfully seeded with initial production-ready data!');
+
+    process.exit(0);
+  } catch (error) {
+    console.error('[Seed Engine Error]', error);
+    process.exit(1);
+  }
+};
+
+seedData();
