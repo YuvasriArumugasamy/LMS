@@ -44,7 +44,15 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health Check API
+// Root & Health Check API
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    service: 'Enterprise Leave Management System (ELMS) API Backend',
+    version: '1.0.0'
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'success',
