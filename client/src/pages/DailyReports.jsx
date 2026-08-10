@@ -277,12 +277,12 @@ export const DailyReports = () => {
               <CheckCircle2 className="w-6 h-6 stroke-[2.2]" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black tracking-wider text-emerald-600 dark:text-emerald-400 uppercase">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-black tracking-wider text-emerald-600 dark:text-emerald-400 uppercase whitespace-nowrap">
                   TODAY'S REPORT
                 </span>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase">
+                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase whitespace-nowrap">
                   {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
               </div>

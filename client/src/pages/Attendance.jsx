@@ -553,40 +553,43 @@ export const Attendance = () => {
 
       {/* Daily Punch Widget Banner (Only for regular employees & managers, hidden for CEO) */}
       {user?.role !== 'CEO' && (
-        <div className="glass-panel p-3.5 sm:p-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-blue-600/10 via-sky-500/5 to-transparent flex items-center justify-between gap-3 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary text-white shadow-md shadow-primary/20 shrink-0">
+        <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-primary/20 bg-gradient-to-r from-blue-600/10 via-sky-500/5 to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <div className="p-3 rounded-2xl bg-primary text-white shadow-md shadow-primary/20 shrink-0 flex items-center justify-center">
               <Clock className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-mono font-bold text-slate-400">TODAY</span>
-                <span className="text-[10px] font-black text-primary uppercase">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  TODAY
+                </span>
+                <span className="text-slate-300 dark:text-slate-700">•</span>
+                <span className="text-[11px] font-black text-primary uppercase whitespace-nowrap">
                   {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
               </div>
 
-              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white leading-tight">
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight mt-0.5 truncate">
                 {todayAttendance?.clockIn
                   ? `Checked In at ${new Date(todayAttendance.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                   : 'Not Checked In Yet'}
               </h3>
 
               {todayAttendance?.clockOut && (
-                <p className="text-[11px] font-semibold text-emerald-500">
+                <p className="text-xs font-semibold text-emerald-500 mt-0.5 truncate">
                   Checked Out at {new Date(todayAttendance.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ({formatWorkDuration(todayAttendance)} worked)
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:justify-end">
             {!todayAttendance?.clockIn ? (
               <>
                 <select
                   value={workLocation}
                   onChange={(e) => setWorkLocation(e.target.value)}
-                  className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none"
+                  className="px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:ring-2 focus:ring-primary/20 shadow-2xs"
                 >
                   <option value="WFH">🏡 Remote / WFH</option>
                   <option value="IN_OFFICE">🏢 In-Office</option>
@@ -611,8 +614,8 @@ export const Attendance = () => {
                 Check Out
               </UiverseStarButton>
             ) : (
-              <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Attendance Completed
+              <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
+                <CheckCircle2 className="w-4 h-4" /> Attendance Completed
               </div>
             )}
           </div>
