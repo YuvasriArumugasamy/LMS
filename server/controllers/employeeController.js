@@ -265,3 +265,71 @@ export const deleteEmployee = asyncHandler(async (req, res, next) => {
     message: 'Employee deactivated successfully.'
   });
 });
+
+// Register or Update Face Lock Descriptor (CEO & HR Access Only)
+export const registerFaceLock = asyncHandler(async (req, res, next) => {
+  const { faceDescriptor } = req.body;
+  const { id } = req.params;
+
+  if (!faceDescriptor || !Array.isArray(faceDescriptor) || faceDescriptor.length === 0) {
+    return next(new AppError('Valid Face Descriptor array is required.', 400));
+  }
+
+  const employee = await User.findById(id);
+  if (!employee || employee.isDeleted) {
+    return next(new AppError('Employee not found.', 404));
+  }
+
+  employee.faceDescriptor = faceDescriptor;
+  employee.isFaceRegistered = true;
+  await employee.save({ validateBeforeSave: false });
+
+  await AuditLog.create({
+    user: req.user._id,
+    userName: `${req.user.firstName} ${req.user.lastName}`,
+    userRole: req.user.role,
+    action: 'FACE_LOCK_REGISTER',
+    module: 'EMPLOYEE',
+    details: `Registered Face Lock pattern for employee ${employee.firstName} ${employee.lastName} (${employee.employeeId})`
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Face Lock registered successfully!',
+    data: {
+      isFaceRegistered: true
+    }
+  });
+});
+
+// Reset / Remove Face Lock (CEO & HR Access Only)
+export const removeFaceLock = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const employee = await User.findById(id);
+  if (!employee || employee.isDeleted) {
+    return next(new AppError('Employee not found.', 404));
+  }
+
+  employee.faceDescriptor = [];
+  employee.isFaceRegistered = false;
+  await employee.save({ validateBeforeSave: false });
+
+  await AuditLog.create({
+    user: req.user._id,
+    userName: `${req.user.firstName} ${req.user.lastName}`,
+    userRole: req.user.role,
+    action: 'FACE_LOCK_REMOVE',
+    module: 'EMPLOYEE',
+    details: `Removed Face Lock pattern for employee ${employee.firstName} ${employee.lastName} (${employee.employeeId})`
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Face Lock pattern removed successfully.',
+    data: {
+      isFaceRegistered: false
+    }
+  });
+});
+

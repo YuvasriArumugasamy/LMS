@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
 import { UiverseStarButton } from '../components/UiverseStarButton';
 import { Modal } from '../components/Modal';
+import { FaceCameraModal } from '../components/FaceCameraModal';
 import blueBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_49 PM.png';
 import greenBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_43 PM.png';
 import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.png';
@@ -90,6 +91,10 @@ export const Attendance = () => {
   const [workLocation, setWorkLocation] = useState('WFH');
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Face Verification Camera Modal State
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
+  const [pendingClockAction, setPendingClockAction] = useState(null); // 'clockIn' | 'clockOut'
 
   // Modal State for Image 2 Design
   const [historyModalEmp, setHistoryModalEmp] = useState(null);
@@ -184,13 +189,41 @@ export const Attendance = () => {
     return new Date(timeStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
-  // Group attendance logs by Employee & include ALL directory employees so every worker has a card
+  // Group attendance logs by Employee & include directory employees according to role permissions
   const groupedEmployeeMap = {};
 
-  // 1. Pre-fill all directory employees (excluding CEO)
-  allEmployees.forEach((emp) => {
+  const currentUserId = user?._id || user?.id;
+  const userRole = user?.role;
+
+  // Role based employee filtering:
+  // - EMPLOYEE: Only show self
+  // - MANAGER: Only show self and direct reports
+  // - HR / SUPER_ADMIN / ADMIN / CEO: Show all non-CEO employees
+  let roleFilteredEmployees = allEmployees;
+
+  if (userRole === 'EMPLOYEE') {
+    roleFilteredEmployees = allEmployees.filter(
+      (emp) => emp._id === currentUserId || emp.id === currentUserId
+    );
+    if (roleFilteredEmployees.length === 0 && user) {
+      roleFilteredEmployees = [user];
+    }
+  } else if (userRole === 'MANAGER') {
+    roleFilteredEmployees = allEmployees.filter((emp) => {
+      const isSelf = emp._id === currentUserId || emp.id === currentUserId;
+      const rMgr = emp.reportingManager?._id || emp.reportingManager;
+      const isDirectReport = rMgr === currentUserId;
+      return isSelf || isDirectReport;
+    });
+    if (roleFilteredEmployees.length === 0 && user) {
+      roleFilteredEmployees = [user];
+    }
+  }
+
+  // 1. Pre-fill allowed directory employees (excluding CEO)
+  roleFilteredEmployees.forEach((emp) => {
     if (emp && emp.role !== 'CEO') {
-      const empId = emp._id;
+      const empId = emp._id || emp.id;
       groupedEmployeeMap[empId] = {
         empId,
         user: emp,
@@ -209,7 +242,15 @@ export const Attendance = () => {
   logs.forEach((log) => {
     const empId = log.user?._id || log.user || 'unknown';
     if (!groupedEmployeeMap[empId]) {
-      if (log.user && log.user.role !== 'CEO') {
+      const logUserId = typeof log.user === 'object' ? log.user?._id : log.user;
+      const isSelf = logUserId === currentUserId;
+
+      let isAllowed = true;
+      if (userRole === 'EMPLOYEE') {
+        isAllowed = isSelf;
+      }
+
+      if (isAllowed && log.user && log.user.role !== 'CEO') {
         groupedEmployeeMap[empId] = {
           empId,
           user: log.user,
@@ -255,6 +296,7 @@ export const Attendance = () => {
       if (statusFilter === 'HALF_DAY') return empGroup.halfDayCount > 0 || empGroup.logs.some((l) => l.status === 'HALF_DAY');
       if (statusFilter === 'WFH') return empGroup.wfhCount > 0 || empGroup.logs.some((l) => l.workLocation === 'WFH');
       if (statusFilter === 'ABSENT') return empGroup.absentCount > 0 || empGroup.logs.some((l) => l.status === 'ABSENT');
+      if (statusFilter === 'OVER_DUTY') return empGroup.logs.some((l) => ['OVER_DUTY', 'OD'].includes(l.status));
     }
 
     return true;
@@ -464,27 +506,30 @@ export const Attendance = () => {
     fetchAttendanceLogs();
   }, [statusFilter]);
 
-  const handleClockIn = async () => {
-    setActionLoading(true);
-    try {
-      await api.post('/attendance/clock-in', { workLocation });
-      await fetchTodayStatus();
-      await fetchAttendanceLogs();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to check in.');
-    } finally {
-      setActionLoading(false);
-    }
+  const handleInitiateClockIn = () => {
+    setPendingClockAction('clockIn');
+    setIsFaceModalOpen(true);
   };
 
-  const handleClockOut = async () => {
+  const handleInitiateClockOut = () => {
+    setPendingClockAction('clockOut');
+    setIsFaceModalOpen(true);
+  };
+
+  const handleFaceVerificationSuccess = async (faceDescriptor) => {
     setActionLoading(true);
     try {
-      await api.post('/attendance/clock-out');
+      if (pendingClockAction === 'clockIn') {
+        await api.post('/attendance/clock-in', { workLocation, faceDescriptor });
+      } else if (pendingClockAction === 'clockOut') {
+        await api.post('/attendance/clock-out', { faceDescriptor });
+      }
+      setIsFaceModalOpen(false);
+      setPendingClockAction(null);
       await fetchTodayStatus();
       await fetchAttendanceLogs();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to check out.');
+      alert(err.response?.data?.message || `Failed to ${pendingClockAction === 'clockIn' ? 'check in' : 'check out'}.`);
     } finally {
       setActionLoading(false);
     }
@@ -549,7 +594,7 @@ export const Attendance = () => {
 
                 <UiverseStarButton
                   disabled={actionLoading}
-                  onClick={handleClockIn}
+                  onClick={handleInitiateClockIn}
                   variant="emerald"
                   icon={Play}
                 >
@@ -559,7 +604,7 @@ export const Attendance = () => {
             ) : !todayAttendance?.clockOut ? (
               <UiverseStarButton
                 disabled={actionLoading}
-                onClick={handleClockOut}
+                onClick={handleInitiateClockOut}
                 variant="checkout"
                 icon={Square}
               >
@@ -686,6 +731,7 @@ export const Attendance = () => {
               <option value="HALF_DAY">Half Day Only</option>
               <option value="WFH">WFH / Remote</option>
               <option value="ABSENT">Absent Only</option>
+              <option value="OVER_DUTY">⚡ Over Duty (OD)</option>
             </select>
           </div>
         </div>
@@ -1038,7 +1084,11 @@ export const Attendance = () => {
 
                         {/* STATUS Column */}
                         <div className="text-center whitespace-nowrap">
-                          {log.status === 'WEEK_OFF' ? (
+                          {['OVER_DUTY', 'OD'].includes(log.status) ? (
+                            <span className="px-1.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 font-extrabold text-[9.5px] sm:text-xs inline-block shadow-2xs border border-purple-200/80">
+                              ⚡ Over Duty
+                            </span>
+                          ) : log.status === 'WEEK_OFF' ? (
                             <span className="px-1.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full bg-purple-50 text-[#7c3aed] dark:bg-purple-950/60 dark:text-purple-300 font-extrabold text-[9.5px] sm:text-xs inline-block shadow-2xs border border-purple-100 dark:border-purple-900/40">
                               Week Off
                             </span>
@@ -1180,6 +1230,12 @@ export const Attendance = () => {
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
+                {['OVER_DUTY', 'OD'].includes(selectedDetailLog.status) && (
+                  <span className="px-2.5 sm:px-3.5 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 font-black text-[11px] sm:text-xs inline-flex items-center gap-1.5 border border-purple-200/80">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span>
+                    <span>⚡ OVER DUTY (OD)</span>
+                  </span>
+                )}
                 {selectedDetailLog.status === 'WEEK_OFF' && (
                   <span className="px-2.5 sm:px-3.5 py-1 rounded-full bg-[#f5f3ff] text-[#7c3aed] dark:bg-purple-950/70 dark:text-purple-300 font-black text-[11px] sm:text-xs inline-flex items-center gap-1.5 border border-purple-200/80">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#7c3aed]"></span>
@@ -1285,6 +1341,19 @@ export const Attendance = () => {
           </div>
         )}
       </Modal>
+
+      {/* Face Verification Modal for Check-In & Check-Out */}
+      <FaceCameraModal
+        isOpen={isFaceModalOpen}
+        onClose={() => {
+          setIsFaceModalOpen(false);
+          setPendingClockAction(null);
+        }}
+        mode="verify"
+        employeeName={user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : ''}
+        onCaptureSuccess={handleFaceVerificationSuccess}
+        isSubmitting={actionLoading}
+      />
     </div>
   );
 };

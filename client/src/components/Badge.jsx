@@ -15,7 +15,10 @@ export const StatusBadge = ({ status }) => {
     CANCELLED: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
     ACTIVE: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
     INACTIVE: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
-    DRAFT: 'bg-slate-500/10 text-slate-500 border-slate-500/20'
+    DRAFT: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
+    OVER_DUTY: 'bg-purple-500/15 text-purple-600 dark:text-purple-300 border-purple-500/30',
+    OD: 'bg-purple-500/15 text-purple-600 dark:text-purple-300 border-purple-500/30',
+    WEEK_OFF: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
   };
 
   const labels = {
@@ -32,7 +35,10 @@ export const StatusBadge = ({ status }) => {
     CANCELLED: 'Cancelled',
     ACTIVE: 'Active',
     INACTIVE: 'Inactive',
-    DRAFT: 'Draft'
+    DRAFT: 'Draft',
+    OVER_DUTY: '⚡ Over Duty (OD)',
+    OD: '⚡ Over Duty (OD)',
+    WEEK_OFF: '📅 Week Off'
   };
 
   const currentStyle = styles[status] || 'bg-slate-500/10 text-slate-500 border-slate-500/20';

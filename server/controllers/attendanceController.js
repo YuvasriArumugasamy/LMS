@@ -14,11 +14,42 @@ const getTodayDateRange = () => {
   return { start, end };
 };
 
+// Calculate Euclidean distance between two descriptor arrays
+const calculateEuclideanDistance = (desc1, desc2) => {
+  if (!desc1 || !desc2 || desc1.length !== desc2.length) return 1.0;
+  let sum = 0;
+  for (let i = 0; i < desc1.length; i++) {
+    const diff = desc1[i] - desc2[i];
+    sum += diff * diff;
+  }
+  return Math.sqrt(sum);
+};
+
+const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
+  if (!user.isFaceRegistered || !user.faceDescriptor || user.faceDescriptor.length === 0) {
+    return { valid: true };
+  }
+  if (!submittedDescriptor || !Array.isArray(submittedDescriptor) || submittedDescriptor.length === 0) {
+    return { valid: false, message: 'Face scan is required for Check-In/Out verification.' };
+  }
+  const distance = calculateEuclideanDistance(user.faceDescriptor, submittedDescriptor);
+  if (distance > 0.55) {
+    return { valid: false, message: `Face verification failed! Face does not match registered profile.` };
+  }
+  return { valid: true, distance };
+};
+
 // Clock In
 export const clockIn = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const { workLocation, notes } = req.body;
+  const { workLocation, notes, faceDescriptor } = req.body;
   const { start } = getTodayDateRange();
+
+  // Face Verification Check
+  const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
+  if (!faceVerification.valid) {
+    return next(new AppError(faceVerification.message, 400));
+  }
 
   let existingAttendance = await Attendance.findOne({ user: userId, date: start });
   if (existingAttendance && existingAttendance.clockIn) {
@@ -28,14 +59,18 @@ export const clockIn = asyncHandler(async (req, res, next) => {
   const now = new Date();
   const workStartHour = 9; // 9 AM
   const isLate = now.getHours() >= 9 && (now.getHours() > 9 || now.getMinutes() > 15);
+  const isSunday = now.getDay() === 0;
+
+  // Auto-detect Sunday / Holiday Check-in as OVER_DUTY (OD)
+  const attendanceStatus = isSunday ? 'OVER_DUTY' : (isLate ? 'LATE' : 'PRESENT');
 
   const attendance = await Attendance.create({
     user: userId,
     date: start,
     clockIn: now,
     workLocation: workLocation || 'IN_OFFICE',
-    status: isLate ? 'LATE' : 'PRESENT',
-    notes: notes || ''
+    status: attendanceStatus,
+    notes: notes || (isSunday ? 'Sunday Special Over Duty (OD)' : '')
   });
 
   res.status(201).json({
@@ -47,7 +82,14 @@ export const clockIn = asyncHandler(async (req, res, next) => {
 // Clock Out
 export const clockOut = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
+  const { faceDescriptor } = req.body;
   const { start } = getTodayDateRange();
+
+  // Face Verification Check
+  const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
+  if (!faceVerification.valid) {
+    return next(new AppError(faceVerification.message, 400));
+  }
 
   const attendance = await Attendance.findOne({ user: userId, date: start });
   if (!attendance) {
@@ -143,9 +185,10 @@ export const getAttendanceLogs = asyncHandler(async (req, res, next) => {
 
   // Calculate Summary Metrics
   const totalDays = logs.length;
-  const presentCount = logs.filter((l) => ['PRESENT', 'LATE'].includes(l.status)).length;
+  const presentCount = logs.filter((l) => ['PRESENT', 'LATE', 'OVER_DUTY', 'OD'].includes(l.status)).length;
   const wfhCount = logs.filter((l) => l.workLocation === 'WFH').length;
   const lateCount = logs.filter((l) => l.status === 'LATE').length;
+  const overDutyCount = logs.filter((l) => ['OVER_DUTY', 'OD'].includes(l.status)).length;
 
   res.status(200).json({
     status: 'success',
@@ -155,7 +198,8 @@ export const getAttendanceLogs = asyncHandler(async (req, res, next) => {
         totalDays,
         presentCount,
         wfhCount,
-        lateCount
+        lateCount,
+        overDutyCount
       }
     }
   });

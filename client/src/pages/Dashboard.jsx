@@ -9,6 +9,7 @@ import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.png';
 import orangeBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_34 PM.png';
 import { StatusBadge } from '../components/Badge';
 import { LeaveApplyModal } from '../components/LeaveApplyModal';
+import { FaceCameraModal } from '../components/FaceCameraModal';
 import { UiverseStarButton } from '../components/UiverseStarButton';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -76,6 +77,10 @@ export const Dashboard = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
+  // Face Camera Verification Modal State for Dashboard Check-In / Check-Out
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
+  const [pendingClockAction, setPendingClockAction] = useState(null); // 'clockIn' | 'clockOut'
+
   const fetchDashboard = async () => {
     try {
       const [statsRes, leaveTypesRes, balanceRes, attendanceRes] = await Promise.all([
@@ -99,25 +104,29 @@ export const Dashboard = () => {
     fetchDashboard();
   }, []);
 
-  const handleQuickClockIn = async () => {
-    setActionLoading(true);
-    try {
-      await api.post('/attendance/clock-in', { workLocation: 'IN_OFFICE' });
-      fetchDashboard();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to clock in.');
-    } finally {
-      setActionLoading(false);
-    }
+  const handleQuickClockIn = () => {
+    setPendingClockAction('clockIn');
+    setIsFaceModalOpen(true);
   };
 
-  const handleQuickClockOut = async () => {
+  const handleQuickClockOut = () => {
+    setPendingClockAction('clockOut');
+    setIsFaceModalOpen(true);
+  };
+
+  const handleFaceVerificationSuccess = async (faceDescriptor) => {
     setActionLoading(true);
     try {
-      await api.post('/attendance/clock-out');
-      fetchDashboard();
+      if (pendingClockAction === 'clockIn') {
+        await api.post('/attendance/clock-in', { workLocation: 'IN_OFFICE', faceDescriptor });
+      } else if (pendingClockAction === 'clockOut') {
+        await api.post('/attendance/clock-out', { faceDescriptor });
+      }
+      setIsFaceModalOpen(false);
+      setPendingClockAction(null);
+      await fetchDashboard();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to clock out.');
+      alert(err.response?.data?.message || `Failed to ${pendingClockAction === 'clockIn' ? 'check in' : 'check out'}.`);
     } finally {
       setActionLoading(false);
     }
@@ -773,6 +782,19 @@ export const Dashboard = () => {
         onSuccess={fetchDashboard}
         leaveTypes={leaveTypes}
         balance={balance}
+      />
+
+      {/* Face Verification Modal for Dashboard Quick Check-In / Check-Out */}
+      <FaceCameraModal
+        isOpen={isFaceModalOpen}
+        onClose={() => {
+          setIsFaceModalOpen(false);
+          setPendingClockAction(null);
+        }}
+        mode="verify"
+        employeeName={user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : ''}
+        onCaptureSuccess={handleFaceVerificationSuccess}
+        isSubmitting={actionLoading}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import { StatusBadge } from '../components/Badge';
 import { UserAvatar } from '../components/UserAvatar';
 import { Modal } from '../components/Modal';
 import { EmployeeDetailsModal } from '../components/EmployeeDetailsModal';
+import { FaceCameraModal } from '../components/FaceCameraModal';
 import {
   Plus,
   Search,
@@ -29,7 +30,10 @@ import {
   Lock,
   EyeOff,
   Info,
-  X
+  X,
+  Camera,
+  CheckCircle,
+  Scan
 } from 'lucide-react';
 
 const CARD_THEMES = [
@@ -110,6 +114,9 @@ export const Employees = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const [isCreateFaceModalOpen, setIsCreateFaceModalOpen] = useState(false);
+  const [capturedFaceDescriptor, setCapturedFaceDescriptor] = useState(null);
 
   useEffect(() => {
     const actionParam = searchParams.get('action');
@@ -193,9 +200,14 @@ export const Employees = () => {
       if (!payload.department) delete payload.department;
       if (!payload.designation) delete payload.designation;
       if (!payload.password) payload.password = '123456';
+      if (capturedFaceDescriptor) {
+        payload.faceDescriptor = capturedFaceDescriptor;
+        payload.isFaceRegistered = true;
+      }
 
       await api.post('/employees', payload);
       setIsCreateModalOpen(false);
+      setCapturedFaceDescriptor(null);
       fetchEmployees();
       setFormData({
         firstName: '',
@@ -647,6 +659,37 @@ export const Employees = () => {
               </div>
             </div>
 
+            {/* Biometric Face Lock Setup */}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-900/10 via-indigo-900/10 to-transparent border border-purple-500/30 flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl text-white ${capturedFaceDescriptor ? 'bg-emerald-600 shadow-md shadow-emerald-500/20' : 'bg-purple-600 shadow-md shadow-purple-500/20'}`}>
+                  {capturedFaceDescriptor ? <Lock className="w-4 h-4 stroke-[2.2]" /> : <Scan className="w-4 h-4 stroke-[2.2]" />}
+                </div>
+                <div>
+                  <h4 className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                    Face Lock Registration
+                    {capturedFaceDescriptor && (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[9px] font-extrabold flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" /> Face Captured
+                      </span>
+                    )}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                    {capturedFaceDescriptor ? 'Employee face locked for attendance verification.' : 'Scan employee face now or setup later in profile.'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsCreateFaceModalOpen(true)}
+                className="px-3 py-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-extrabold rounded-xl shadow-md shadow-purple-500/25 flex items-center gap-1.5 transition-all shrink-0"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>{capturedFaceDescriptor ? 'Re-scan' : 'Scan Face'}</span>
+              </button>
+            </div>
+
             {/* Info Alert Box */}
             <div className="bg-purple-50/80 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/40 rounded-2xl p-3.5 flex items-start sm:items-center gap-3 text-xs text-purple-700 dark:text-purple-300 font-semibold">
               <Info className="w-5 h-5 text-purple-600 shrink-0 mt-0.5 sm:mt-0" />
@@ -673,6 +716,18 @@ export const Employees = () => {
           </form>
         </div>
       </Modal>
+
+      {/* Face Lock Registration Modal for New Employee Creation */}
+      <FaceCameraModal
+        isOpen={isCreateFaceModalOpen}
+        onClose={() => setIsCreateFaceModalOpen(false)}
+        mode="register"
+        employeeName={`${formData.firstName} ${formData.lastName}`.trim() || 'New Employee'}
+        onCaptureSuccess={(desc) => {
+          setCapturedFaceDescriptor(desc);
+          setIsCreateFaceModalOpen(false);
+        }}
+      />
     </div>
   );
 };

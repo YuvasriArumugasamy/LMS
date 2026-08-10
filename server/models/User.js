@@ -100,6 +100,14 @@ const userSchema = new mongoose.Schema(
     isDeleted: {
       type: Boolean,
       default: false
+    },
+    faceDescriptor: {
+      type: [Number],
+      default: []
+    },
+    isFaceRegistered: {
+      type: Boolean,
+      default: false
     }
   },
   {

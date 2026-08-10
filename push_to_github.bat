@@ -5,7 +5,7 @@ git remote remove origin 2>nul
 git remote add origin https://github.com/YuvasriArumugasamy/LMS.git
 git branch -M main
 git add .
-git commit -m "Complete LMS application with Daily Work Reports tracking, employee history, and security updates"
+git commit -m "Complete LMS application with Face Lock, Sunday Over Duty, and Vercel configuration"
 git push -u origin main
 echo Completed Git Push!
 pause

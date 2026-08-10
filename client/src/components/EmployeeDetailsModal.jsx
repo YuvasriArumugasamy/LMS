@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import { UserAvatar } from './UserAvatar';
 import { StatusBadge } from './Badge';
+import { FaceCameraModal } from './FaceCameraModal';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { Mail, Phone, Building2, Award, Calendar, ShieldCheck, UserCheck, CheckCircle, XCircle, Edit3, Save, X, Trash2 } from 'lucide-react';
+import { Mail, Phone, Building2, Award, Calendar, ShieldCheck, UserCheck, CheckCircle, XCircle, Edit3, Save, X, Trash2, Camera, Lock, Unlock, Scan } from 'lucide-react';
 
 export const EmployeeDetailsModal = ({
   isOpen,
@@ -14,8 +16,11 @@ export const EmployeeDetailsModal = ({
   onToggleStatus,
   onUpdateSuccess
 }) => {
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
+  const [faceSubmitting, setFaceSubmitting] = useState(false);
   const [editForm, setEditForm] = useState({
     firstName: '',
     lastName: '',
@@ -25,6 +30,8 @@ export const EmployeeDetailsModal = ({
     role: 'EMPLOYEE',
     employmentType: 'Full Time'
   });
+
+  const canManageFaceLock = ['CEO', 'HR', 'SUPER_ADMIN'].includes(user?.role);
 
   const handlePhoneChange = (value) => {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
@@ -84,6 +91,38 @@ export const EmployeeDetailsModal = ({
     }
   };
 
+  const handleSaveFaceLock = async (faceDescriptor) => {
+    setFaceSubmitting(true);
+    try {
+      await api.post(`/employees/${employee._id}/face-lock`, { faceDescriptor });
+      alert(`✅ Face Lock successfully set up for ${employee.firstName} ${employee.lastName}!`);
+      setIsFaceModalOpen(false);
+      if (onUpdateSuccess) onUpdateSuccess();
+      onClose();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to save face lock.');
+    } finally {
+      setFaceSubmitting(false);
+    }
+  };
+
+  const handleRemoveFaceLock = async () => {
+    if (!window.confirm(`Are you sure you want to remove Face Lock for ${employee.firstName}?`)) {
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.delete(`/employees/${employee._id}/face-lock`);
+      alert(`✅ Face Lock pattern removed for ${employee.firstName}.`);
+      if (onUpdateSuccess) onUpdateSuccess();
+      onClose();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to remove face lock.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -130,6 +169,60 @@ export const EmployeeDetailsModal = ({
             <StatusBadge status={employee.status} />
           </div>
         </div>
+
+        {/* Biometric Face Lock Status & Setup Banner (CEO / HR Access) */}
+        {canManageFaceLock && !isEditing && (
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-900/10 via-purple-900/10 to-transparent border border-purple-500/30 flex items-center justify-between gap-3 flex-wrap shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className={`p-2.5 rounded-xl text-white ${employee.isFaceRegistered ? 'bg-emerald-600 shadow-md shadow-emerald-500/20' : 'bg-purple-600 shadow-md shadow-purple-500/20'}`}>
+                {employee.isFaceRegistered ? <Lock className="w-5 h-5 stroke-[2.2]" /> : <Scan className="w-5 h-5 stroke-[2.2]" />}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
+                    Biometric Face Lock
+                  </h4>
+                  {employee.isFaceRegistered ? (
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" /> Enrolled
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-[10px] font-extrabold">
+                      Not Configured
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  {employee.isFaceRegistered
+                    ? 'Employee must scan face for attendance check-in/out.'
+                    : 'Only CEO and HR have permission to capture and set Face Lock.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsFaceModalOpen(true)}
+                className="px-3.5 py-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-extrabold rounded-xl shadow-md shadow-purple-500/25 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Camera className="w-4 h-4" />
+                <span>{employee.isFaceRegistered ? 'Re-enroll Face' : 'Set Face Lock'}</span>
+              </button>
+
+              {employee.isFaceRegistered && (
+                <button
+                  type="button"
+                  onClick={handleRemoveFaceLock}
+                  className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs font-extrabold rounded-xl transition-all"
+                  title="Remove Face Lock"
+                >
+                  <Unlock className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Mode 1: View Details */}
         {!isEditing ? (
@@ -338,6 +431,16 @@ export const EmployeeDetailsModal = ({
           </form>
         )}
       </div>
+
+      {/* Face Lock Enrolment Camera Modal */}
+      <FaceCameraModal
+        isOpen={isFaceModalOpen}
+        onClose={() => setIsFaceModalOpen(false)}
+        mode="register"
+        employeeName={`${employee.firstName} ${employee.lastName}`}
+        onCaptureSuccess={handleSaveFaceLock}
+        isSubmitting={faceSubmitting}
+      />
     </Modal>
   );
 };

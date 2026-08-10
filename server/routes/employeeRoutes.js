@@ -5,7 +5,9 @@ import {
   createEmployee,
   updateEmployee,
   toggleEmployeeStatus,
-  deleteEmployee
+  deleteEmployee,
+  registerFaceLock,
+  removeFaceLock
 } from '../controllers/employeeController.js';
 import { protect, restrictTo } from '../middleware/authMiddleware.js';
 
@@ -19,5 +21,7 @@ router.post('/', restrictTo('CEO'), createEmployee);
 router.put('/:id', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), updateEmployee);
 router.patch('/:id/status', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), toggleEmployeeStatus);
 router.delete('/:id', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), deleteEmployee);
+router.post('/:id/face-lock', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), registerFaceLock);
+router.delete('/:id/face-lock', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), removeFaceLock);
 
 export default router;
