@@ -11,25 +11,15 @@ import { Settings } from '../models/Settings.js';
 
 dotenv.config();
 
-const seedData = async () => {
+export const runAutoSeed = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/elms_enterprise';
-    await mongoose.connect(mongoUri);
-    console.log('[Seed Engine] Connected to MongoDB');
+    const userCount = await User.countDocuments();
+    if (userCount > 0) {
+      console.log('[Seed Engine] Database already populated. Skipping auto-seed.');
+      return;
+    }
 
-    // Clear existing collections
-    await Promise.all([
-      User.deleteMany({}),
-      Department.deleteMany({}),
-      Designation.deleteMany({}),
-      LeaveType.deleteMany({}),
-      LeaveBalance.deleteMany({}),
-      LeaveRequest.deleteMany({}),
-      Holiday.deleteMany({}),
-      Settings.deleteMany({})
-    ]);
-
-    console.log('[Seed Engine] Cleared existing data');
+    console.log('[Seed Engine] Empty database detected! Auto-seeding initial enterprise accounts...');
 
     // 1. Create Default Settings
     await Settings.create({
@@ -233,12 +223,7 @@ const seedData = async () => {
     // 8. No sample leave requests are created by default.
 
     console.log('[Seed Engine] ✅ Enterprise database successfully seeded with initial production-ready data!');
-
-    process.exit(0);
   } catch (error) {
     console.error('[Seed Engine Error]', error);
-    process.exit(1);
   }
 };
-
-seedData();
