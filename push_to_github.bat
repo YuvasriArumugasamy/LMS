@@ -4,8 +4,9 @@ git init
 git remote remove origin 2>nul
 git remote add origin https://github.com/YuvasriArumugasamy/LMS.git
 git branch -M main
+git rm -r --cached .vscode 2>nul
 git add .
-git commit -m "Complete LMS application with Face Lock, Sunday Over Duty, and Vercel configuration"
-git push -u origin main
+git commit -m "Clean up repository, add .gitignore and README documentation"
+git push -u origin main -f
 echo Completed Git Push!
 pause
