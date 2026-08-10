@@ -304,6 +304,14 @@ export const Attendance = () => {
 
   const getLocalDateString = (dateVal) => {
     if (!dateVal) return '';
+    const dateStr = typeof dateVal === 'string' ? dateVal : (dateVal instanceof Date ? dateVal.toISOString() : String(dateVal));
+    if (dateStr.endsWith('T00:00:00.000Z')) {
+      const d = new Date(dateVal);
+      const y = d.getUTCFullYear();
+      const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
     const d = new Date(dateVal);
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -317,8 +325,9 @@ export const Attendance = () => {
 
     const existingMap = {};
     (empGroup.logs || []).forEach((log) => {
-      if (log.date) {
-        const dStr = getLocalDateString(log.date);
+      const logDateVal = log.clockIn || log.date;
+      if (logDateVal) {
+        const dStr = getLocalDateString(logDateVal);
         existingMap[dStr] = log;
       }
     });
@@ -384,7 +393,7 @@ export const Attendance = () => {
       }
       currDate.setDate(currDate.getDate() - 1);
     }
-    return fullHistory.sort((a, b) => new Date(a.date) - new Date(b.date));
+    return fullHistory.sort((a, b) => new Date(a.clockIn || a.date) - new Date(b.clockIn || b.date));
   };
 
   const handleOpenHistoryModal = (empGroup) => {
@@ -436,8 +445,9 @@ export const Attendance = () => {
   const currentEmpFullHistory = getEmployeeFullHistory(historyModalEmp);
 
   const modalFilteredLogs = currentEmpFullHistory.filter((log) => {
-    const logDate = new Date(log.date);
-    const logDateStr = getLocalDateString(log.date);
+    const logDateVal = log.clockIn || log.date;
+    const logDate = new Date(logDateVal);
+    const logDateStr = getLocalDateString(logDateVal);
     const computedRange = getComputedDateRange();
 
     if (computedRange.start && logDateStr < computedRange.start) return false;
@@ -1040,7 +1050,7 @@ export const Attendance = () => {
                 {/* Attendance Logs Cards Stack (Each Row as a distinct Card Box) */}
                 {paginatedLogs.length > 0 ? (
                   paginatedLogs.map((log) => {
-                    const dateObj = new Date(log.date);
+                    const dateObj = new Date(log.clockIn || log.date);
                     const isPresent = log.status === 'PRESENT';
                     const isLate = log.status === 'LATE';
                     const isAbsent = log.status === 'ABSENT';
@@ -1222,7 +1232,7 @@ export const Attendance = () => {
                     Date
                   </span>
                   <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate block">
-                    {new Date(selectedDetailLog.date).toLocaleDateString('en-US', {
+                    {new Date(selectedDetailLog.clockIn || selectedDetailLog.date).toLocaleDateString('en-US', {
                       weekday: 'long',
                       month: 'long',
                       day: 'numeric',
