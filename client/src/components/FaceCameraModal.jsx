@@ -231,15 +231,16 @@ export const FaceCameraModal = ({
               {/* High-Tech HUD Scanner Overlay */}
               <div className="absolute inset-0 pointer-events-none border-[3px] border-cyan-500/30 rounded-3xl flex items-center justify-center">
                 {/* Face Scanning Box */}
-                <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-3xl border-2 border-cyan-400/80 shadow-[0_0_30px_rgba(6,182,212,0.3)] relative flex items-center justify-center animate-pulse">
+                <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-3xl border-2 border-cyan-400/80 shadow-[0_0_30px_rgba(6,182,212,0.3)] relative overflow-hidden flex items-center justify-center">
                   {/* Corner accents */}
-                  <div className="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-cyan-400 rounded-tl-xl" />
-                  <div className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-cyan-400 rounded-tr-xl" />
-                  <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-4 border-l-4 border-cyan-400 rounded-bl-xl" />
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-4 border-r-4 border-cyan-400 rounded-br-xl" />
+                  <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-cyan-400 rounded-tl-2xl z-20" />
+                  <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-cyan-400 rounded-tr-2xl z-20" />
+                  <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-cyan-400 rounded-bl-2xl z-20" />
+                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-cyan-400 rounded-br-2xl z-20" />
 
-                  {/* Laser Scan Line */}
-                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_#06b6d4] animate-bounce" />
+                  {/* Top-to-Bottom Laser Scan Line & Wave */}
+                  <div className="animate-scan-line" />
+                  <div className="animate-scan-wave" />
                 </div>
 
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-cyan-500/30 text-cyan-400 text-[11px] font-extrabold flex items-center gap-2">
