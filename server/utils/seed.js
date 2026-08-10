@@ -193,9 +193,9 @@ export const runAutoSeed = async () => {
       description: 'Medical and sick leave'
     });
 
-    const earnedLeave = await LeaveType.create({
-      name: 'Earned Leave',
-      code: 'EL',
+    const paidLeave = await LeaveType.create({
+      name: 'Paid Leave',
+      code: 'PL',
       maxDays: 15,
       colorBadge: '#22C55E',
       carryForward: true,

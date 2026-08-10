@@ -221,7 +221,7 @@ export const LeaveTypes = () => {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g. Earned Leave"
+              placeholder="e.g. Paid Leave"
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none"
               required
             />

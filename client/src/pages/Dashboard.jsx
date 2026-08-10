@@ -157,7 +157,7 @@ export const Dashboard = () => {
   const pieData = [
     { name: 'Casual Leave', value: 40, color: '#2563EB' },
     { name: 'Sick Leave', value: 25, color: '#EF4444' },
-    { name: 'Earned Leave', value: 25, color: '#22C55E' },
+    { name: 'Paid Leave', value: 25, color: '#22C55E' },
     { name: 'Emergency Leave', value: 10, color: '#F59E0B' }
   ];
 
@@ -168,12 +168,12 @@ export const Dashboard = () => {
         code: alloc.leaveTypeCode,
         remaining: alloc.remaining,
         total: alloc.total,
-        color: alloc.colorBadge || (alloc.leaveTypeCode === 'CL' ? '#2563EB' : alloc.leaveTypeCode === 'SL' ? '#EF4444' : alloc.leaveTypeCode === 'EL' ? '#22C55E' : '#F59E0B')
+        color: alloc.colorBadge || (alloc.leaveTypeCode === 'CL' ? '#2563EB' : alloc.leaveTypeCode === 'SL' ? '#EF4444' : (alloc.leaveTypeCode === 'PL' || alloc.leaveTypeCode === 'EL') ? '#22C55E' : '#F59E0B')
       }))
     : [
         { id: '1', name: 'Casual Leave', code: 'CL', remaining: 12, total: 18, color: '#2563EB' },
         { id: '2', name: 'Sick Leave', code: 'SL', remaining: 10, total: 12, color: '#EF4444' },
-        { id: '3', name: 'Earned Leave', code: 'EL', remaining: 15, total: 30, color: '#22C55E' },
+        { id: '3', name: 'Paid Leave', code: 'PL', remaining: 15, total: 30, color: '#22C55E' },
         { id: '4', name: 'Emergency Leave', code: 'EML', remaining: 5, total: 10, color: '#F59E0B' }
       ];
 
