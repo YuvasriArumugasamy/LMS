@@ -238,9 +238,8 @@ export const FaceCameraModal = ({
                   <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-cyan-400 rounded-bl-2xl z-20" />
                   <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-cyan-400 rounded-br-2xl z-20" />
 
-                  {/* Top-to-Bottom Laser Scan Line & Wave */}
+                  {/* Top-to-Bottom Laser Scan Line */}
                   <div className="animate-scan-line" />
-                  <div className="animate-scan-wave" />
                 </div>
 
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-cyan-500/30 text-cyan-400 text-[11px] font-extrabold flex items-center gap-2">
