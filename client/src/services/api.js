@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const rawApiUrl = import.meta.env.VITE_API_URL || '/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: rawApiUrl,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -29,7 +32,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('elms_refresh_token');
         if (refreshToken) {
-          const res = await axios.post('/api/auth/refresh-token', { token: refreshToken });
+          const res = await axios.post(`${rawApiUrl}/auth/refresh-token`, { token: refreshToken });
           const { accessToken } = res.data.data;
           localStorage.setItem('elms_access_token', accessToken);
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
