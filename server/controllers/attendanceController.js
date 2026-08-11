@@ -64,8 +64,8 @@ export const clockIn = asyncHandler(async (req, res, next) => {
 
   const now = new Date();
   const workStartHour = 9; // 9 AM
-  // Late if after 9:30 AM
-  const isLate = now.getHours() >= 9 && (now.getHours() > 9 || now.getMinutes() > 30);
+  // Late if after 9:40 AM
+  const isLate = now.getHours() >= 9 && (now.getHours() > 9 || now.getMinutes() > 40);
   const isSunday = now.getDay() === 0;
 
   // Auto-detect Sunday / Holiday Check-in as OVER_DUTY (OD)
