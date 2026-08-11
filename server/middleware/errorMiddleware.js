@@ -16,6 +16,19 @@ export const globalErrorHandler = (err, req, res, next) => {
     }
   }
 
+  // Handle Mongoose Validation Errors (e.g. enum mismatch, required field missing)
+  if (err.name === 'ValidationError') {
+    statusCode = 400;
+    const errors = Object.values(err.errors).map((e) => e.message);
+    message = errors.join('. ');
+  }
+
+  // Handle Mongoose CastError (e.g. invalid ObjectId)
+  if (err.name === 'CastError') {
+    statusCode = 400;
+    message = `Invalid value for field '${err.path}'.`;
+  }
+
   console.error('[API ERROR]', err);
 
   res.status(statusCode).json({

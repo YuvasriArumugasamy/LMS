@@ -94,7 +94,7 @@ export const sendDailyReportReminder = asyncHandler(async (req, res, next) => {
   }
 
   const senderRole = req.user.role === 'CEO' ? 'CEO' : req.user.role === 'MANAGER' ? 'Manager' : 'HR';
-  await Notification.create({
+  await Notification.safeCreate({
     recipient: userId,
     title: 'Daily Report Reminder 🔔',
     message: `${senderRole} ${req.user.firstName || ''} ${req.user.lastName || ''} sent you a reminder: Please submit your Daily Work Report for today.`,
@@ -270,7 +270,7 @@ export const reviewDailyReport = asyncHandler(async (req, res, next) => {
   // Send real-time notification to the employee about the feedback
   try {
     const reviewerRole = req.user.role === 'CEO' ? 'CEO' : req.user.role === 'MANAGER' ? 'Manager' : 'HR';
-    await Notification.create({
+    await Notification.safeCreate({
       recipient: report.user,
       title: `Daily Report ${status || 'Reviewed'}`,
       message: `${reviewerRole} ${req.user.firstName || ''} ${req.user.lastName || ''} reviewed your report "${report.title}": ${feedback ? `"${feedback}"` : 'Status updated.'}`,

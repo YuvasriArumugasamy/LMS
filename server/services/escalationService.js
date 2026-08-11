@@ -35,7 +35,7 @@ export const checkEmergencyEscalations = async () => {
 
       // Send notifications to HR
       for (const hr of hrUsers) {
-        await Notification.create({
+        await Notification.safeCreate({
           recipient: hr._id,
           title,
           message,

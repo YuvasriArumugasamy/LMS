@@ -176,7 +176,7 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
   // 1. Notify Applicant
   const applicantTitle = isEmergency ? '🚨 Urgent Emergency Leave Submitted' : 'Leave Application Submitted';
   const applicantMsg = `Your leave request for ${daysCount} day(s) (${start.toLocaleDateString()} - ${end.toLocaleDateString()}) has been submitted successfully.`;
-  await Notification.create({
+  await Notification.safeCreate({
     recipient: userId,
     title: applicantTitle,
     message: applicantMsg,
@@ -190,7 +190,7 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
   if (managerId && managerId.toString() !== userId.toString()) {
     const mgrTitle = isEmergency ? '🚨 Urgent Emergency Leave Request' : 'New Leave Request Received';
     const mgrMsg = `${req.user.firstName} ${req.user.lastName} applied for ${daysCount} day(s) leave.`;
-    await Notification.create({
+    await Notification.safeCreate({
       recipient: managerId,
       title: mgrTitle,
       message: mgrMsg,
@@ -213,7 +213,7 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
     const hrIds = [];
     for (const adminUser of hrAdmins) {
       hrIds.push(adminUser._id);
-      await Notification.create({
+      await Notification.safeCreate({
         recipient: adminUser._id,
         title: hrTitle,
         message: hrMsg,
@@ -442,14 +442,17 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
   // Notify Employee / Applicant
   const approveTitle = leave.status === 'CEO_APPROVED' ? 'Leave Request Final Approved by CEO ✅' : `Leave Request Status Updated: ${leave.status.replace('_', ' ')}`;
   const approveMsg = `Your leave request for ${leave.daysCount} day(s) has been updated to ${leave.status.replace('_', ' ')}.`;
-  await Notification.create({
-    recipient: leave.user._id,
-    title: approveTitle,
-    message: approveMsg,
-    type: 'LEAVE_APPROVED',
-    targetUrl: '/leaves'
-  });
-  sendPushNotification(leave.user._id, approveTitle, approveMsg, '/leaves');
+  const applicantId = leave.user?._id || leave.user;
+  if (applicantId) {
+    await Notification.safeCreate({
+      recipient: applicantId,
+      title: approveTitle,
+      message: approveMsg,
+      type: 'LEAVE_APPROVED',
+      targetUrl: '/leaves'
+    });
+    sendPushNotification(applicantId, approveTitle, approveMsg, '/leaves');
+  }
 
   // Level 1 -> Level 2 Notification Dispatch: Notify CEO if Level 1 approval was done and CEO final approval is pending
   if (leave.status === 'ADMIN_APPROVED' || leave.status === 'HR_APPROVED') {
@@ -460,7 +463,7 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
       const ceoIds = [];
       for (const ceo of ceoUsers) {
         ceoIds.push(ceo._id);
-        await Notification.create({
+        await Notification.safeCreate({
           recipient: ceo._id,
           title: ceoTitle,
           message: ceoMsg,
@@ -539,7 +542,7 @@ export const rejectLeave = asyncHandler(async (req, res, next) => {
   // Notify Employee
   const rejectTitle = `Leave Request Rejected by ${reviewerRole} ❌`;
   const rejectMsg = `Your leave request has been rejected. Reason: ${comments}`;
-  await Notification.create({
+  await Notification.safeCreate({
     recipient: leave.user,
     title: rejectTitle,
     message: rejectMsg,
