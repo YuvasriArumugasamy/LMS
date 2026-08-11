@@ -7,6 +7,7 @@ import { CalendarDays, Plus, CheckCircle, XCircle, Trash2, AlertTriangle, Edit3 
 const LEAVE_CARD_MAP = {
   CL: '/leave-cards/CL.png',
   EL: '/leave-cards/EL.png',
+  PL: '/leave-cards/EL.png',
   EML: '/leave-cards/EML.png',
   SL: '/leave-cards/SL.png'
 };
@@ -187,7 +188,9 @@ export const LeaveTypes = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {leaveTypes.map((lt, index) => {
-            const codeKey = lt.code?.toUpperCase();
+            const displayCode = lt.code === 'EL' ? 'PL' : (lt.code || '');
+            const displayName = lt.name?.toLowerCase().includes('earned') ? 'Paid Leave' : lt.name;
+            const codeKey = displayCode.toUpperCase();
             const bgImage = LEAVE_CARD_MAP[codeKey] || DEFAULT_CARD_BG_LIST[index % DEFAULT_CARD_BG_LIST.length];
 
             return (
@@ -204,7 +207,7 @@ export const LeaveTypes = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-white/90 text-slate-900 shadow-2xs backdrop-blur-sm">
-                          {lt.code}
+                          {displayCode}
                         </span>
 
                         {canEdit && (
@@ -240,7 +243,7 @@ export const LeaveTypes = () => {
                       </span>
                     </div>
 
-                    <h3 className="text-2xl font-black text-slate-950 dark:text-white tracking-tight mb-1">{lt.name}</h3>
+                    <h3 className="text-2xl font-black text-slate-950 dark:text-white tracking-tight mb-1">{displayName}</h3>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed max-w-[240px]">{lt.description || 'Enterprise leave policy.'}</p>
                   </div>
 

@@ -14,19 +14,15 @@ dotenv.config();
 export const updateEarnedLeaveToPaidLeave = async () => {
   try {
     await LeaveType.updateMany(
-      { name: 'Earned Leave' },
+      { $or: [{ name: /earned/i }, { code: /^el$/i }] },
       { name: 'Paid Leave', code: 'PL' }
-    );
-    await LeaveType.updateMany(
-      { code: 'EL' },
-      { code: 'PL' }
     );
 
     const balances = await LeaveBalance.find();
     for (const bal of balances) {
       let modified = false;
       for (const alloc of bal.allocations) {
-        if (alloc.leaveTypeName === 'Earned Leave' || alloc.leaveTypeCode === 'EL') {
+        if (alloc.leaveTypeName === 'Earned Leave' || alloc.leaveTypeCode === 'EL' || /earned/i.test(alloc.leaveTypeName || '')) {
           alloc.leaveTypeName = 'Paid Leave';
           alloc.leaveTypeCode = 'PL';
           modified = true;

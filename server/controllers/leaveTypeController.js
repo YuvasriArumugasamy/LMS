@@ -14,6 +14,11 @@ export const getLeaveTypes = asyncHandler(async (req, res, next) => {
       { $set: { 'allocations.$[elem].leaveTypeName': 'Paid Leave', 'allocations.$[elem].leaveTypeCode': 'PL' } },
       { arrayFilters: [{ 'elem.leaveTypeName': /earned/i }] }
     );
+    await LeaveBalance.updateMany(
+      { 'allocations.leaveTypeCode': /^el$/i },
+      { $set: { 'allocations.$[elem].leaveTypeName': 'Paid Leave', 'allocations.$[elem].leaveTypeCode': 'PL' } },
+      { arrayFilters: [{ 'elem.leaveTypeCode': /^el$/i }] }
+    );
   } catch (e) {
     console.error('Leave migration in getLeaveTypes error:', e);
   }

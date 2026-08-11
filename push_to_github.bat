@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "fix(dashboard): map Earned Leave to Paid Leave in dynamic leave distribution chart and backend API"
+git commit -m "fix(leave-policy): rename Earned Leave to Paid Leave across policy cards and backend database migration"
 git push -u origin main
 echo Completed Git Push!
 pause
