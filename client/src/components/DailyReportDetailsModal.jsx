@@ -222,45 +222,69 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
             </div>
           )}
 
-          {/* Report Focus / Title Card Matching Image 1 */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200/60 dark:border-purple-900/60 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
-                <Target className="w-5 h-5 stroke-[2.2]" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 dark:text-purple-400">
-                  Report Focus / Title
+          {/* Project Title, Module Name & Work Status Badge */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-black border border-indigo-200 dark:border-indigo-800">
+                  📁 Project: {report.projectTitle || 'Attendance Project'}
                 </span>
-                <p className="text-sm font-extrabold text-slate-900 dark:text-white truncate mt-0.5">
-                  {report.title}
-                </p>
+                <span className="px-3 py-1 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-xs font-black border border-purple-200 dark:border-purple-800">
+                  🧩 Module: {report.moduleName || 'Employee Management'}
+                </span>
               </div>
+
+              {/* Work Progress Status Badge */}
+              <span className={`px-3.5 py-1 rounded-full text-xs font-black flex items-center gap-1.5 shadow-2xs ${
+                report.workStatus === 'PENDING'
+                  ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 animate-pulse'
+                  : report.workStatus === 'COMPLETED'
+                  ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
+                  : 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700'
+              }`}>
+                {report.workStatus === 'PENDING' ? '🟡 Task Status: Pending (Interrupted / Paused)' : report.workStatus === 'COMPLETED' ? '🟢 Task Status: Completed' : '🔵 Task Status: On Progress'}
+              </span>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0 pl-4 border-l border-slate-100 dark:border-slate-700">
-              <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-200/60 dark:border-blue-900/60 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-                <Clock className="w-4 h-4 stroke-[2.2]" />
+            <div className="flex items-center justify-between gap-4 pt-1 border-t border-slate-100 dark:border-slate-700">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200/60 dark:border-purple-900/60 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                  <Target className="w-4.5 h-4.5 stroke-[2.2]" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 dark:text-purple-400">
+                    Report Focus / Title
+                  </span>
+                  <p className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate mt-0.5">
+                    {report.title}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-xs font-black text-blue-600 dark:text-blue-400 block">
-                  {report.hoursWorked || 8} Hours Logged
-                </span>
-                <span className="text-[10px] font-medium text-slate-400 block">
-                  Total time spent
-                </span>
+
+              <div className="flex items-center gap-2 shrink-0 pl-4 border-l border-slate-100 dark:border-slate-700">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-200/60 dark:border-blue-900/60 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                  <Clock className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-black text-blue-600 dark:text-blue-400 block">
+                    {report.hoursWorked || 8} Hours
+                  </span>
+                  <span className="text-[9px] font-medium text-slate-400 block">
+                    Total spent
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Tasks Completed Card Matching Image 1 */}
+          {/* Specific Task Description Card Matching Image 1 */}
           <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 relative overflow-hidden shadow-2xs">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-300/80 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shrink-0">
                 <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.2]" />
               </div>
               <span className="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                Tasks Completed
+                Specific Task Description
               </span>
             </div>
 

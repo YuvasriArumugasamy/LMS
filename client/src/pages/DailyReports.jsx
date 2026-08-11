@@ -571,10 +571,28 @@ export const DailyReports = () => {
                     )}
                   </div>
 
-                  {/* Row 3: Daily Work Report Content or Pending Alert */}
+                  {/* Row 3: Daily Work Report Content with Project Title, Module Name & Work Status */}
                   {item.hasSubmitted ? (
-                    <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 space-y-1">
-                      <div className="text-xs font-black text-slate-900 dark:text-white line-clamp-1">
+                    <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 space-y-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-black border border-indigo-200 dark:border-indigo-800 truncate max-w-[150px]">
+                          📁 {item.report?.projectTitle || 'Attendance Project'}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[10px] font-black border border-purple-200 dark:border-purple-800 truncate max-w-[150px]">
+                          🧩 {item.report?.moduleName || 'Employee Management'}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
+                          item.report?.workStatus === 'PENDING'
+                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
+                            : item.report?.workStatus === 'COMPLETED'
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-300 dark:border-blue-800'
+                        }`}>
+                          {item.report?.workStatus === 'PENDING' ? '🟡 Pending' : item.report?.workStatus === 'COMPLETED' ? '🟢 Completed' : '🔵 On Progress'}
+                        </span>
+                      </div>
+
+                      <div className="text-xs font-black text-slate-900 dark:text-white line-clamp-1 mt-1">
                         📌 {item.report?.title || 'Daily Work Report'}
                       </div>
                       <div className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold line-clamp-2 leading-relaxed">

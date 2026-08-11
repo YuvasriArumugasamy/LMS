@@ -17,6 +17,16 @@ const dailyReportSchema = new mongoose.Schema(
       required: [true, 'Please enter a report title or summary.'],
       trim: true
     },
+    projectTitle: {
+      type: String,
+      default: 'Attendance Project',
+      trim: true
+    },
+    moduleName: {
+      type: String,
+      default: 'General',
+      trim: true
+    },
     tasksCompleted: {
       type: String,
       required: [true, 'Please detail the tasks completed today.']
@@ -34,6 +44,11 @@ const dailyReportSchema = new mongoose.Schema(
       default: 8,
       min: [0, 'Hours worked cannot be negative.'],
       max: [24, 'Hours worked cannot exceed 24.']
+    },
+    workStatus: {
+      type: String,
+      enum: ['IN_PROGRESS', 'PENDING', 'COMPLETED'],
+      default: 'IN_PROGRESS'
     },
     status: {
       type: String,

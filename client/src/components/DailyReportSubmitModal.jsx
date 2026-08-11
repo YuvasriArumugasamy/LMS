@@ -22,6 +22,9 @@ import api from '../services/api';
 export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingReport }) => {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
+  const [projectTitle, setProjectTitle] = useState('Attendance Project');
+  const [moduleName, setModuleName] = useState('Employee Management');
+  const [workStatus, setWorkStatus] = useState('IN_PROGRESS'); // IN_PROGRESS | PENDING | COMPLETED
   const [tasksCompleted, setTasksCompleted] = useState('');
   const [pendingTasks, setPendingTasks] = useState('');
   const [blockers, setBlockers] = useState('');
@@ -33,12 +36,18 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
     if (isOpen) {
       if (existingReport) {
         setTitle(existingReport.title || '');
+        setProjectTitle(existingReport.projectTitle || 'Attendance Project');
+        setModuleName(existingReport.moduleName || 'Employee Management');
+        setWorkStatus(existingReport.workStatus || 'IN_PROGRESS');
         setTasksCompleted(existingReport.tasksCompleted || '');
         setPendingTasks(existingReport.pendingTasks || '');
         setBlockers(existingReport.blockers || '');
         setHoursWorked(existingReport.hoursWorked || 8);
       } else {
         setTitle('');
+        setProjectTitle('Attendance Project');
+        setModuleName('Employee Management');
+        setWorkStatus('IN_PROGRESS');
         setTasksCompleted('');
         setPendingTasks('');
         setBlockers('');
@@ -53,12 +62,15 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
     setError('');
 
     if (!title.trim() || !tasksCompleted.trim()) {
-      setError('Please provide a report title and tasks completed.');
+      setError('Please provide a report title and task description.');
       return;
     }
 
     const payload = {
       title: title.trim(),
+      projectTitle: projectTitle.trim() || 'Attendance Project',
+      moduleName: moduleName.trim() || 'General',
+      workStatus,
       tasksCompleted: tasksCompleted.trim(),
       pendingTasks: pendingTasks.trim(),
       blockers: blockers.trim(),
@@ -135,14 +147,51 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
           </div>
         </div>
 
-        {/* Row 1: Report Title & Logged Hours (2 Cols) Matching Image 1 */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          <div className="sm:col-span-2 space-y-1.5">
-            <label className="block text-xs font-black uppercase tracking-wider text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-md bg-purple-100 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+        {/* Row 1: Section 1 - Project Title & Section 2 - Module Name */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
+              <div className="w-5 h-5 rounded-md bg-indigo-100 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
                 <Target className="w-3.5 h-3.5 stroke-[2.5]" />
               </div>
-              <span>Report Title / Primary Focus *</span>
+              <span>Section 1: Project Title *</span>
+            </label>
+            <input
+              type="text"
+              value={projectTitle}
+              onChange={(e) => setProjectTitle(e.target.value)}
+              placeholder="e.g. Attendance Project / LMS Portal"
+              className="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-2xs"
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-black uppercase tracking-wider text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
+              <div className="w-5 h-5 rounded-md bg-purple-100 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                <FileEdit className="w-3.5 h-3.5 stroke-[2.5]" />
+              </div>
+              <span>Section 2: Module Name *</span>
+            </label>
+            <input
+              type="text"
+              value={moduleName}
+              onChange={(e) => setModuleName(e.target.value)}
+              placeholder="e.g. Employee Management / Daily Reports"
+              className="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all shadow-2xs"
+              required
+            />
+          </div>
+        </div>
+
+        {/* Row 2: Report Title & Hours Worked */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div className="sm:col-span-2 space-y-1.5">
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <div className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 shrink-0">
+                <Target className="w-3.5 h-3.5 stroke-[2.5]" />
+              </div>
+              <span>Report Title / Summary Focus *</span>
             </label>
             <input
               type="text"
@@ -159,7 +208,7 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
               <div className="w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
                 <Clock className="w-3.5 h-3.5 stroke-[2.5]" />
               </div>
-              <span>Logged Hours Worked</span>
+              <span>Hours Logged</span>
             </label>
             <div className="flex items-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden shadow-2xs">
               <input
@@ -179,13 +228,60 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
           </div>
         </div>
 
-        {/* Row 2: Tasks Completed Today * Matching Image 1 */}
+        {/* Work Status Selection (3 Statuses: In Progress, Pending, Completed) */}
+        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-2">
+          <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            Work Status / Task Progress *
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => setWorkStatus('IN_PROGRESS')}
+              className={`p-2.5 rounded-xl border text-xs font-black flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                workStatus === 'IN_PROGRESS'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/25 scale-[1.02]'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-300'
+              }`}
+            >
+              <span className="flex items-center gap-1">🔵 On Progress</span>
+              <span className="text-[9px] opacity-80 font-medium hidden sm:inline">Continuing work...</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setWorkStatus('PENDING')}
+              className={`p-2.5 rounded-xl border text-xs font-black flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                workStatus === 'PENDING'
+                  ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/25 scale-[1.02]'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-amber-300'
+              }`}
+            >
+              <span className="flex items-center gap-1">🟡 Pending</span>
+              <span className="text-[9px] opacity-80 font-medium hidden sm:inline">Interrupted / Paused</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setWorkStatus('COMPLETED')}
+              className={`p-2.5 rounded-xl border text-xs font-black flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                workStatus === 'COMPLETED'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-500/25 scale-[1.02]'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-300'
+              }`}
+            >
+              <span className="flex items-center gap-1">🟢 Completed</span>
+              <span className="text-[9px] opacity-80 font-medium hidden sm:inline">Finished today</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Section 3: Specific Task Description */}
         <div className="space-y-1.5">
           <label className="block text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
             <div className="w-5 h-5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
               <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
             </div>
-            <span>Tasks Completed Today *</span>
+            <span>Section 3: Specific Task Description & Progress Details *</span>
           </label>
           <div className="relative">
             <textarea
@@ -193,7 +289,7 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
               onChange={(e) => setTasksCompleted(e.target.value)}
               rows="3"
               maxLength="1000"
-              placeholder="Describe tasks completed today..."
+              placeholder="Detail the specific tasks performed in this module..."
               className="w-full p-3.5 bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/50 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-emerald-500 transition-all leading-relaxed shadow-2xs"
               required
             />

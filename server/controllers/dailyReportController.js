@@ -16,7 +16,7 @@ const getTodayRange = () => {
 // Submit / Upsert Daily Report for Today
 export const submitDailyReport = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const { title, tasksCompleted, pendingTasks, blockers, hoursWorked } = req.body;
+  const { title, projectTitle, moduleName, tasksCompleted, pendingTasks, blockers, hoursWorked, workStatus } = req.body;
 
   if (!title || !title.trim()) {
     return next(new AppError('Please provide a report title.', 400));
@@ -34,10 +34,13 @@ export const submitDailyReport = asyncHandler(async (req, res, next) => {
 
   if (report) {
     report.title = title.trim();
+    report.projectTitle = (projectTitle || 'Attendance Project').trim();
+    report.moduleName = (moduleName || 'General').trim();
     report.tasksCompleted = tasksCompleted.trim();
     report.pendingTasks = (pendingTasks || '').trim();
     report.blockers = (blockers || '').trim();
     report.hoursWorked = Number(hoursWorked) || 8;
+    if (workStatus) report.workStatus = workStatus;
     report.status = 'SUBMITTED';
     await report.save();
   } else {
@@ -45,10 +48,13 @@ export const submitDailyReport = asyncHandler(async (req, res, next) => {
       user: userId,
       date: new Date(),
       title: title.trim(),
+      projectTitle: (projectTitle || 'Attendance Project').trim(),
+      moduleName: (moduleName || 'General').trim(),
       tasksCompleted: tasksCompleted.trim(),
       pendingTasks: (pendingTasks || '').trim(),
       blockers: (blockers || '').trim(),
       hoursWorked: Number(hoursWorked) || 8,
+      workStatus: workStatus || 'IN_PROGRESS',
       status: 'SUBMITTED'
     });
   }
@@ -282,7 +288,7 @@ export const reviewDailyReport = asyncHandler(async (req, res, next) => {
 // Update / Edit Daily Report
 export const updateDailyReport = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { title, tasksCompleted, pendingTasks, blockers, hoursWorked } = req.body;
+  const { title, projectTitle, moduleName, tasksCompleted, pendingTasks, blockers, hoursWorked, workStatus } = req.body;
 
   const report = await DailyReport.findById(id);
   if (!report) {
@@ -295,10 +301,13 @@ export const updateDailyReport = asyncHandler(async (req, res, next) => {
   }
 
   if (title) report.title = title.trim();
+  if (projectTitle !== undefined) report.projectTitle = projectTitle.trim();
+  if (moduleName !== undefined) report.moduleName = moduleName.trim();
   if (tasksCompleted) report.tasksCompleted = tasksCompleted.trim();
   if (pendingTasks !== undefined) report.pendingTasks = pendingTasks.trim();
   if (blockers !== undefined) report.blockers = blockers.trim();
   if (hoursWorked !== undefined) report.hoursWorked = Number(hoursWorked) || 8;
+  if (workStatus) report.workStatus = workStatus;
 
   await report.save();
 
