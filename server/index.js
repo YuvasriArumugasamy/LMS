@@ -30,9 +30,21 @@ dotenv.config();
 
 const app = express();
 
-// Database Connection
-connectDB().then(() => {
-  updateEarnedLeaveToPaidLeave();
+// Database Connection (Only run top-level connection on non-Vercel environments)
+if (process.env.VERCEL !== '1') {
+  connectDB().then(() => {
+    updateEarnedLeaveToPaidLeave();
+  });
+}
+
+// Lazy DB connection middleware for Vercel serverless requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error('[DB Middleware Error]', err.message);
+  }
+  next();
 });
 
 // Essential Middleware
