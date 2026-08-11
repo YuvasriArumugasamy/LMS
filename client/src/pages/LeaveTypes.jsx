@@ -157,12 +157,9 @@ export const LeaveTypes = () => {
             return (
               <div
                 key={lt._id || index}
-                className="relative overflow-hidden rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 border-0 bg-transparent group"
+                className="relative overflow-hidden rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 border border-slate-200/80 dark:border-slate-800 bg-[image:var(--bg-card-img)] dark:!bg-none bg-white dark:bg-slate-900 bg-[length:100%_100%] bg-center bg-no-repeat group min-h-[220px]"
                 style={{
-                  backgroundImage: `url(${bgImage})`,
-                  backgroundSize: '100% 100%',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
+                  '--bg-card-img': `url(${bgImage})`,
                   minHeight: '220px'
                 }}
               >
