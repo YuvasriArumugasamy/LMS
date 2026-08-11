@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "fix(vercel): add root package.json module type and backend dependencies for serverless API deployment"
+git commit -m "fix(vercel): move build tools to client dependencies and add include=dev for Vercel build"
 git push -u origin main
 echo Completed Git Push!
 pause
