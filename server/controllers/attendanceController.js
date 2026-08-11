@@ -289,9 +289,9 @@ export const getAttendanceLogs = asyncHandler(async (req, res, next) => {
   // Strictly filter out any logs without a valid user object or with CEO role
   const logs = rawLogs.filter((l) => l.user && l.user.role !== 'CEO');
 
-  // Calculate Summary Metrics
+  // Calculate Summary Metrics (for the current user's visible logs only)
   const totalDays = logs.length;
-  const presentCount = logs.filter((l) => ['PRESENT', 'LATE', 'OVER_DUTY', 'OD'].includes(l.status)).length;
+  const presentCount = logs.filter((l) => ['PRESENT', 'LATE', 'HALF_DAY', 'OVER_DUTY', 'OD'].includes(l.status)).length;
   const wfhCount = logs.filter((l) => l.workLocation === 'WFH').length;
   const lateCount = logs.filter((l) => l.status === 'LATE').length;
   const overDutyCount = logs.filter((l) => ['OVER_DUTY', 'OD'].includes(l.status)).length;

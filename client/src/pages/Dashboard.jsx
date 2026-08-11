@@ -160,8 +160,11 @@ export const Dashboard = () => {
     setIsFaceModalOpen(true);
   };
 
+  const [clockErrorMsg, setClockErrorMsg] = useState('');
+
   const handleFaceVerificationSuccess = async (faceDescriptor) => {
     setActionLoading(true);
+    setClockErrorMsg('');
     try {
       if (pendingClockAction === 'clockIn') {
         await api.post('/attendance/clock-in', { workLocation: dashWorkLocation, faceDescriptor });
@@ -176,7 +179,10 @@ export const Dashboard = () => {
       setPendingClockAction(null);
       await fetchDashboard();
     } catch (err) {
-      alert(err.response?.data?.message || `Failed to ${pendingClockAction.replace(/([A-Z])/g, ' $1').toLowerCase()}.`);
+      const msg = err.response?.data?.message || `Failed to ${pendingClockAction?.replace(/([A-Z])/g, ' $1').toLowerCase() || 'complete action'}.`;
+      setClockErrorMsg(msg);
+      setIsFaceModalOpen(false); // close camera modal on error
+      setTimeout(() => setClockErrorMsg(''), 6000);
     } finally {
       setActionLoading(false);
     }

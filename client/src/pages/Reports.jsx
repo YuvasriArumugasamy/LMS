@@ -139,9 +139,9 @@ export const Reports = () => {
             }}
             className="w-full sm:w-auto px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500 shadow-2xs"
           >
-            <option value={2026}>Year 2026</option>
-            <option value={2025}>Year 2025</option>
-            <option value={2024}>Year 2024</option>
+            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((yr) => (
+              <option key={yr} value={yr}>Year {yr}</option>
+            ))}
           </select>
 
           {selectedCustomDate && (

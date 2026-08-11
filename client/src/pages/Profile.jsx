@@ -39,8 +39,9 @@ export const Profile = () => {
   const [saving, setSaving] = useState(false);
 
   const handlePhoneChange = (value) => {
-    const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
-    setFormData({ ...formData, phone: digitsOnly });
+    // Allow +, digits, spaces, hyphens — max 15 chars (international format)
+    const cleaned = value.replace(/[^\d\s\+\-\(\)]/g, '').slice(0, 15);
+    setFormData({ ...formData, phone: cleaned });
   };
 
   // Check if profileImage is a custom uploaded photo
@@ -357,8 +358,8 @@ export const Profile = () => {
               type="tel"
               value={formData.phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
-              maxLength={10}
-              placeholder="1234567890"
+              maxLength={15}
+              placeholder="+91 9876543210"
               className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold outline-none"
             />
           </div>

@@ -558,7 +558,8 @@ export const cancelLeave = asyncHandler(async (req, res, next) => {
   const leave = await LeaveRequest.findById(req.params.id);
   if (!leave || leave.isDeleted) return next(new AppError('Leave request not found.', 404));
 
-  if (leave.user.toString() !== req.user._id.toString() && req.user.role === 'EMPLOYEE') {
+  // Only the leave owner can cancel — managers/HR cannot cancel on behalf of employees
+  if (leave.user.toString() !== req.user._id.toString()) {
     return next(new AppError('You can only cancel your own leave requests.', 403));
   }
 

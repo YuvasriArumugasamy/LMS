@@ -2,9 +2,22 @@ import { AuditLog } from '../models/AuditLog.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const getAuditLogs = asyncHandler(async (req, res, next) => {
-  const { page = 1, limit = 20, module } = req.query;
+  const { page = 1, limit = 20, module, action, fromDate, toDate } = req.query;
   const query = {};
+
   if (module) query.module = module;
+  if (action) query.action = { $regex: action, $options: 'i' };
+
+  // Date range filter
+  if (fromDate || toDate) {
+    query.createdAt = {};
+    if (fromDate) query.createdAt.$gte = new Date(fromDate);
+    if (toDate) {
+      const end = new Date(toDate);
+      end.setHours(23, 59, 59, 999);
+      query.createdAt.$lte = end;
+    }
+  }
 
   const skip = (Number(page) - 1) * Number(limit);
   const total = await AuditLog.countDocuments(query);
