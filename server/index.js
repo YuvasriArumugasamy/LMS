@@ -34,6 +34,8 @@ const app = express();
 if (process.env.VERCEL !== '1') {
   connectDB().then(() => {
     updateEarnedLeaveToPaidLeave();
+  }).catch((err) => {
+    console.error('[DB Init Error]', err.message);
   });
 }
 
@@ -41,10 +43,14 @@ if (process.env.VERCEL !== '1') {
 app.use(async (req, res, next) => {
   try {
     await connectDB();
+    next();
   } catch (err) {
     console.error('[DB Middleware Error]', err.message);
+    return res.status(503).json({
+      status: 'error',
+      message: 'Database connection unavailable. Please try again shortly.'
+    });
   }
-  next();
 });
 
 // Essential Middleware

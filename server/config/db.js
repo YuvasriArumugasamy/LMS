@@ -2,29 +2,45 @@ import mongoose from 'mongoose';
 import { runAutoSeed } from '../utils/seed.js';
 
 let isConnected = false;
+let connectionPromise = null;
 
 export const connectDB = async () => {
-  if (isConnected || mongoose.connection.readyState === 1) {
-    isConnected = true;
+  if (isConnected && mongoose.connection.readyState === 1) {
     return;
+  }
+
+  // If a connection is already in progress, wait for it (prevents multiple parallel connections on Vercel)
+  if (connectionPromise) {
+    return connectionPromise;
   }
 
   const mongoUri = process.env.MONGODB_URI;
 
-  if (!mongoUri && process.env.VERCEL === '1') {
-    console.warn('[MongoDB Warning] MONGODB_URI environment variable is missing on Vercel.');
-    return;
+  if (!mongoUri) {
+    if (process.env.VERCEL === '1') {
+      console.warn('[MongoDB Warning] MONGODB_URI environment variable is missing on Vercel.');
+      return;
+    }
   }
 
-  try {
-    const conn = await mongoose.connect(mongoUri || 'mongodb://127.0.0.1:27017/elms_enterprise', {
-      serverSelectionTimeoutMS: 4000
+  connectionPromise = mongoose
+    .connect(mongoUri || 'mongodb://127.0.0.1:27017/elms_enterprise', {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      bufferCommands: false
+    })
+    .then((conn) => {
+      isConnected = true;
+      connectionPromise = null;
+      console.log(`[MongoDB] Connected: ${conn.connection.host}`);
+      runAutoSeed().catch((err) => console.error('[AutoSeed Error]', err));
+    })
+    .catch((error) => {
+      isConnected = false;
+      connectionPromise = null;
+      console.error(`[MongoDB Error] Connection Failed: ${error.message}`);
+      throw error;
     });
-    isConnected = true;
-    console.log(`[MongoDB] Connected: ${conn.connection.host}`);
-    runAutoSeed().catch((err) => console.error('[AutoSeed Error]', err));
-  } catch (error) {
-    console.error(`[MongoDB Error] Connection Failed: ${error.message}`);
-    console.warn('[MongoDB Warning] Operating with fallback memory state if DB is unreachable.');
-  }
+
+  return connectionPromise;
 };
