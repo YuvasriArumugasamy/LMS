@@ -50,6 +50,23 @@ export const updateLeaveType = asyncHandler(async (req, res, next) => {
 
   if (!leaveType) return next(new AppError('Leave type not found.', 404));
 
+  // Sync updated leave type properties to existing user leave balances
+  if (req.body.maxDays !== undefined || req.body.name || req.body.colorBadge) {
+    const balances = await LeaveBalance.find();
+    for (let bal of balances) {
+      const alloc = bal.allocations.find((a) => a.leaveType?.toString() === leaveType._id.toString());
+      if (alloc) {
+        if (req.body.maxDays !== undefined) {
+          alloc.total = leaveType.maxDays;
+          alloc.remaining = Math.max(0, alloc.total - (alloc.used || 0) - (alloc.pending || 0));
+        }
+        if (req.body.name) alloc.leaveTypeName = leaveType.name;
+        if (req.body.colorBadge) alloc.colorBadge = leaveType.colorBadge;
+      }
+      await bal.save();
+    }
+  }
+
   res.status(200).json({
     status: 'success',
     data: { leaveType }

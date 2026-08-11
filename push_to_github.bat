@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "feat(notifications): integrate Firebase Web Push FCM notifications with VAPID key"
+git commit -m "feat(leave-types): restrict leave distribution edit permissions exclusively to CEO and Admin"
 git push -u origin main
 echo Completed Git Push!
 pause

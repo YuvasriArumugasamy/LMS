@@ -8,6 +8,7 @@ import greenBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_43 PM.png';
 import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.png';
 import orangeBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_34 PM.png';
 import { StatusBadge } from '../components/Badge';
+import { Modal } from '../components/Modal';
 import { LeaveApplyModal } from '../components/LeaveApplyModal';
 import { FaceCameraModal } from '../components/FaceCameraModal';
 import { UiverseStarButton } from '../components/UiverseStarButton';
@@ -33,7 +34,8 @@ import {
   ShieldAlert,
   PieChart as PieChartIcon,
   Search,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Edit3
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -80,6 +82,11 @@ export const Dashboard = () => {
   // Face Camera Verification Modal State for Dashboard Check-In / Check-Out
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
   const [pendingClockAction, setPendingClockAction] = useState(null); // 'clockIn' | 'clockOut'
+
+  // Leave Distribution Edit Modal State (CEO & SUPER_ADMIN Exclusive)
+  const [isEditDistributionModalOpen, setIsEditDistributionModalOpen] = useState(false);
+  const [editDistributionData, setEditDistributionData] = useState([]);
+  const [savingDistribution, setSavingDistribution] = useState(false);
 
   const fetchDashboard = async () => {
     try {
@@ -132,6 +139,46 @@ export const Dashboard = () => {
     }
   };
 
+  const handleOpenEditDistribution = () => {
+    if (leaveTypes && leaveTypes.length > 0) {
+      setEditDistributionData(
+        leaveTypes.map((lt) => ({
+          id: lt._id,
+          name: lt.name,
+          code: lt.code,
+          maxDays: lt.maxDays || 0,
+          colorBadge: lt.colorBadge || '#2563EB'
+        }))
+      );
+    } else {
+      setEditDistributionData([
+        { id: 'cl', name: 'Casual Leave', code: 'CL', maxDays: 18, colorBadge: '#2563EB' },
+        { id: 'sl', name: 'Sick Leave', code: 'SL', maxDays: 12, colorBadge: '#EF4444' },
+        { id: 'pl', name: 'Paid Leave', code: 'PL', maxDays: 30, colorBadge: '#22C55E' },
+        { id: 'eml', name: 'Emergency Leave', code: 'EML', maxDays: 10, colorBadge: '#F59E0B' }
+      ]);
+    }
+    setIsEditDistributionModalOpen(true);
+  };
+
+  const handleSaveDistribution = async (e) => {
+    e.preventDefault();
+    setSavingDistribution(true);
+    try {
+      for (const item of editDistributionData) {
+        if (item.id && !['cl', 'sl', 'pl', 'eml'].includes(item.id)) {
+          await api.put(`/leave-types/${item.id}`, { maxDays: Number(item.maxDays) });
+        }
+      }
+      setIsEditDistributionModalOpen(false);
+      await fetchDashboard();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update leave distribution settings.');
+    } finally {
+      setSavingDistribution(false);
+    }
+  };
+
   const defaultTrend = [
     { month: 'Jan', leaves: 12 },
     { month: 'Feb', leaves: 18 },
@@ -154,12 +201,23 @@ export const Dashboard = () => {
     leaves: item.leaves !== undefined ? item.leaves : (item.count !== undefined ? item.count : 10)
   }));
 
-  const pieData = [
-    { name: 'Casual Leave', value: 40, color: '#2563EB' },
-    { name: 'Sick Leave', value: 25, color: '#EF4444' },
-    { name: 'Paid Leave', value: 25, color: '#22C55E' },
-    { name: 'Emergency Leave', value: 10, color: '#F59E0B' }
-  ];
+  const totalDaysAllTypes = leaveTypes.length > 0
+    ? leaveTypes.reduce((sum, lt) => sum + (lt.maxDays || 0), 0)
+    : 42;
+
+  const pieData = leaveTypes.length > 0
+    ? leaveTypes.map((lt) => ({
+        name: lt.name,
+        value: totalDaysAllTypes > 0 ? Math.round(((lt.maxDays || 0) / totalDaysAllTypes) * 100) : 0,
+        maxDays: lt.maxDays,
+        color: lt.colorBadge || (lt.code === 'CL' ? '#2563EB' : lt.code === 'SL' ? '#EF4444' : (lt.code === 'PL' || lt.code === 'EL') ? '#22C55E' : '#F59E0B')
+      }))
+    : [
+        { name: 'Casual Leave', value: 40, maxDays: 18, color: '#2563EB' },
+        { name: 'Sick Leave', value: 25, maxDays: 12, color: '#EF4444' },
+        { name: 'Paid Leave', value: 25, maxDays: 30, color: '#22C55E' },
+        { name: 'Emergency Leave', value: 10, maxDays: 10, color: '#F59E0B' }
+      ];
 
   const entitlements = balance?.allocations && balance.allocations.length > 0
     ? balance.allocations.map((alloc) => ({
@@ -664,7 +722,18 @@ export const Dashboard = () => {
 
             {/* Leave Distribution Donut Chart matching Image (5 Cols) */}
             <div className="md:col-span-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
-              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Leave Distribution</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">Leave Distribution</h3>
+                {(user?.role === 'CEO' || user?.role === 'SUPER_ADMIN') && (
+                  <button
+                    onClick={handleOpenEditDistribution}
+                    className="px-2.5 py-1 text-[11px] font-bold bg-blue-600/10 text-blue-600 hover:bg-blue-600 hover:text-white dark:text-blue-400 dark:hover:text-white rounded-xl flex items-center gap-1 transition-all cursor-pointer"
+                    title="Edit Leave Distribution (CEO & Admin Only)"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" /> Edit
+                  </button>
+                )}
+              </div>
 
               <div className="relative w-full h-36 flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
@@ -679,7 +748,7 @@ export const Dashboard = () => {
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Total</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white leading-none">42</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{totalDaysAllTypes}</span>
                   <span className="text-[9px] font-bold text-slate-400">Leaves</span>
                 </div>
               </div>
@@ -796,6 +865,73 @@ export const Dashboard = () => {
         onCaptureSuccess={handleFaceVerificationSuccess}
         isSubmitting={actionLoading}
       />
+      {/* Leave Distribution Edit Modal (CEO & SUPER_ADMIN Only) */}
+      <Modal
+        isOpen={isEditDistributionModalOpen}
+        onClose={() => setIsEditDistributionModalOpen(false)}
+        title="Edit Leave Distribution Quotas"
+      >
+        <form onSubmit={handleSaveDistribution} className="space-y-4">
+          <p className="text-xs text-slate-500 font-medium">
+            Update maximum yearly leave day allocations per policy. Only CEO and Super Admin can modify these quotas.
+          </p>
+
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            {editDistributionData.map((item, idx) => (
+              <div
+                key={item.id || idx}
+                className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className="w-3.5 h-3.5 rounded-full shrink-0 shadow-2xs"
+                    style={{ backgroundColor: item.colorBadge }}
+                  />
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{item.name}</h4>
+                    <span className="text-[10px] font-mono font-bold text-slate-400">({item.code})</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    max="365"
+                    value={item.maxDays}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setEditDistributionData((prev) =>
+                        prev.map((it, i) => (i === idx ? { ...it, maxDays: val } : it))
+                      );
+                    }}
+                    className="w-20 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500 text-center"
+                    required
+                  />
+                  <span className="text-xs font-semibold text-slate-500">Days/Yr</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => setIsEditDistributionModalOpen(false)}
+              className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={savingDistribution}
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer disabled:opacity-50"
+            >
+              {savingDistribution ? 'Saving Changes...' : 'Save Distribution'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

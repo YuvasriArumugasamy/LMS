@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/Modal';
-import { CalendarDays, Plus, CheckCircle, XCircle, Trash2, AlertTriangle } from 'lucide-react';
+import { CalendarDays, Plus, CheckCircle, XCircle, Trash2, AlertTriangle, Edit3 } from 'lucide-react';
 
 const LEAVE_CARD_MAP = {
   CL: '/leave-cards/CL.png',
@@ -30,12 +31,16 @@ const initialFormData = {
 };
 
 export const LeaveTypes = () => {
+  const { user } = useAuth();
+  const canEdit = user?.role === 'CEO' || user?.role === 'SUPER_ADMIN';
+
   const [leaveTypes, setLeaveTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [modalError, setModalError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(initialFormData);
 
   // Custom Delete Modal State
@@ -62,6 +67,7 @@ export const LeaveTypes = () => {
 
   const resetForm = () => {
     setFormData(initialFormData);
+    setEditingId(null);
   };
 
   const closeModal = () => {
@@ -71,7 +77,23 @@ export const LeaveTypes = () => {
     setModalError('');
   };
 
-  const handleCreate = async (e) => {
+  const handleOpenEdit = (lt) => {
+    setEditingId(lt._id);
+    setFormData({
+      name: lt.name || '',
+      code: lt.code || '',
+      maxDays: lt.maxDays || 12,
+      colorBadge: lt.colorBadge || '#2563EB',
+      paidLeave: lt.paidLeave !== undefined ? lt.paidLeave : true,
+      carryForward: !!lt.carryForward,
+      documentRequired: !!lt.documentRequired,
+      allowHalfDay: lt.allowHalfDay !== undefined ? lt.allowHalfDay : true,
+      description: lt.description || ''
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmitForm = async (e) => {
     e.preventDefault();
     setModalError('');
 
@@ -82,16 +104,25 @@ export const LeaveTypes = () => {
 
     try {
       setSubmitting(true);
-      await api.post('/leave-types', {
-        ...formData,
-        name: formData.name.trim(),
-        code: formData.code.trim().toUpperCase(),
-        description: formData.description.trim()
-      });
+      if (editingId) {
+        await api.put(`/leave-types/${editingId}`, {
+          ...formData,
+          name: formData.name.trim(),
+          code: formData.code.trim().toUpperCase(),
+          description: formData.description.trim()
+        });
+      } else {
+        await api.post('/leave-types', {
+          ...formData,
+          name: formData.name.trim(),
+          code: formData.code.trim().toUpperCase(),
+          description: formData.description.trim()
+        });
+      }
       closeModal();
       await fetchLeaveTypes();
     } catch (err) {
-      setModalError(err.response?.data?.message || 'Failed to create leave policy');
+      setModalError(err.response?.data?.message || 'Failed to save leave policy');
     } finally {
       setSubmitting(false);
     }
@@ -125,12 +156,17 @@ export const LeaveTypes = () => {
           <p className="text-xs sm:text-sm text-slate-500 font-medium">Configure corporate leave entitlements, caps, and rules</p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-5 py-2.5 bg-primary hover:bg-blue-700 text-white text-xs font-bold rounded-enterprise shadow-lg shadow-primary/25 flex items-center gap-2 transition-all cursor-pointer"
-        >
-          <Plus className="w-4 h-4" /> Add Leave Policy
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => {
+              resetForm();
+              setIsModalOpen(true);
+            }}
+            className="px-5 py-2.5 bg-primary hover:bg-blue-700 text-white text-xs font-bold rounded-enterprise shadow-lg shadow-primary/25 flex items-center gap-2 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" /> Add Leave Policy
+          </button>
+        )}
       </div>
 
       {error && (
@@ -170,17 +206,34 @@ export const LeaveTypes = () => {
                         <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-white/90 text-slate-900 shadow-2xs backdrop-blur-sm">
                           {lt.code}
                         </span>
-                        {/* Red Delete Button */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenDeleteModal(lt);
-                          }}
-                          title="Delete Leave Policy"
-                          className="p-1.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white shadow-sm shadow-rose-500/30 transition-all hover:scale-110 active:scale-95 cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 stroke-[2]" />
-                        </button>
+
+                        {canEdit && (
+                          <>
+                            {/* Blue Edit Button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenEdit(lt);
+                              }}
+                              title="Edit Leave Policy"
+                              className="p-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-600/30 transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                            >
+                              <Edit3 className="w-3.5 h-3.5 stroke-[2]" />
+                            </button>
+
+                            {/* Red Delete Button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenDeleteModal(lt);
+                              }}
+                              title="Delete Leave Policy"
+                              className="p-1.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white shadow-sm shadow-rose-500/30 transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 stroke-[2]" />
+                            </button>
+                          </>
+                        )}
                       </div>
                       <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full ${lt.paidLeave ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300' : 'bg-slate-500/20 text-slate-800 dark:text-slate-200'}`}>
                         {lt.paidLeave ? 'Paid Leave' : 'Unpaid LOP'}
@@ -204,9 +257,9 @@ export const LeaveTypes = () => {
         </div>
       )}
 
-      {/* Create Leave Policy Modal */}
-      <Modal isOpen={isModalOpen} onClose={closeModal} title="Create Leave Policy">
-        <form onSubmit={handleCreate} className="space-y-4">
+      {/* Create / Edit Leave Policy Modal */}
+      <Modal isOpen={isModalOpen} onClose={closeModal} title={editingId ? "Edit Leave Policy" : "Create Leave Policy"}>
+        <form onSubmit={handleSubmitForm} className="space-y-4">
           {modalError && (
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-bold">
               {modalError}
@@ -323,7 +376,7 @@ export const LeaveTypes = () => {
               disabled={submitting}
               className="px-5 py-2 bg-primary hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer disabled:opacity-50"
             >
-              {submitting ? 'Creating...' : 'Create Policy'}
+              {submitting ? 'Saving...' : editingId ? 'Save Changes' : 'Create Policy'}
             </button>
           </div>
         </form>
