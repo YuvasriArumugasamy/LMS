@@ -45,7 +45,7 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-xl',
             {!hideCloseButton && (
               title ? (
                 <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
-                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">{title}</h3>
+                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight pr-6 sm:pr-0">{title}</h3>
                   <button
                     type="button"
                     onClick={onClose}
@@ -59,10 +59,10 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-xl',
                 <button
                   type="button"
                   onClick={onClose}
-                  className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all shrink-0 hover:scale-105 shadow-2xs"
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all shrink-0 hover:scale-105 shadow-2xs"
                   title="Close Modal"
                 >
-                  <X className="w-4.5 h-4.5 stroke-[2.5]" />
+                  <X className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
                 </button>
               )
             )}

@@ -97,16 +97,16 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
     <Modal isOpen={isOpen} onClose={onClose} showHeader={false} maxWidth="max-w-2xl">
       <form onSubmit={handleSubmit} className="space-y-4 p-1">
         {/* Custom Header Matching Image 1 */}
-        <div className="flex items-center justify-between pb-1">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 shrink-0">
-              <FileEdit className="w-5 h-5 stroke-[2.2]" />
+        <div className="flex items-center justify-between pb-1 pr-8 sm:pr-10">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 shrink-0">
+              <FileEdit className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[2.2]" />
             </div>
-            <div>
-              <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                 {existingReport ? 'Edit Daily Work Report' : 'Submit Daily Work Report'}
               </h2>
-              <p className="text-xs text-slate-400 dark:text-slate-400 font-medium">
+              <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-400 font-medium truncate">
                 Update your daily progress and keep track of your tasks.
               </p>
             </div>
@@ -121,26 +121,26 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
         )}
 
         {/* Employee & Date Profile Card Matching Image 1 */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-purple-50/60 dark:from-slate-800/80 dark:to-slate-800/40 border border-indigo-100/80 dark:border-slate-700 flex items-center justify-between gap-3 shadow-2xs">
-          <div className="flex items-center gap-3.5">
-            <UserAvatar user={user} size="w-11 h-11 text-sm shrink-0" />
-            <div>
-              <h3 className="text-base font-black text-slate-900 dark:text-white">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-purple-50/60 dark:from-slate-800/80 dark:to-slate-800/40 border border-indigo-100/80 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <UserAvatar user={user} size="w-10 h-10 sm:w-11 sm:h-11 text-xs sm:text-sm shrink-0" />
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white truncate">
                 {user?.firstName || 'Employee'} {user?.lastName || ''}
               </h3>
-              <p className="text-xs text-indigo-600/90 dark:text-indigo-400 font-extrabold mt-0.5">
+              <p className="text-[11px] sm:text-xs text-indigo-600/90 dark:text-indigo-400 font-extrabold mt-0.5 truncate">
                 {user?.employeeId || 'EMP-4889'} • {user?.department?.name || 'Engineering'}
               </p>
             </div>
           </div>
 
-          <div className="p-2.5 rounded-2xl bg-white/90 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 flex items-center gap-2.5 shadow-2xs shrink-0">
-            <div className="p-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400">
+          <div className="p-2 sm:p-2.5 rounded-2xl bg-white/90 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 flex items-center gap-2 sm:gap-2.5 shadow-2xs shrink-0 self-start sm:self-auto max-w-full">
+            <div className="p-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 shrink-0">
               <CalendarDays className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <div>
-              <span className="text-[10px] font-bold text-slate-400 block leading-none">Date</span>
-              <span className="text-xs font-extrabold text-purple-700 dark:text-purple-300 block mt-0.5">
+            <div className="min-w-0">
+              <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 block leading-none">Date</span>
+              <span className="text-[11px] sm:text-xs font-extrabold text-purple-700 dark:text-purple-300 block mt-0.5 whitespace-nowrap">
                 {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
             </div>

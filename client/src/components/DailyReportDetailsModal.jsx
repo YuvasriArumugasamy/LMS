@@ -151,16 +151,16 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
       <Modal isOpen={isOpen} onClose={onClose} showHeader={false} maxWidth="max-w-2xl">
         <div className="space-y-4 p-1">
           {/* Custom Header Matching Image 1 */}
-          <div className="flex items-center justify-between pb-1 pr-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/25 shrink-0">
-                <ClipboardList className="w-5 h-5 stroke-[2.2]" />
+          <div className="flex items-center justify-between pb-1 pr-8 sm:pr-10">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/25 shrink-0">
+                <ClipboardList className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[2.2]" />
               </div>
-              <div>
-                <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                   Daily Work Report Details
                 </h2>
-                <p className="text-xs text-slate-400 dark:text-slate-400 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-400 font-medium truncate">
                   Overview of your daily progress and tasks
                 </p>
               </div>
