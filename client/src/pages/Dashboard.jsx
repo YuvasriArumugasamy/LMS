@@ -213,10 +213,10 @@ export const Dashboard = () => {
         color: lt.colorBadge || (lt.code === 'CL' ? '#2563EB' : lt.code === 'SL' ? '#EF4444' : (lt.code === 'PL' || lt.code === 'EL') ? '#22C55E' : '#F59E0B')
       }))
     : [
-        { name: 'Casual Leave', value: 40, maxDays: 18, color: '#2563EB' },
-        { name: 'Sick Leave', value: 25, maxDays: 12, color: '#EF4444' },
-        { name: 'Paid Leave', value: 25, maxDays: 30, color: '#22C55E' },
-        { name: 'Emergency Leave', value: 10, maxDays: 10, color: '#F59E0B' }
+        { name: 'Casual Leave', value: 29, maxDays: 12, color: '#2563EB' },
+        { name: 'Earned Leave', value: 36, maxDays: 15, color: '#22C55E' },
+        { name: 'Emergency Leave', value: 12, maxDays: 5, color: '#F59E0B' },
+        { name: 'Sick Leave', value: 24, maxDays: 10, color: '#EF4444' }
       ];
 
   const entitlements = balance?.allocations && balance.allocations.length > 0
@@ -760,7 +760,7 @@ export const Dashboard = () => {
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                       <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">{item.name}</span>
                     </div>
-                    <span className="font-black text-slate-900 dark:text-white shrink-0">{item.value}%</span>
+                    <span className="font-black text-slate-900 dark:text-white shrink-0">{item.maxDays} Days ({item.value}%)</span>
                   </div>
                 ))}
               </div>

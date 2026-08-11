@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "feat(leave-types): restrict leave distribution edit permissions exclusively to CEO and Admin"
+git commit -m "fix(dashboard): display exact leave days count alongside percentage in leave distribution chart"
 git push -u origin main
 echo Completed Git Push!
 pause
