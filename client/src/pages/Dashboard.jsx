@@ -760,7 +760,7 @@ export const Dashboard = () => {
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                       <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">{item.name}</span>
                     </div>
-                    <span className="font-black text-slate-900 dark:text-white shrink-0">{item.maxDays} Days ({item.value}%)</span>
+                    <span className="font-black text-slate-900 dark:text-white shrink-0">{item.maxDays} Days</span>
                   </div>
                 ))}
               </div>
