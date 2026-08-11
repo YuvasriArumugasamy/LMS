@@ -78,6 +78,7 @@ export const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [selectedBalanceYear, setSelectedBalanceYear] = useState(new Date().getFullYear());
 
   // Face Camera Verification Modal State for Dashboard Check-In / Check-Out
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
@@ -88,12 +89,13 @@ export const Dashboard = () => {
   const [editDistributionData, setEditDistributionData] = useState([]);
   const [savingDistribution, setSavingDistribution] = useState(false);
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = async (balanceYear) => {
     try {
+      const year = balanceYear || selectedBalanceYear;
       const [statsRes, leaveTypesRes, balanceRes, attendanceRes] = await Promise.all([
         api.get('/dashboard/stats'),
         api.get('/leave-types'),
-        api.get('/leaves/balance'),
+        api.get('/leaves/balance', { params: { year } }),
         api.get('/attendance/today')
       ]);
       setStats(statsRes.data.data);
@@ -110,6 +112,17 @@ export const Dashboard = () => {
   useEffect(() => {
     fetchDashboard();
   }, []);
+
+  // Re-fetch balance when year changes
+  const handleBalanceYearChange = async (year) => {
+    setSelectedBalanceYear(year);
+    try {
+      const res = await api.get('/leaves/balance', { params: { year } });
+      setBalance(res.data.data.balance);
+    } catch (err) {
+      console.error('[Balance Year Change Error]', err);
+    }
+  };
 
   const handleQuickClockIn = () => {
     setPendingClockAction('clockIn');
@@ -497,7 +510,15 @@ export const Dashboard = () => {
           <div className="lg:col-span-8 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Your Leave Entitlements</h3>
-              <span className="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">Year 2026 ▾</span>
+              <select
+                value={selectedBalanceYear}
+                onChange={(e) => handleBalanceYearChange(Number(e.target.value))}
+                className="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1 rounded-full border-none outline-none cursor-pointer transition-colors"
+              >
+                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((yr) => (
+                  <option key={yr} value={yr}>Year {yr}</option>
+                ))}
+              </select>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
@@ -621,7 +642,7 @@ export const Dashboard = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">Leave Quotas Allocated</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">Annual Quotas (Year 2026)</p>
+                    <p className="text-[11px] font-medium text-slate-400 truncate">Annual Quotas (Year {selectedBalanceYear})</p>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 shrink-0">Jan 1</span>
                 </div>
