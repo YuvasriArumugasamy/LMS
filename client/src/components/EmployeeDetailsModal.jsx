@@ -438,6 +438,7 @@ export const EmployeeDetailsModal = ({
         onClose={() => setIsFaceModalOpen(false)}
         mode="register"
         employeeName={`${employee.firstName} ${employee.lastName}`}
+        employeeId={employee.email}
         onCaptureSuccess={handleSaveFaceLock}
         isSubmitting={faceSubmitting}
       />

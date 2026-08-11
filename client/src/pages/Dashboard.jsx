@@ -942,6 +942,7 @@ export const Dashboard = () => {
         }}
         mode="verify"
         employeeName={user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : ''}
+        employeeId={user?.email}
         onCaptureSuccess={handleFaceVerificationSuccess}
         isSubmitting={actionLoading}
       />

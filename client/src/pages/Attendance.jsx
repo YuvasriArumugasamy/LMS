@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
@@ -1372,6 +1372,7 @@ export const Attendance = () => {
         }}
         mode="verify"
         employeeName={user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : ''}
+        employeeId={user?.email}
         onCaptureSuccess={handleFaceVerificationSuccess}
         isSubmitting={actionLoading}
       />

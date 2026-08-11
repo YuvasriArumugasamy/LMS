@@ -723,6 +723,7 @@ export const Employees = () => {
         onClose={() => setIsCreateFaceModalOpen(false)}
         mode="register"
         employeeName={`${formData.firstName} ${formData.lastName}`.trim() || 'New Employee'}
+        employeeId={formData.email || 'new_user_temp'}
         onCaptureSuccess={(desc) => {
           setCapturedFaceDescriptor(desc);
           setIsCreateFaceModalOpen(false);
