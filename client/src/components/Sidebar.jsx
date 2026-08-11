@@ -149,7 +149,12 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
                       <NavLink
                         key={item.path}
                         to={item.path}
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => {
+                          setIsOpen(false);
+                          const mainEl = document.querySelector('main');
+                          if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
                         className={({ isActive }) =>
                           `relative flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 group ${
                             isActive
@@ -191,7 +196,12 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
         <div className="p-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/40 shrink-0">
           <NavLink
             to="/profile"
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              const mainEl = document.querySelector('main');
+              if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             className="p-3 rounded-2xl bg-white dark:bg-slate-800/90 hover:bg-blue-50/60 dark:hover:bg-blue-950/40 border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-500/40 flex items-center gap-3 transition-all cursor-pointer group shadow-2xs"
           >
             <div className="relative shrink-0">
