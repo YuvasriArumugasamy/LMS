@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { ASSETS } from '../assets';
 import { MetricCard } from '../components/Card';
-import blueBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_49 PM.png';
-import greenBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_43 PM.png';
-import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.png';
-import orangeBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_34 PM.png';
+import blueBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_49 PM.webp';
+import greenBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_43 PM.webp';
+import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.webp';
+import orangeBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_34 PM.webp';
 import { StatusBadge } from '../components/Badge';
 import { Modal } from '../components/Modal';
 import { LeaveApplyModal } from '../components/LeaveApplyModal';

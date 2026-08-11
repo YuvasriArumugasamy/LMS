@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
 import { DailyReportSubmitModal } from '../components/DailyReportSubmitModal';
 import { DailyReportDetailsModal } from '../components/DailyReportDetailsModal';
 import { EmployeeReportHistoryModal } from '../components/EmployeeReportHistoryModal';
-import noteImg from '../assets/note.png';
-import notesImg from '../assets/notes.png';
-import winImg from '../assets/win.png';
-import growthImg from '../assets/growth.png';
-import bg1Img from '../assets/bg1.png';
-import bg2Img from '../assets/bg2.png';
-import bg3Img from '../assets/bg3.png';
+import noteImg from '../assets/note.webp';
+import notesImg from '../assets/notes.webp';
+import winImg from '../assets/win.webp';
+import growthImg from '../assets/growth.webp';
+import bg1Img from '../assets/bg1.webp';
+import bg2Img from '../assets/bg2.webp';
+import bg3Img from '../assets/bg3.webp';
 import {
   FileText,
   Plus,

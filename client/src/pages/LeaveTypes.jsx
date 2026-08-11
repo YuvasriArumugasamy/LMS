@@ -5,18 +5,18 @@ import { Modal } from '../components/Modal';
 import { CalendarDays, Plus, CheckCircle, XCircle, Trash2, AlertTriangle, Edit3 } from 'lucide-react';
 
 const LEAVE_CARD_MAP = {
-  CL: '/leave-cards/CL.png',
-  EL: '/leave-cards/EL.png',
-  PL: '/leave-cards/EL.png',
-  EML: '/leave-cards/EML.png',
-  SL: '/leave-cards/SL.png'
+  CL: '/leave-cards/CL.webp',
+  EL: '/leave-cards/EL.webp',
+  PL: '/leave-cards/EL.webp',
+  EML: '/leave-cards/EML.webp',
+  SL: '/leave-cards/SL.webp'
 };
 
 const DEFAULT_CARD_BG_LIST = [
-  '/leave-cards/CL.png',
-  '/leave-cards/EL.png',
-  '/leave-cards/EML.png',
-  '/leave-cards/SL.png'
+  '/leave-cards/CL.webp',
+  '/leave-cards/EL.webp',
+  '/leave-cards/EML.webp',
+  '/leave-cards/SL.webp'
 ];
 
 const initialFormData = {

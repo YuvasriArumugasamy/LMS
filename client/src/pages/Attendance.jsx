@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
 import { UiverseStarButton } from '../components/UiverseStarButton';
 import { Modal } from '../components/Modal';
 import { FaceCameraModal } from '../components/FaceCameraModal';
-import blueBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_49 PM.png';
-import greenBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_43 PM.png';
-import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.png';
-import orangeBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_34 PM.png';
+import blueBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_49 PM.webp';
+import greenBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_43 PM.webp';
+import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.webp';
+import orangeBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_34 PM.webp';
 import {
   Clock,
   Calendar,

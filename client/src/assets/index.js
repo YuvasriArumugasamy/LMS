@@ -1,7 +1,7 @@
-import companyLogoImg from './Screenshot 2026-08-01 113959.png';
+﻿import companyLogoImg from './Screenshot 2026-08-01 113959.webp';
 import appBgVideoFile from './ezgif-512e6aff163f390f.mp4';
-import bannerIllustrationImg from './ChatGPT Image Aug 3, 2026, 11_12_49 AM.png';
-import logoutIllustrationImg from './ChatGPT Image Aug 3, 2026, 12_52_53 PM.png';
+import bannerIllustrationImg from './ChatGPT Image Aug 3, 2026, 11_12_49 AM.webp';
+import logoutIllustrationImg from './ChatGPT Image Aug 3, 2026, 12_52_53 PM.webp';
 
 // Enterprise LMS Assets Management Directory
 export const ASSETS = {
