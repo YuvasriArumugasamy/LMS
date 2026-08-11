@@ -18,7 +18,7 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['LEAVE_APPLIED', 'LEAVE_APPROVED', 'LEAVE_REJECTED', 'LEAVE_ESCALATED', 'HOLIDAY_ANNOUNCEMENT', 'SYSTEM'],
+      enum: ['LEAVE_APPLIED', 'LEAVE_APPROVED', 'LEAVE_REJECTED', 'LEAVE_ESCALATED', 'HOLIDAY_ANNOUNCEMENT', 'DAILY_REPORT', 'SYSTEM'],
       default: 'SYSTEM'
     },
     isRead: {

@@ -95,10 +95,11 @@ export const sendDailyReportReminder = asyncHandler(async (req, res, next) => {
 
   const senderRole = req.user.role === 'CEO' ? 'CEO' : req.user.role === 'MANAGER' ? 'Manager' : 'HR';
   await Notification.create({
-    user: userId,
+    recipient: userId,
     title: 'Daily Report Reminder 🔔',
     message: `${senderRole} ${req.user.firstName || ''} ${req.user.lastName || ''} sent you a reminder: Please submit your Daily Work Report for today.`,
-    type: 'LEAVE_STATUS'
+    type: 'DAILY_REPORT',
+    targetUrl: '/daily-reports'
   });
 
   res.status(200).json({
@@ -270,10 +271,11 @@ export const reviewDailyReport = asyncHandler(async (req, res, next) => {
   try {
     const reviewerRole = req.user.role === 'CEO' ? 'CEO' : req.user.role === 'MANAGER' ? 'Manager' : 'HR';
     await Notification.create({
-      user: report.user,
+      recipient: report.user,
       title: `Daily Report ${status || 'Reviewed'}`,
       message: `${reviewerRole} ${req.user.firstName || ''} ${req.user.lastName || ''} reviewed your report "${report.title}": ${feedback ? `"${feedback}"` : 'Status updated.'}`,
-      type: 'LEAVE_STATUS'
+      type: 'DAILY_REPORT',
+      targetUrl: '/daily-reports'
     });
   } catch (notifErr) {
     console.error('[Notification Error]', notifErr);
