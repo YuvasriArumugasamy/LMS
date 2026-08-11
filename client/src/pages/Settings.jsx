@@ -1,16 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Save, Zap, Building, Mail, Shield } from 'lucide-react';
+import api from '../services/api';
 
 export const Settings = () => {
   const [companyName, setCompanyName] = useState('Life Changers LMS');
   const [escalationMinutes, setEscalationMinutes] = useState(5);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = (e) => {
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await api.get('/settings');
+        const settings = res.data.data.settings;
+        if (settings) {
+          setCompanyName(settings.companyName || 'Life Changers LMS');
+          setEscalationMinutes(settings.emergencyEscalationMinutes || 5);
+        }
+      } catch (err) {
+        console.error('Error fetching settings:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      await api.put('/settings', {
+        companyName,
+        emergencyEscalationMinutes: escalationMinutes
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update settings');
+    }
   };
+
+  if (loading) return <div className="p-8 text-center text-slate-500">Loading settings...</div>;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

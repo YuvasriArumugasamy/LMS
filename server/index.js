@@ -23,6 +23,7 @@ import auditRoutes from './routes/auditRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
 import wfhRoutes from './routes/wfhRoutes.js';
 import dailyReportRoutes from './routes/dailyReportRoutes.js';
+import settingsRoutes from './routes/settingsRoutes.js';
 import { checkEmergencyEscalations } from './services/escalationService.js';
 import { updateEarnedLeaveToPaidLeave } from './utils/seed.js';
 
@@ -79,6 +80,7 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/wfh', wfhRoutes);
 app.use('/api/daily-reports', dailyReportRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Global Error Handler
 app.use(globalErrorHandler);
