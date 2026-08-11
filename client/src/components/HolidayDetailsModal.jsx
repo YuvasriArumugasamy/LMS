@@ -7,7 +7,7 @@ export const HolidayDetailsModal = ({ isOpen, onClose, holiday, currentUser, onD
 
   if (!holiday) return null;
 
-  const isHR = ['HR', 'SUPER_ADMIN'].includes(currentUser?.role);
+  const isHR = ['HR', 'SUPER_ADMIN', 'CEO'].includes(currentUser?.role);
 
   const handleDeleteClick = async () => {
     if (window.confirm(`Are you sure you want to remove ${holiday.name}?`)) {
