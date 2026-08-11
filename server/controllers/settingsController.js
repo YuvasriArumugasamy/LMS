@@ -1,5 +1,5 @@
 import { Settings } from '../models/Settings.js';
-import { asyncHandler } from '../middleware/errorMiddleware.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
 // @desc    Get system settings
 // @route   GET /api/settings
