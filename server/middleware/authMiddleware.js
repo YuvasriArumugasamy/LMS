@@ -15,7 +15,7 @@ export const protect = asyncHandler(async (req, res, next) => {
 
   try {
     const decoded = verifyAccessToken(token);
-    let currentUser = await User.findById(decoded.id);
+    let currentUser = await User.findById(decoded.id).select('+faceDescriptor');
 
     if (!currentUser || currentUser.isDeleted || currentUser.status !== 'ACTIVE') {
       return next(new AppError('The user belonging to this token no longer exists or is inactive.', 401));

@@ -5,6 +5,37 @@ import { LeaveBalance } from '../models/LeaveBalance.js';
 import { Holiday } from '../models/Holiday.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
+// Build real monthly leave trend for current year
+const buildMonthlyTrend = async (matchQuery = {}) => {
+  const year = new Date().getFullYear();
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const results = await LeaveRequest.aggregate([
+    {
+      $match: {
+        isDeleted: false,
+        fromDate: { $gte: new Date(`${year}-01-01`), $lte: new Date(`${year}-12-31`) },
+        ...matchQuery
+      }
+    },
+    {
+      $group: {
+        _id: { $month: '$fromDate' },
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  const countMap = {};
+  results.forEach((r) => { countMap[r._id] = r.count; });
+
+  return months.map((month, idx) => ({
+    month,
+    leaves: countMap[idx + 1] || 0,
+    count: countMap[idx + 1] || 0
+  }));
+};
+
 export const getDashboardStats = asyncHandler(async (req, res, next) => {
   const role = req.user.role;
   const userId = req.user._id;
@@ -12,134 +43,90 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const defaultMonthlyTrend = [
-    { month: 'Jan', leaves: 12, count: 12 },
-    { month: 'Feb', leaves: 18, count: 18 },
-    { month: 'Mar', leaves: 24, count: 24 },
-    { month: 'Apr', leaves: 15, count: 15 },
-    { month: 'May', leaves: 29, count: 29 },
-    { month: 'Jun', leaves: 32, count: 32 },
-    { month: 'Jul', leaves: 22, count: 22 },
-    { month: 'Aug', leaves: 19, count: 19 }
-  ];
-
   if (['SUPER_ADMIN', 'CEO'].includes(role)) {
-    const totalEmployees = await User.countDocuments({ isDeleted: false, status: 'ACTIVE' });
-    const totalDepartments = await Department.countDocuments({ isDeleted: false });
-    const totalManagers = await User.countDocuments({ role: 'MANAGER', isDeleted: false });
-    const pendingLeaves = await LeaveRequest.countDocuments({ status: { $in: ['PENDING', 'ESCALATED_TO_HR'] }, isDeleted: false });
-    const approvedLeaves = await LeaveRequest.countDocuments({ status: 'HR_APPROVED', isDeleted: false });
-    const rejectedLeaves = await LeaveRequest.countDocuments({ status: { $in: ['MANAGER_REJECTED', 'HR_REJECTED'] }, isDeleted: false });
-
-    // Employees on leave today
-    const leavesToday = await LeaveRequest.find({
-      status: 'HR_APPROVED',
-      fromDate: { $lte: today },
-      toDate: { $gte: today },
-      isDeleted: false
-    }).populate('user', 'firstName lastName employeeId department profileImage');
+    const [totalEmployees, totalDepartments, totalManagers, pendingLeaves, approvedLeaves, rejectedLeaves, leavesToday, monthlyTrend] = await Promise.all([
+      User.countDocuments({ isDeleted: false, status: 'ACTIVE' }),
+      Department.countDocuments({ isDeleted: false }),
+      User.countDocuments({ role: 'MANAGER', isDeleted: false }),
+      LeaveRequest.countDocuments({ status: { $in: ['PENDING', 'ESCALATED_TO_HR'] }, isDeleted: false }),
+      LeaveRequest.countDocuments({ status: 'HR_APPROVED', isDeleted: false }),
+      LeaveRequest.countDocuments({ status: { $in: ['MANAGER_REJECTED', 'HR_REJECTED'] }, isDeleted: false }),
+      LeaveRequest.find({ status: 'HR_APPROVED', fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
+        .populate('user', 'firstName lastName employeeId department profileImage'),
+      buildMonthlyTrend()
+    ]);
 
     res.status(200).json({
       status: 'success',
       data: {
-        cards: {
-          totalEmployees,
-          totalDepartments,
-          totalManagers,
-          pendingLeaves,
-          approvedLeaves,
-          rejectedLeaves,
-          employeesOnLeaveToday: leavesToday.length
-        },
+        cards: { totalEmployees, totalDepartments, totalManagers, pendingLeaves, approvedLeaves, rejectedLeaves, employeesOnLeaveToday: leavesToday.length },
         leavesToday,
-        monthlyTrend: defaultMonthlyTrend
+        monthlyTrend
       }
     });
   } else if (role === 'HR') {
-    const totalEmployees = await User.countDocuments({ isDeleted: false });
-    const pendingHrApprovals = await LeaveRequest.countDocuments({ status: { $in: ['MANAGER_APPROVED', 'ESCALATED_TO_HR', 'PENDING'] }, isDeleted: false });
-    const holidayCount = await Holiday.countDocuments({ isDeleted: false, status: 'ACTIVE' });
-    const newEmployees = await User.countDocuments({
-      createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
-      isDeleted: false
-    });
-
-    const recentRequests = await LeaveRequest.find({ isDeleted: false })
-      .populate('user', 'firstName lastName profileImage department')
-      .populate('leaveType', 'name colorBadge')
-      .sort({ createdAt: -1 })
-      .limit(5);
+    const [totalEmployees, pendingHrApprovals, holidayCount, newEmployees, recentRequests, monthlyTrend] = await Promise.all([
+      User.countDocuments({ isDeleted: false }),
+      LeaveRequest.countDocuments({ status: { $in: ['MANAGER_APPROVED', 'ESCALATED_TO_HR', 'PENDING'] }, isDeleted: false }),
+      Holiday.countDocuments({ isDeleted: false, status: 'ACTIVE' }),
+      User.countDocuments({ createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, isDeleted: false }),
+      LeaveRequest.find({ isDeleted: false })
+        .populate('user', 'firstName lastName profileImage department')
+        .populate('leaveType', 'name colorBadge')
+        .sort({ createdAt: -1 })
+        .limit(5),
+      buildMonthlyTrend()
+    ]);
 
     res.status(200).json({
       status: 'success',
       data: {
-        cards: {
-          totalEmployees,
-          pendingHrApprovals,
-          holidayCount,
-          newEmployees
-        },
+        cards: { totalEmployees, pendingHrApprovals, holidayCount, newEmployees },
         recentRequests,
-        monthlyTrend: defaultMonthlyTrend
+        monthlyTrend
       }
     });
   } else if (role === 'MANAGER') {
     const teamMembers = await User.find({ reportingManager: userId, isDeleted: false }).select('_id');
     const teamIds = teamMembers.map((m) => m._id);
 
-    const teamCount = teamIds.length;
-    const pendingRequests = await LeaveRequest.countDocuments({ user: { $in: teamIds }, status: 'PENDING', isDeleted: false });
-    const approvedRequests = await LeaveRequest.countDocuments({ user: { $in: teamIds }, status: 'HR_APPROVED', isDeleted: false });
-
-    const teamOnLeaveToday = await LeaveRequest.find({
-      user: { $in: teamIds },
-      status: 'HR_APPROVED',
-      fromDate: { $lte: today },
-      toDate: { $gte: today },
-      isDeleted: false
-    }).populate('user', 'firstName lastName profileImage designation');
+    const [teamCount, pendingRequests, approvedRequests, teamOnLeaveToday, monthlyTrend] = await Promise.all([
+      Promise.resolve(teamIds.length),
+      LeaveRequest.countDocuments({ user: { $in: teamIds }, status: 'PENDING', isDeleted: false }),
+      LeaveRequest.countDocuments({ user: { $in: teamIds }, status: 'HR_APPROVED', isDeleted: false }),
+      LeaveRequest.find({ user: { $in: teamIds }, status: 'HR_APPROVED', fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
+        .populate('user', 'firstName lastName profileImage designation'),
+      buildMonthlyTrend({ user: { $in: teamIds } })
+    ]);
 
     res.status(200).json({
       status: 'success',
       data: {
-        cards: {
-          teamCount,
-          pendingRequests,
-          approvedRequests,
-          teamOnLeaveTodayCount: teamOnLeaveToday.length
-        },
+        cards: { teamCount, pendingRequests, approvedRequests, teamOnLeaveTodayCount: teamOnLeaveToday.length },
         teamOnLeaveToday,
-        monthlyTrend: defaultMonthlyTrend
+        monthlyTrend
       }
     });
   } else {
     // EMPLOYEE DASHBOARD
-    const balance = await LeaveBalance.findOne({ user: userId, year: new Date().getFullYear() }).populate('allocations.leaveType');
-    const pendingRequests = await LeaveRequest.countDocuments({ user: userId, status: { $in: ['PENDING', 'MANAGER_APPROVED', 'ESCALATED_TO_HR'] }, isDeleted: false });
-    const approvedLeaves = await LeaveRequest.countDocuments({ user: userId, status: 'HR_APPROVED', isDeleted: false });
-    const rejectedLeaves = await LeaveRequest.countDocuments({ user: userId, status: { $in: ['MANAGER_REJECTED', 'HR_REJECTED'] }, isDeleted: false });
-
-    const upcomingHolidays = await Holiday.find({ date: { $gte: today }, isDeleted: false, status: 'ACTIVE' })
-      .sort({ date: 1 })
-      .limit(5);
-
-    const recentLeaves = await LeaveRequest.find({ user: userId, isDeleted: false })
-      .populate('leaveType', 'name colorBadge')
-      .sort({ createdAt: -1 })
-      .limit(5);
+    const [balance, pendingRequests, approvedLeaves, rejectedLeaves, upcomingHolidays, recentLeaves, monthlyTrend] = await Promise.all([
+      LeaveBalance.findOne({ user: userId, year: new Date().getFullYear() }).populate('allocations.leaveType'),
+      LeaveRequest.countDocuments({ user: userId, status: { $in: ['PENDING', 'MANAGER_APPROVED', 'ESCALATED_TO_HR'] }, isDeleted: false }),
+      LeaveRequest.countDocuments({ user: userId, status: 'HR_APPROVED', isDeleted: false }),
+      LeaveRequest.countDocuments({ user: userId, status: { $in: ['MANAGER_REJECTED', 'HR_REJECTED'] }, isDeleted: false }),
+      Holiday.find({ date: { $gte: today }, isDeleted: false, status: 'ACTIVE' }).sort({ date: 1 }).limit(5),
+      LeaveRequest.find({ user: userId, isDeleted: false }).populate('leaveType', 'name colorBadge').sort({ createdAt: -1 }).limit(5),
+      buildMonthlyTrend({ user: userId })
+    ]);
 
     res.status(200).json({
       status: 'success',
       data: {
-        cards: {
-          pendingRequests,
-          approvedLeaves,
-          rejectedLeaves
-        },
+        cards: { pendingRequests, approvedLeaves, rejectedLeaves },
         balance,
         upcomingHolidays,
         recentLeaves,
-        monthlyTrend: defaultMonthlyTrend
+        monthlyTrend
       }
     });
   }

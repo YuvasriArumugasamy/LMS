@@ -103,7 +103,8 @@ const userSchema = new mongoose.Schema(
     },
     faceDescriptor: {
       type: [Number],
-      default: []
+      default: [],
+      select: false
     },
     isFaceRegistered: {
       type: Boolean,

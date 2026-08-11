@@ -28,6 +28,10 @@ export const Settings = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (escalationMinutes < 1 || escalationMinutes > 1440) {
+      alert('Escalation minutes must be between 1 and 1440 (24 hours).');
+      return;
+    }
     try {
       await api.put('/settings', {
         companyName,
@@ -83,12 +87,14 @@ export const Settings = () => {
             </label>
             <input
               type="number"
+              min="1"
+              max="1440"
               value={escalationMinutes}
               onChange={(e) => setEscalationMinutes(Number(e.target.value))}
               className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-900 dark:text-white outline-none"
             />
             <p className="text-xs text-slate-400 font-medium mt-1">
-              If a Manager does not act on an Emergency Leave request within this period, it automatically escalates to HR.
+              If a Manager does not act on an Emergency Leave request within this period, it automatically escalates to HR. (Min: 1, Max: 1440 minutes)
             </p>
           </div>
         </div>

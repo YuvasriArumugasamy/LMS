@@ -178,10 +178,6 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     previewUrl
   };
 
-  if (process.env.NODE_ENV !== 'production') {
-    responsePayload.resetUrl = resetURL;
-  }
-
   res.status(200).json(responsePayload);
 });
 

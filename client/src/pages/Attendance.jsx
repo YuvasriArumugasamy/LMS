@@ -569,9 +569,8 @@ export const Attendance = () => {
         </div>
       </div>
 
-      {/* Daily Punch Widget Banner (Only for regular employees & managers, hidden for CEO) */}
-      {user?.role !== 'CEO' && (
-        <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-primary/20 bg-gradient-to-r from-blue-600/10 via-sky-500/5 to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+      {/* Daily Punch Widget Banner */}
+      <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-primary/20 bg-gradient-to-r from-blue-600/10 via-sky-500/5 to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
             <div className="p-3 rounded-2xl bg-primary text-white shadow-md shadow-primary/20 shrink-0 flex items-center justify-center">
               <Clock className="w-5 h-5" />
@@ -638,7 +637,6 @@ export const Attendance = () => {
             )}
           </div>
         </div>
-      )}
 
       {/* Top 4 KPI Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { StatusBadge } from '../components/Badge';
 import { UserAvatar } from '../components/UserAvatar';
 import { LeaveApplyModal } from '../components/LeaveApplyModal';
 import { LeaveDetailsModal } from '../components/LeaveDetailsModal';
-import { Plus, Search, Filter, Calendar, ChevronRight, Zap, Eye, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Search, Filter, Calendar, ChevronRight, ChevronLeft, Zap, Eye, CheckCircle2, XCircle } from 'lucide-react';
+
+const LIMIT = 10;
 
 export const LeaveRequests = () => {
   const { user } = useAuth();
@@ -14,14 +16,18 @@ export const LeaveRequests = () => {
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
-  const fetchLeaves = async () => {
+  const fetchLeaves = useCallback(async () => {
     try {
-      const params = {};
+      setLoading(true);
+      const params = { page, limit: LIMIT };
       if (statusFilter) params.status = statusFilter;
 
       const [leavesRes, typesRes, balRes] = await Promise.all([
@@ -31,6 +37,8 @@ export const LeaveRequests = () => {
       ]);
 
       setLeaves(leavesRes.data.data.leaves || []);
+      setTotal(leavesRes.data.data.pagination?.total || 0);
+      setTotalPages(leavesRes.data.data.pagination?.pages || 1);
       setLeaveTypes(typesRes.data?.data?.leaveTypes || []);
       setBalance(balRes.data?.data?.balance || null);
     } catch (err) {
@@ -38,10 +46,15 @@ export const LeaveRequests = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, page]);
 
   useEffect(() => {
     fetchLeaves();
+  }, [fetchLeaves]);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setPage(1);
   }, [statusFilter]);
 
   const handleOpenDetails = (leave) => {
@@ -217,6 +230,29 @@ export const LeaveRequests = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center disabled:opacity-40 hover:bg-primary hover:text-white transition-all"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+            Page {page} of {totalPages} <span className="text-slate-400 font-medium">({total} total)</span>
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center disabled:opacity-40 hover:bg-primary hover:text-white transition-all"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Leave Details Interactive Modal */}
       <LeaveDetailsModal
