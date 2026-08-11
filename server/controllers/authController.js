@@ -245,3 +245,22 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
     message: 'Your password has been reset successfully. Please sign in with your new password.'
   });
 });
+
+export const saveFcmToken = asyncHandler(async (req, res, next) => {
+  const { fcmToken } = req.body;
+  if (!fcmToken) {
+    return next(new AppError('FCM token is required.', 400));
+  }
+
+  const user = await User.findById(req.user._id);
+  if (user) {
+    if (!user.fcmTokens) user.fcmTokens = [];
+    if (!user.fcmTokens.includes(fcmToken)) {
+      user.fcmTokens.push(fcmToken);
+      await user.save();
+    }
+  }
+
+  res.status(200).json({ status: 'success', message: 'FCM token saved successfully.' });
+});
+

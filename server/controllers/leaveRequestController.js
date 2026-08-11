@@ -7,6 +7,7 @@ import { Settings } from '../models/Settings.js';
 import { AppError } from '../utils/appError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AuditLog } from '../models/AuditLog.js';
+import { sendPushNotification } from '../services/pushNotificationService.js';
 
 export const getLeaveRequests = asyncHandler(async (req, res, next) => {
   const { status, leaveType, search, user, page = 1, limit = 10 } = req.query;
@@ -173,24 +174,30 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
   }
 
   // 1. Notify Applicant
+  const applicantTitle = isEmergency ? '🚨 Urgent Emergency Leave Submitted' : 'Leave Application Submitted';
+  const applicantMsg = `Your leave request for ${daysCount} day(s) (${start.toLocaleDateString()} - ${end.toLocaleDateString()}) has been submitted successfully.`;
   await Notification.create({
     recipient: userId,
-    title: isEmergency ? '🚨 Urgent Emergency Leave Submitted' : 'Leave Application Submitted',
-    message: `Your leave request for ${daysCount} day(s) (${start.toLocaleDateString()} - ${end.toLocaleDateString()}) has been submitted successfully.`,
+    title: applicantTitle,
+    message: applicantMsg,
     type: 'LEAVE_APPLIED',
     targetUrl: '/leaves'
   });
+  sendPushNotification(userId, applicantTitle, applicantMsg, '/leaves');
 
   // 2. Notify Reporting Manager if assigned
   const managerId = req.user.reportingManager;
   if (managerId && managerId.toString() !== userId.toString()) {
+    const mgrTitle = isEmergency ? '🚨 Urgent Emergency Leave Request' : 'New Leave Request Received';
+    const mgrMsg = `${req.user.firstName} ${req.user.lastName} applied for ${daysCount} day(s) leave.`;
     await Notification.create({
       recipient: managerId,
-      title: isEmergency ? '🚨 Urgent Emergency Leave Request' : 'New Leave Request Received',
-      message: `${req.user.firstName} ${req.user.lastName} applied for ${daysCount} day(s) leave.`,
+      title: mgrTitle,
+      message: mgrMsg,
       type: 'LEAVE_APPLIED',
       targetUrl: '/leaves'
     });
+    sendPushNotification(managerId, mgrTitle, mgrMsg, '/leaves');
   }
 
   // 3. Notify HR and Super Admin Managers
@@ -201,14 +208,21 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
       _id: { $ne: userId }
     });
 
+    const hrTitle = isEmergency ? '🚨 Urgent Emergency Leave Alert' : 'New Leave Application Submitted';
+    const hrMsg = `${req.user.firstName} ${req.user.lastName} (${req.user.employeeId}) applied for ${daysCount} day(s) leave.`;
+    const hrIds = [];
     for (const adminUser of hrAdmins) {
+      hrIds.push(adminUser._id);
       await Notification.create({
         recipient: adminUser._id,
-        title: isEmergency ? '🚨 Urgent Emergency Leave Alert' : 'New Leave Application Submitted',
-        message: `${req.user.firstName} ${req.user.lastName} (${req.user.employeeId}) applied for ${daysCount} day(s) leave.`,
+        title: hrTitle,
+        message: hrMsg,
         type: 'LEAVE_APPLIED',
         targetUrl: '/leaves'
       });
+    }
+    if (hrIds.length > 0) {
+      sendPushNotification(hrIds, hrTitle, hrMsg, '/leaves');
     }
   } catch (err) {
     console.error('[Notification Dispatch Error]', err);
@@ -426,26 +440,36 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
   await leave.save();
 
   // Notify Employee / Applicant
+  const approveTitle = leave.status === 'CEO_APPROVED' ? 'Leave Request Final Approved by CEO ✅' : `Leave Request Status Updated: ${leave.status.replace('_', ' ')}`;
+  const approveMsg = `Your leave request for ${leave.daysCount} day(s) has been updated to ${leave.status.replace('_', ' ')}.`;
   await Notification.create({
     recipient: leave.user._id,
-    title: leave.status === 'CEO_APPROVED' ? 'Leave Request Final Approved by CEO ✅' : `Leave Request Status Updated: ${leave.status.replace('_', ' ')}`,
-    message: `Your leave request for ${leave.daysCount} day(s) has been updated to ${leave.status.replace('_', ' ')}.`,
+    title: approveTitle,
+    message: approveMsg,
     type: 'LEAVE_APPROVED',
     targetUrl: '/leaves'
   });
+  sendPushNotification(leave.user._id, approveTitle, approveMsg, '/leaves');
 
   // Level 1 -> Level 2 Notification Dispatch: Notify CEO if Level 1 approval was done and CEO final approval is pending
   if (leave.status === 'ADMIN_APPROVED' || leave.status === 'HR_APPROVED') {
     try {
       const ceoUsers = await User.find({ role: 'CEO', status: 'ACTIVE' });
+      const ceoTitle = `🚨 CEO Level 2 Final Approval Required (${applicantRole} Leave)`;
+      const ceoMsg = `${leave.user?.firstName} ${leave.user?.lastName} (${applicantRole}) leave request has passed Level 1 and requires your CEO final approval.`;
+      const ceoIds = [];
       for (const ceo of ceoUsers) {
+        ceoIds.push(ceo._id);
         await Notification.create({
           recipient: ceo._id,
-          title: `🚨 CEO Level 2 Final Approval Required (${applicantRole} Leave)`,
-          message: `${leave.user?.firstName} ${leave.user?.lastName} (${applicantRole}) leave request has passed Level 1 and requires your CEO final approval.`,
+          title: ceoTitle,
+          message: ceoMsg,
           type: 'LEAVE_APPLIED',
           targetUrl: '/leaves'
         });
+      }
+      if (ceoIds.length > 0) {
+        sendPushNotification(ceoIds, ceoTitle, ceoMsg, '/leaves');
       }
     } catch (err) {
       console.error('[Notification Dispatch Error]', err);
@@ -513,13 +537,16 @@ export const rejectLeave = asyncHandler(async (req, res, next) => {
   }
 
   // Notify Employee
+  const rejectTitle = `Leave Request Rejected by ${reviewerRole} ❌`;
+  const rejectMsg = `Your leave request has been rejected. Reason: ${comments}`;
   await Notification.create({
     recipient: leave.user,
-    title: `Leave Request Rejected by ${reviewerRole} ❌`,
-    message: `Your leave request has been rejected. Reason: ${comments}`,
+    title: rejectTitle,
+    message: rejectMsg,
     type: 'LEAVE_REJECTED',
     targetUrl: '/leaves'
   });
+  sendPushNotification(leave.user, rejectTitle, rejectMsg, '/leaves');
 
   res.status(200).json({ status: 'success', data: { leave } });
 });

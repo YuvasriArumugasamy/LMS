@@ -1,6 +1,7 @@
 import { LeaveRequest } from '../models/LeaveRequest.js';
 import { Notification } from '../models/Notification.js';
 import { User } from '../models/User.js';
+import { sendPushNotification } from './pushNotificationService.js';
 
 export const checkEmergencyEscalations = async () => {
   try {
@@ -16,6 +17,7 @@ export const checkEmergencyEscalations = async () => {
 
     // Fetch HR users to notify
     const hrUsers = await User.find({ role: { $in: ['HR', 'SUPER_ADMIN'] }, status: 'ACTIVE' });
+    const hrIds = hrUsers.map((h) => h._id);
 
     for (const leave of overdueLeaves) {
       leave.status = 'ESCALATED_TO_HR';
@@ -28,18 +30,26 @@ export const checkEmergencyEscalations = async () => {
       });
       await leave.save();
 
+      const title = '🚨 Emergency Leave Escalated';
+      const message = `Emergency Leave request for ${leave.user.firstName} ${leave.user.lastName} (${leave.user.employeeId}) has been escalated to HR for immediate action.`;
+
       // Send notifications to HR
       for (const hr of hrUsers) {
         await Notification.create({
           recipient: hr._id,
-          title: '🚨 Emergency Leave Escalated',
-          message: `Emergency Leave request for ${leave.user.firstName} ${leave.user.lastName} (${leave.user.employeeId}) has been escalated to HR for immediate action.`,
+          title,
+          message,
           type: 'LEAVE_ESCALATED',
           targetUrl: '/leaves'
         });
+      }
+
+      if (hrIds.length > 0) {
+        sendPushNotification(hrIds, title, message, '/leaves');
       }
     }
   } catch (error) {
     console.error('[Escalation Service Error]', error);
   }
 };
+
