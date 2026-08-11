@@ -16,8 +16,8 @@ export const login = asyncHandler(async (req, res, next) => {
   const searchInput = email.trim().toLowerCase();
   const username = searchInput.split('@')[0];
 
-  // Match by exact email, username alias (@enterprise.com), or @lifechangersind.com
-  let user = await User.findOne({
+  // Match by exact email or known domain aliases only
+  const user = await User.findOne({
     $or: [
       { email: searchInput },
       { email: `${username}@enterprise.com` },
@@ -30,42 +30,15 @@ export const login = asyncHandler(async (req, res, next) => {
     .populate('designation', 'name code')
     .populate('reportingManager', 'firstName lastName email');
 
-  // AUTO-PROVISION / SEED DEMO ACCOUNT IF MISSING IN DATABASE
+  // No auto-provision — if user not found, reject
   if (!user) {
-    try {
-      user = await User.create({
-        employeeId: `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
-        firstName: username.charAt(0).toUpperCase() + username.slice(1),
-        lastName: 'Executive',
-        email: `${username}@enterprise.com`,
-        password: password,
-        role: username.toLowerCase().includes('ceo')
-          ? 'CEO'
-          : username.toLowerCase().includes('hr')
-          ? 'HR'
-          : username.toLowerCase().includes('admin')
-          ? 'SUPER_ADMIN'
-          : (username.toLowerCase().includes('manager') || username.toLowerCase().includes('tl'))
-          ? 'MANAGER'
-          : 'EMPLOYEE',
-        status: 'ACTIVE'
-      });
-      user = await User.findById(user._id).select('+password');
-    } catch (err) {
-      return next(new AppError('Invalid email or password. Please verify your credentials.', 401));
-    }
+    return next(new AppError('Invalid email or password. Please verify your credentials.', 401));
   }
 
-  // STRICT PASSWORD VALIDATION WITH FLEXIBLE DEMO PASSWORDS
+  // Strict password validation — no backdoor passwords allowed
   const isValidPassword = await user.comparePassword(password);
   if (!isValidPassword) {
-    // If password was recently updated or demo password used (Password@123, password123, CEO@123, admin123), allow seamless update
-    if (password === 'CEO@123' || password === 'Password@123' || password === 'password123' || password === 'Password123' || password === 'admin123') {
-      user.password = password;
-      await user.save();
-    } else {
-      return next(new AppError('Invalid email or password. Please verify your credentials.', 401));
-    }
+    return next(new AppError('Invalid email or password. Please verify your credentials.', 401));
   }
 
   if (user.status !== 'ACTIVE') {
@@ -74,7 +47,6 @@ export const login = asyncHandler(async (req, res, next) => {
 
   const { accessToken, refreshToken } = generateTokens(user);
 
-  // Log audit if AuditLog collection is active
   try {
     await AuditLog.create({
       user: user._id,
@@ -86,7 +58,7 @@ export const login = asyncHandler(async (req, res, next) => {
       ipAddress: req.ip
     });
   } catch (err) {
-    // Ignore audit log error in dev mock mode
+    // Ignore audit log error silently
   }
 
   const userData = typeof user.toObject === 'function' ? user.toObject() : { ...user };

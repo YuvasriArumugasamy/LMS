@@ -580,10 +580,12 @@ export const cancelLeave = asyncHandler(async (req, res, next) => {
   if (balance) {
     const alloc = balance.allocations.find((a) => a.leaveType.toString() === leave.leaveType.toString());
     if (alloc) {
-      if (previousStatus === 'HR_APPROVED') {
+      if (['CEO_APPROVED', 'ADMIN_APPROVED', 'HR_APPROVED'].includes(previousStatus)) {
+        // Fully or partially approved — restore from used
         alloc.used = Math.max(0, alloc.used - leave.daysCount);
         alloc.remaining += leave.daysCount;
       } else if (['PENDING', 'MANAGER_APPROVED', 'ESCALATED_TO_HR'].includes(previousStatus)) {
+        // Still in pending state — restore from pending
         alloc.pending = Math.max(0, alloc.pending - leave.daysCount);
         alloc.remaining += leave.daysCount;
       }

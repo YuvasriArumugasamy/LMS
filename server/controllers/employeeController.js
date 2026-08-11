@@ -34,50 +34,6 @@ export const getEmployees = asyncHandler(async (req, res, next) => {
 
     if (deptObjId) {
       query.department = deptObjId;
-
-      // Auto-provision demo employees if department currently has 0 members
-      const count = await User.countDocuments({ department: deptObjId, isDeleted: false });
-      if (count === 0) {
-        const deptInfo = await Department.findById(deptObjId);
-        const codePrefix = deptInfo?.code?.toUpperCase() || 'DEPT';
-        const demoTeam = [
-          {
-            employeeId: `${codePrefix}001`,
-            firstName: 'Robert',
-            lastName: 'Vance',
-            email: `robert.${codePrefix.toLowerCase()}@enterprise.com`,
-            password: 'Password@123',
-            role: 'MANAGER',
-            department: deptObjId,
-            status: 'ACTIVE'
-          },
-          {
-            employeeId: `${codePrefix}002`,
-            firstName: 'Emily',
-            lastName: 'Watson',
-            email: `emily.${codePrefix.toLowerCase()}@enterprise.com`,
-            password: 'Password@123',
-            role: 'EMPLOYEE',
-            department: deptObjId,
-            status: 'ACTIVE'
-          },
-          {
-            employeeId: `${codePrefix}003`,
-            firstName: 'Michael',
-            lastName: 'Chang',
-            email: `michael.${codePrefix.toLowerCase()}@enterprise.com`,
-            password: 'Password@123',
-            role: 'EMPLOYEE',
-            department: deptObjId,
-            status: 'ACTIVE'
-          }
-        ];
-        try {
-          await User.insertMany(demoTeam);
-        } catch (err) {
-          // ignore duplicate key
-        }
-      }
     }
   }
   if (role) query.role = role;
@@ -173,9 +129,9 @@ export const createEmployee = asyncHandler(async (req, res, next) => {
   if (!req.body.designation) delete req.body.designation;
   if (!req.body.reportingManager) delete req.body.reportingManager;
 
-  // Auto-set default password if missing
+  // Default password if not provided — strong default
   if (!req.body.password) {
-    req.body.password = '123456';
+    req.body.password = 'Welcome@123';
   }
 
   const newEmployee = await User.create(req.body);
