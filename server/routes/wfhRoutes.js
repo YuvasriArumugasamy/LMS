@@ -14,8 +14,8 @@ router.use(protect);
 
 router.post('/apply', createWfhRequest);
 router.get('/requests', getWfhRequests);
-router.patch('/:id/approve', restrictTo('MANAGER', 'HR', 'SUPER_ADMIN'), approveWfhRequest);
-router.patch('/:id/reject', restrictTo('MANAGER', 'HR', 'SUPER_ADMIN'), rejectWfhRequest);
+router.patch('/:id/approve', restrictTo('MANAGER', 'HR', 'SUPER_ADMIN', 'CEO'), approveWfhRequest);
+router.patch('/:id/reject', restrictTo('MANAGER', 'HR', 'SUPER_ADMIN', 'CEO'), rejectWfhRequest);
 router.patch('/:id/cancel', cancelWfhRequest);
 
 export default router;

@@ -60,9 +60,9 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
     setError('');
 
     try {
-      const attachments = attachmentName || attachmentUrl ? [{
-        fileName: attachmentName || 'Medical_Certificate.pdf',
-        fileUrl: attachmentUrl || 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800&auto=format&fit=crop&q=80',
+      const attachments = (attachmentName.trim() && attachmentUrl.trim()) ? [{
+        fileName: attachmentName.trim(),
+        fileUrl: attachmentUrl.trim(),
         fileType: 'application/pdf'
       }] : [];
 
@@ -143,6 +143,7 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
             <input
               type="date"
               value={fromDate}
+              min={new Date().toISOString().split('T')[0]}
               onChange={(e) => setFromDate(e.target.value)}
               className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary transition-all"
               required

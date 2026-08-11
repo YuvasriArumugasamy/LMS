@@ -6,8 +6,110 @@ import { ImageCropModal } from '../components/ImageCropModal';
 import { UserAvatar } from '../components/UserAvatar';
 import {
   User, Phone, Mail, MapPin, Building2, Calendar, ShieldCheck, Save,
-  Camera, Eye, Folder, Trash2, X, Check, Link as LinkIcon
+  Camera, Eye, Folder, Trash2, X, Check, Link as LinkIcon, Lock, KeyRound
 } from 'lucide-react';
+
+// ── Password Change Section Component ──────────────────────────────────────
+const ChangePasswordSection = () => {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (newPassword.length < 6) {
+      setError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.put('/auth/change-password', { currentPassword, newPassword });
+      setSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setSuccess(false), 4000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to change password.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleChangePassword} className="glass-card p-6 space-y-4">
+      <div className="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <Lock className="w-5 h-5 text-primary" />
+        <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Change Password</h2>
+      </div>
+
+      {error && (
+        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+          ✅ Password changed successfully!
+        </div>
+      )}
+
+      <div>
+        <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Current Password *</label>
+        <input
+          type="password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold outline-none focus:border-primary"
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-bold uppercase text-slate-500 mb-1">New Password *</label>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Min 6 characters"
+            className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold outline-none focus:border-primary"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Confirm New Password *</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold outline-none focus:border-primary"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={saving}
+          className="px-6 py-2.5 bg-primary hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-primary/25 flex items-center gap-2 transition-all disabled:opacity-50"
+        >
+          <KeyRound className="w-4 h-4" /> {saving ? 'Changing...' : 'Change Password'}
+        </button>
+      </div>
+    </form>
+  );
+};
+// ───────────────────────────────────────────────────────────────────────────
 
 export const Profile = () => {
   const { user, setUser } = useAuth();
@@ -385,6 +487,9 @@ export const Profile = () => {
           </button>
         </div>
       </form>
+
+      {/* Change Password Section */}
+      <ChangePasswordSection />
 
       {/* React Portal Dropdown Menu attached to document.body */}
       {showMenu &&

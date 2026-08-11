@@ -108,7 +108,8 @@ const userSchema = new mongoose.Schema(
     },
     isFaceRegistered: {
       type: Boolean,
-      default: false
+      default: false,
+      index: true
     },
     fcmTokens: {
       type: [String],

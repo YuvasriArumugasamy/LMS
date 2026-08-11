@@ -10,7 +10,7 @@ export const WfhDetailsModal = ({ isOpen, onClose, request, currentUser, onAppro
 
   if (!request) return null;
 
-  const isManagerOrHR = ['MANAGER', 'HR', 'SUPER_ADMIN'].includes(currentUser?.role);
+  const isManagerOrHR = ['MANAGER', 'HR', 'SUPER_ADMIN', 'CEO'].includes(currentUser?.role);
   const isPending = request.status === 'PENDING';
   const isOwner = request.user?._id === currentUser?._id;
 

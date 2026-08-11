@@ -214,6 +214,33 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   });
 });
 
+export const changePassword = asyncHandler(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return next(new AppError('Current password and new password are required.', 400));
+  }
+  if (newPassword.length < 6) {
+    return next(new AppError('New password must be at least 6 characters.', 400));
+  }
+
+  const user = await User.findById(req.user._id).select('+password');
+  if (!user) return next(new AppError('User not found.', 404));
+
+  const isValid = await user.comparePassword(currentPassword);
+  if (!isValid) {
+    return next(new AppError('Current password is incorrect.', 401));
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password changed successfully.'
+  });
+});
+
 export const saveFcmToken = asyncHandler(async (req, res, next) => {
   const { fcmToken } = req.body;
   if (!fcmToken) {
@@ -225,6 +252,10 @@ export const saveFcmToken = asyncHandler(async (req, res, next) => {
     if (!user.fcmTokens) user.fcmTokens = [];
     if (!user.fcmTokens.includes(fcmToken)) {
       user.fcmTokens.push(fcmToken);
+      // Keep only the last 5 tokens (multi-device support with cleanup)
+      if (user.fcmTokens.length > 5) {
+        user.fcmTokens = user.fcmTokens.slice(-5);
+      }
       await user.save();
     }
   }

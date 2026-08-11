@@ -8,11 +8,12 @@ import { CalendarCheck, Plus, Calendar as CalendarIcon, Table as TableIcon, Tras
 export const Holidays = () => {
   const { user } = useAuth();
   const [holidays, setHolidays] = useState([]);
-  const [viewMode, setViewMode] = useState('card'); // 'card' | 'calendar'
+  const [viewMode, setViewMode] = useState('card');
   const [loading, setLoading] = useState(true);
   const [selectedHoliday, setSelectedHoliday] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
 
   const [formData, setFormData] = useState({
     name: '',
@@ -24,7 +25,7 @@ export const Holidays = () => {
 
   const fetchHolidays = async () => {
     try {
-      const res = await api.get('/holidays');
+      const res = await api.get('/holidays', { params: { year: yearFilter } });
       setHolidays(res.data.data.holidays || []);
     } catch (err) {
       console.error(err);
@@ -35,7 +36,7 @@ export const Holidays = () => {
 
   useEffect(() => {
     fetchHolidays();
-  }, []);
+  }, [yearFilter]);
 
   const handleOpenDetails = (h) => {
     setSelectedHoliday(h);
@@ -61,6 +62,7 @@ export const Holidays = () => {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this holiday? This cannot be undone.')) return;
     try {
       await api.delete(`/holidays/${id}`);
       fetchHolidays();
@@ -79,6 +81,17 @@ export const Holidays = () => {
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+          {/* Year Filter */}
+          <select
+            value={yearFilter}
+            onChange={(e) => setYearFilter(Number(e.target.value))}
+            className="px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none"
+          >
+            {Array.from({ length: 4 }, (_, i) => new Date().getFullYear() - 1 + i).map((yr) => (
+              <option key={yr} value={yr}>{yr}</option>
+            ))}
+          </select>
+
           <div className="p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center">
             <button
               onClick={() => setViewMode('card')}
@@ -117,11 +130,13 @@ export const Holidays = () => {
           {loading ? (
             <div className="glass-card p-8 text-center text-slate-400 font-medium">Loading holidays...</div>
           ) : holidays.length > 0 ? (
-            holidays.map((h) => (
+            holidays.map((h) => {
+              const isPast = new Date(h.date) < new Date();
+              return (
               <div
                 key={h._id}
                 onClick={() => handleOpenDetails(h)}
-                className="glass-card p-4 sm:p-5 grid grid-cols-1 md:grid-cols-12 items-center gap-3 md:gap-4 cursor-pointer hover:border-primary/50 transition-all group"
+                className={`glass-card p-4 sm:p-5 grid grid-cols-1 md:grid-cols-12 items-center gap-3 md:gap-4 cursor-pointer hover:border-primary/50 transition-all group ${isPast ? 'opacity-60' : ''}`}
               >
                 {/* Holiday Name & Icon: 5 Columns */}
                 <div className="md:col-span-5 flex items-center justify-between md:justify-start gap-3.5 min-w-0">
@@ -137,11 +152,12 @@ export const Holidays = () => {
                     </div>
                   </div>
 
-                  {/* Type badge right-aligned on mobile */}
-                  <div className="md:hidden shrink-0">
+                  {/* Type + Past badge on mobile */}
+                  <div className="md:hidden shrink-0 flex flex-col items-end gap-1">
                     <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                       {h.type}
                     </span>
+                    {isPast && <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500">Past</span>}
                   </div>
                 </div>
 
@@ -151,8 +167,9 @@ export const Holidays = () => {
                 </div>
 
                 {/* Type Badge & Action Arrow: 3 Columns */}
-                <div className="flex items-center justify-between md:justify-end gap-4 md:col-span-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
-                  <div className="hidden md:block">
+                <div className="flex items-center justify-between md:justify-end gap-2 md:col-span-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
+                  <div className="hidden md:flex items-center gap-2">
+                    {isPast && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500">Past</span>}
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                       {h.type}
                     </span>
@@ -163,7 +180,8 @@ export const Holidays = () => {
                   </div>
                 </div>
               </div>
-            ))
+              );
+            })
           ) : (
             <div className="glass-card p-12 text-center text-slate-400 font-medium">
               No corporate holidays configured.

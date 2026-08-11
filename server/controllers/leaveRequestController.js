@@ -89,6 +89,13 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
     return next(new AppError('From Date cannot be later than To Date.', 400));
   }
 
+  // Prevent past date leave applications
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (start < today) {
+    return next(new AppError('Leave cannot be applied for past dates.', 400));
+  }
+
   // Calculate day count
   const diffTime = Math.abs(end - start);
   let daysCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;

@@ -74,12 +74,14 @@ export const WfhRequests = () => {
           <p className="text-xs sm:text-sm text-slate-500 font-medium">Remote duty applications, manager approvals, and WFH quotas</p>
         </div>
 
-        <button
-          onClick={() => setIsApplyModalOpen(true)}
-          className="px-5 py-2.5 bg-primary hover:bg-blue-700 text-white text-xs font-bold rounded-enterprise shadow-lg shadow-primary/25 flex items-center gap-2 transition-all w-full sm:w-auto justify-center"
-        >
-          <Plus className="w-4 h-4" /> Apply WFH
-        </button>
+        {user?.role !== 'CEO' && (
+          <button
+            onClick={() => setIsApplyModalOpen(true)}
+            className="px-5 py-2.5 bg-primary hover:bg-blue-700 text-white text-xs font-bold rounded-enterprise shadow-lg shadow-primary/25 flex items-center gap-2 transition-all w-full sm:w-auto justify-center"
+          >
+            <Plus className="w-4 h-4" /> Apply WFH
+          </button>
+        )}
       </div>
 
       {/* Filter Bar */}

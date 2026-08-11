@@ -6,7 +6,8 @@ import {
   updateProfile,
   forgotPassword,
   resetPassword,
-  saveFcmToken
+  saveFcmToken,
+  changePassword
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -19,5 +20,6 @@ router.post('/refresh-token', refreshToken);
 router.post('/fcm-token', protect, saveFcmToken);
 router.get('/profile', protect, getProfile);
 router.put('/profile', protect, updateProfile);
+router.put('/change-password', protect, changePassword);
 
 export default router;
