@@ -73,6 +73,21 @@ export const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [leaveTypes, setLeaveTypes] = useState([]);
   const [balance, setBalance] = useState(null);
+  const [attendanceChartData, setAttendanceChartData] = useState([]);
+  
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 30000); // update every 30s
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentHour = currentTime.getHours();
+  const currentMinutes = currentTime.getMinutes();
+  
+  const isBeforeLunchOut = currentHour < 13 || (currentHour === 13 && currentMinutes < 30);
+  const isBeforeLunchIn = currentHour < 14 || (currentHour === 14 && currentMinutes < 15);
+  const isBeforeClockOut = currentHour < 18 || (currentHour === 18 && currentMinutes < 30);
   const [todayAttendance, setTodayAttendance] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -360,35 +375,39 @@ export const Dashboard = () => {
                         {!todayAttendance?.lunchOut ? (
                           <>
                             <UiverseStarButton
-                              disabled={actionLoading}
+                              disabled={actionLoading || isBeforeLunchOut}
                               onClick={handleQuickLunchOut}
                               variant="checkout"
+                              title={isBeforeLunchOut ? "Unlocks at 1:30 PM" : ""}
                             >
-                              Lunch Out
+                              {isBeforeLunchOut ? "Wait till 1:30 PM" : "Lunch Out"}
                             </UiverseStarButton>
                             <UiverseStarButton
-                              disabled={actionLoading}
+                              disabled={actionLoading || isBeforeClockOut}
                               onClick={handleQuickClockOut}
                               variant="checkout"
+                              title={isBeforeClockOut ? "Unlocks at 6:30 PM" : ""}
                             >
-                              Check Out
+                              {isBeforeClockOut ? "Wait till 6:30 PM" : "Check Out"}
                             </UiverseStarButton>
                           </>
                         ) : !todayAttendance?.lunchIn ? (
                           <UiverseStarButton
-                            disabled={actionLoading}
+                            disabled={actionLoading || isBeforeLunchIn}
                             onClick={handleQuickLunchIn}
                             variant="checkin"
+                            title={isBeforeLunchIn ? "Unlocks at 2:15 PM" : ""}
                           >
-                            Lunch In
+                            {isBeforeLunchIn ? "Wait till 2:15 PM" : "Lunch In"}
                           </UiverseStarButton>
                         ) : (
                           <UiverseStarButton
-                            disabled={actionLoading}
+                            disabled={actionLoading || isBeforeClockOut}
                             onClick={handleQuickClockOut}
                             variant="checkout"
+                            title={isBeforeClockOut ? "Unlocks at 6:30 PM" : ""}
                           >
-                            Check Out
+                            {isBeforeClockOut ? "Wait till 6:30 PM" : "Check Out"}
                           </UiverseStarButton>
                         )}
                       </div>

@@ -64,7 +64,8 @@ export const clockIn = asyncHandler(async (req, res, next) => {
 
   const now = new Date();
   const workStartHour = 9; // 9 AM
-  const isLate = now.getHours() >= 9 && (now.getHours() > 9 || now.getMinutes() > 15);
+  // Late if after 9:30 AM
+  const isLate = now.getHours() >= 9 && (now.getHours() > 9 || now.getMinutes() > 30);
   const isSunday = now.getDay() === 0;
 
   // Auto-detect Sunday / Holiday Check-in as OVER_DUTY (OD)
@@ -110,7 +111,13 @@ export const lunchOut = asyncHandler(async (req, res, next) => {
     return next(new AppError('You have already taken lunch out.', 400));
   }
 
-  attendance.lunchOut = new Date();
+  const now = new Date();
+  // Strict Block: Cannot Lunch Out before 1:30 PM
+  if (now.getHours() < 13 || (now.getHours() === 13 && now.getMinutes() < 30)) {
+    return next(new AppError('Lunch Out is only allowed after 1:30 PM.', 400));
+  }
+
+  attendance.lunchOut = now;
   await attendance.save();
 
   res.status(200).json({
@@ -148,7 +155,13 @@ export const lunchIn = asyncHandler(async (req, res, next) => {
     return next(new AppError('You have already taken lunch in.', 400));
   }
 
-  attendance.lunchIn = new Date();
+  const now = new Date();
+  // Strict Block: Cannot Lunch In before 2:15 PM
+  if (now.getHours() < 14 || (now.getHours() === 14 && now.getMinutes() < 15)) {
+    return next(new AppError('Lunch In is only allowed after 2:15 PM.', 400));
+  }
+
+  attendance.lunchIn = now;
   await attendance.save();
 
   res.status(200).json({
@@ -183,6 +196,11 @@ export const clockOut = asyncHandler(async (req, res, next) => {
   }
 
   const now = new Date();
+  // Strict Block: Cannot Clock Out before 6:30 PM
+  if (now.getHours() < 18 || (now.getHours() === 18 && now.getMinutes() < 30)) {
+    return next(new AppError('Check-Out is only allowed after 6:30 PM.', 400));
+  }
+
   let diffMs = now - new Date(attendance.clockIn);
 
   if (attendance.lunchOut && attendance.lunchIn) {
