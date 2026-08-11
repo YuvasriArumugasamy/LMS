@@ -57,6 +57,11 @@ export const LeaveRequests = () => {
     setPage(1);
   }, [statusFilter]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
+
   const handleOpenDetails = (leave) => {
     setSelectedLeave(leave);
     setIsDetailsModalOpen(true);

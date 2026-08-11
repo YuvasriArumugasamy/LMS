@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "fix(vercel): make DB connection non-blocking during serverless initialization to prevent 7s Vercel build timeout"
+git commit -m "feat(ui): add smooth scroll to top behavior when clicking pagination controls"
 git push -u origin main
 echo Completed Git Push!
 pause

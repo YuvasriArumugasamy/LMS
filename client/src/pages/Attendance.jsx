@@ -114,9 +114,15 @@ export const Attendance = () => {
 
   const handleModalPageChange = (newPage) => {
     setModalPage(newPage);
-    if (modalTopRef.current) {
-      modalTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    setTimeout(() => {
+      const scrollContainer = modalTopRef.current?.closest('.overflow-y-auto') || modalTopRef.current?.parentElement;
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      if (modalTopRef.current) {
+        modalTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 10);
   };
 
   const getVisiblePages = (current, total) => {
