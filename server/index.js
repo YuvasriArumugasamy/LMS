@@ -20,6 +20,7 @@ import reportRoutes from './routes/reportRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import auditRoutes from './routes/auditRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
+import wfhRoutes from './routes/wfhRoutes.js';
 import dailyReportRoutes from './routes/dailyReportRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import { checkEmergencyEscalations } from './services/escalationService.js';
@@ -76,6 +77,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/wfh', wfhRoutes);
 app.use('/api/daily-reports', dailyReportRoutes);
 app.use('/api/settings', settingsRoutes);
 
@@ -84,9 +86,11 @@ app.use(globalErrorHandler);
 
 // Emergency Leave Escalation Cron/Background Service (Checks every 30 seconds)
 const ESCALATION_INTERVAL = Number(process.env.ESCALATION_CHECK_INTERVAL_MS) || 30000;
-setInterval(() => {
-  checkEmergencyEscalations();
-}, ESCALATION_INTERVAL);
+if (process.env.VERCEL !== '1') {
+  setInterval(() => {
+    checkEmergencyEscalations();
+  }, ESCALATION_INTERVAL);
+}
 
 const PORT = process.env.PORT || 5000;
 if (process.env.VERCEL !== '1') {

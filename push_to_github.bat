@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "fix(ui): fix mobile screen modal close button positioning and profile banner overflow"
+git commit -m "fix(vercel): add root package.json module type and backend dependencies for serverless API deployment"
 git push -u origin main
 echo Completed Git Push!
 pause
