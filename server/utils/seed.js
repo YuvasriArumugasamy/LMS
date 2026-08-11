@@ -11,8 +11,38 @@ import { Settings } from '../models/Settings.js';
 
 dotenv.config();
 
+export const updateEarnedLeaveToPaidLeave = async () => {
+  try {
+    await LeaveType.updateMany(
+      { name: 'Earned Leave' },
+      { name: 'Paid Leave', code: 'PL' }
+    );
+    await LeaveType.updateMany(
+      { code: 'EL' },
+      { code: 'PL' }
+    );
+
+    const balances = await LeaveBalance.find();
+    for (const bal of balances) {
+      let modified = false;
+      for (const alloc of bal.allocations) {
+        if (alloc.leaveTypeName === 'Earned Leave' || alloc.leaveTypeCode === 'EL') {
+          alloc.leaveTypeName = 'Paid Leave';
+          alloc.leaveTypeCode = 'PL';
+          modified = true;
+        }
+      }
+      if (modified) await bal.save();
+    }
+  } catch (err) {
+    console.error('[Leave Migration Error]', err);
+  }
+};
+
 export const runAutoSeed = async () => {
   try {
+    await updateEarnedLeaveToPaidLeave();
+
     const userCount = await User.countDocuments();
     if (userCount > 0) {
       console.log('[Seed Engine] Database already populated. Skipping auto-seed.');

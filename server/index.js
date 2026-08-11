@@ -24,13 +24,16 @@ import attendanceRoutes from './routes/attendanceRoutes.js';
 import wfhRoutes from './routes/wfhRoutes.js';
 import dailyReportRoutes from './routes/dailyReportRoutes.js';
 import { checkEmergencyEscalations } from './services/escalationService.js';
+import { updateEarnedLeaveToPaidLeave } from './utils/seed.js';
 
 dotenv.config();
 
 const app = express();
 
 // Database Connection
-connectDB();
+connectDB().then(() => {
+  updateEarnedLeaveToPaidLeave();
+});
 
 // Essential Middleware
 app.use(helmet());

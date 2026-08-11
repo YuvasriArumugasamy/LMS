@@ -214,7 +214,7 @@ export const Dashboard = () => {
       }))
     : [
         { name: 'Casual Leave', value: 29, maxDays: 12, color: '#2563EB' },
-        { name: 'Earned Leave', value: 36, maxDays: 15, color: '#22C55E' },
+        { name: 'Paid Leave', value: 36, maxDays: 15, color: '#22C55E' },
         { name: 'Emergency Leave', value: 12, maxDays: 5, color: '#F59E0B' },
         { name: 'Sick Leave', value: 24, maxDays: 10, color: '#EF4444' }
       ];

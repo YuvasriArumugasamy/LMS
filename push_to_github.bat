@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "style(dashboard): remove percentage and display only exact leave days count in distribution chart"
+git commit -m "refactor(leave-types): replace Earned Leave with Paid Leave across frontend and backend database"
 git push -u origin main
 echo Completed Git Push!
 pause
