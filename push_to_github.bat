@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "refactor(leave-types): replace Earned Leave with Paid Leave across frontend and backend database"
+git commit -m "fix(dashboard): map Earned Leave to Paid Leave in dynamic leave distribution chart and backend API"
 git push -u origin main
 echo Completed Git Push!
 pause

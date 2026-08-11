@@ -4,6 +4,20 @@ import { AppError } from '../utils/appError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const getLeaveTypes = asyncHandler(async (req, res, next) => {
+  try {
+    await LeaveType.updateMany(
+      { $or: [{ name: /earned/i }, { code: /^el$/i }] },
+      { name: 'Paid Leave', code: 'PL' }
+    );
+    await LeaveBalance.updateMany(
+      { 'allocations.leaveTypeName': /earned/i },
+      { $set: { 'allocations.$[elem].leaveTypeName': 'Paid Leave', 'allocations.$[elem].leaveTypeCode': 'PL' } },
+      { arrayFilters: [{ 'elem.leaveTypeName': /earned/i }] }
+    );
+  } catch (e) {
+    console.error('Leave migration in getLeaveTypes error:', e);
+  }
+
   const leaveTypes = await LeaveType.find({ isDeleted: false }).sort({ name: 1 });
   res.status(200).json({
     status: 'success',

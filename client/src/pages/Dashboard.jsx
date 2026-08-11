@@ -144,8 +144,8 @@ export const Dashboard = () => {
       setEditDistributionData(
         leaveTypes.map((lt) => ({
           id: lt._id,
-          name: lt.name,
-          code: lt.code,
+          name: lt.name?.toLowerCase().includes('earned') ? 'Paid Leave' : lt.name,
+          code: lt.code === 'EL' ? 'PL' : lt.code,
           maxDays: lt.maxDays || 0,
           colorBadge: lt.colorBadge || '#2563EB'
         }))
@@ -206,12 +206,17 @@ export const Dashboard = () => {
     : 42;
 
   const pieData = leaveTypes.length > 0
-    ? leaveTypes.map((lt) => ({
-        name: lt.name,
-        value: totalDaysAllTypes > 0 ? Math.round(((lt.maxDays || 0) / totalDaysAllTypes) * 100) : 0,
-        maxDays: lt.maxDays,
-        color: lt.colorBadge || (lt.code === 'CL' ? '#2563EB' : lt.code === 'SL' ? '#EF4444' : (lt.code === 'PL' || lt.code === 'EL') ? '#22C55E' : '#F59E0B')
-      }))
+    ? leaveTypes.map((lt) => {
+        const cleanName = lt.name?.toLowerCase().includes('earned') ? 'Paid Leave' : lt.name;
+        const cleanCode = lt.code === 'EL' ? 'PL' : lt.code;
+        return {
+          name: cleanName,
+          code: cleanCode,
+          value: totalDaysAllTypes > 0 ? Math.round(((lt.maxDays || 0) / totalDaysAllTypes) * 100) : 0,
+          maxDays: lt.maxDays,
+          color: lt.colorBadge || (cleanCode === 'CL' ? '#2563EB' : cleanCode === 'SL' ? '#EF4444' : (cleanCode === 'PL') ? '#22C55E' : '#F59E0B')
+        };
+      })
     : [
         { name: 'Casual Leave', value: 29, maxDays: 12, color: '#2563EB' },
         { name: 'Paid Leave', value: 36, maxDays: 15, color: '#22C55E' },
@@ -222,8 +227,8 @@ export const Dashboard = () => {
   const entitlements = balance?.allocations && balance.allocations.length > 0
     ? balance.allocations.map((alloc) => ({
         id: alloc._id,
-        name: alloc.leaveTypeName,
-        code: alloc.leaveTypeCode,
+        name: alloc.leaveTypeName?.toLowerCase().includes('earned') ? 'Paid Leave' : alloc.leaveTypeName,
+        code: alloc.leaveTypeCode === 'EL' ? 'PL' : alloc.leaveTypeCode,
         remaining: alloc.remaining,
         total: alloc.total,
         color: alloc.colorBadge || (alloc.leaveTypeCode === 'CL' ? '#2563EB' : alloc.leaveTypeCode === 'SL' ? '#EF4444' : (alloc.leaveTypeCode === 'PL' || alloc.leaveTypeCode === 'EL') ? '#22C55E' : '#F59E0B')
