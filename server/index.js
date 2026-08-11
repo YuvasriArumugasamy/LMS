@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import './copy_imgs.mjs';
 // LMS Server Entry Point - Updated CEO Exclude Filter
 import express from 'express';
 import cors from 'cors';

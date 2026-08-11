@@ -49,9 +49,9 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
       Department.countDocuments({ isDeleted: false }),
       User.countDocuments({ role: 'MANAGER', isDeleted: false }),
       LeaveRequest.countDocuments({ status: { $in: ['PENDING', 'ESCALATED_TO_HR'] }, isDeleted: false }),
-      LeaveRequest.countDocuments({ status: 'HR_APPROVED', isDeleted: false }),
-      LeaveRequest.countDocuments({ status: { $in: ['MANAGER_REJECTED', 'HR_REJECTED'] }, isDeleted: false }),
-      LeaveRequest.find({ status: 'HR_APPROVED', fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
+      LeaveRequest.countDocuments({ status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, isDeleted: false }),
+      LeaveRequest.countDocuments({ status: { $in: ['MANAGER_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] }, isDeleted: false }),
+      LeaveRequest.find({ status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
         .populate('user', 'firstName lastName employeeId department profileImage'),
       buildMonthlyTrend()
     ]);
@@ -93,8 +93,8 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
     const [teamCount, pendingRequests, approvedRequests, teamOnLeaveToday, monthlyTrend] = await Promise.all([
       Promise.resolve(teamIds.length),
       LeaveRequest.countDocuments({ user: { $in: teamIds }, status: 'PENDING', isDeleted: false }),
-      LeaveRequest.countDocuments({ user: { $in: teamIds }, status: 'HR_APPROVED', isDeleted: false }),
-      LeaveRequest.find({ user: { $in: teamIds }, status: 'HR_APPROVED', fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
+      LeaveRequest.countDocuments({ user: { $in: teamIds }, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, isDeleted: false }),
+      LeaveRequest.find({ user: { $in: teamIds }, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
         .populate('user', 'firstName lastName profileImage designation'),
       buildMonthlyTrend({ user: { $in: teamIds } })
     ]);
@@ -112,8 +112,8 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
     const [balance, pendingRequests, approvedLeaves, rejectedLeaves, upcomingHolidays, recentLeaves, monthlyTrend] = await Promise.all([
       LeaveBalance.findOne({ user: userId, year: new Date().getFullYear() }).populate('allocations.leaveType'),
       LeaveRequest.countDocuments({ user: userId, status: { $in: ['PENDING', 'MANAGER_APPROVED', 'ESCALATED_TO_HR'] }, isDeleted: false }),
-      LeaveRequest.countDocuments({ user: userId, status: 'HR_APPROVED', isDeleted: false }),
-      LeaveRequest.countDocuments({ user: userId, status: { $in: ['MANAGER_REJECTED', 'HR_REJECTED'] }, isDeleted: false }),
+      LeaveRequest.countDocuments({ user: userId, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, isDeleted: false }),
+      LeaveRequest.countDocuments({ user: userId, status: { $in: ['MANAGER_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] }, isDeleted: false }),
       Holiday.find({ date: { $gte: today }, isDeleted: false, status: 'ACTIVE' }).sort({ date: 1 }).limit(5),
       LeaveRequest.find({ user: userId, isDeleted: false }).populate('leaveType', 'name colorBadge').sort({ createdAt: -1 }).limit(5),
       buildMonthlyTrend({ user: userId })
