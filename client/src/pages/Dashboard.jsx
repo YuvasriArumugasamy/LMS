@@ -83,6 +83,7 @@ export const Dashboard = () => {
   // Face Camera Verification Modal State for Dashboard Check-In / Check-Out
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
   const [pendingClockAction, setPendingClockAction] = useState(null); // 'clockIn' | 'clockOut'
+  const [dashWorkLocation, setDashWorkLocation] = useState('WFH');
 
   // Leave Distribution Edit Modal State (CEO & SUPER_ADMIN Exclusive)
   const [isEditDistributionModalOpen, setIsEditDistributionModalOpen] = useState(false);
@@ -138,7 +139,7 @@ export const Dashboard = () => {
     setActionLoading(true);
     try {
       if (pendingClockAction === 'clockIn') {
-        await api.post('/attendance/clock-in', { workLocation: 'IN_OFFICE', faceDescriptor });
+        await api.post('/attendance/clock-in', { workLocation: dashWorkLocation, faceDescriptor });
       } else if (pendingClockAction === 'clockOut') {
         await api.post('/attendance/clock-out', { faceDescriptor });
       }
@@ -323,13 +324,23 @@ export const Dashboard = () => {
                 {user?.role !== 'CEO' && (
                   <div className="shrink-0">
                     {!todayAttendance?.clockIn ? (
-                      <UiverseStarButton
-                        disabled={actionLoading}
-                        onClick={handleQuickClockIn}
-                        variant="checkin"
-                      >
-                        Check In
-                      </UiverseStarButton>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={dashWorkLocation}
+                          onChange={(e) => setDashWorkLocation(e.target.value)}
+                          className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer shadow-xs"
+                        >
+                          <option value="WFH">🏡 Remote / WFH</option>
+                          <option value="IN_OFFICE">🏢 In-Office</option>
+                        </select>
+                        <UiverseStarButton
+                          disabled={actionLoading}
+                          onClick={handleQuickClockIn}
+                          variant="checkin"
+                        >
+                          Check In
+                        </UiverseStarButton>
+                      </div>
                     ) : !todayAttendance?.clockOut ? (
                       <UiverseStarButton
                         disabled={actionLoading}
