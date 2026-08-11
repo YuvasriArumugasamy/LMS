@@ -26,15 +26,21 @@ const calculateEuclideanDistance = (desc1, desc2) => {
 };
 
 const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
+  // If face is not registered, block check-in — face registration is mandatory
   if (!user.isFaceRegistered || !user.faceDescriptor || user.faceDescriptor.length === 0) {
-    return { valid: true };
+    return {
+      valid: false,
+      message: 'Face Lock not registered. Please contact your administrator to register your face before checking in/out.'
+    };
   }
+  // Face is registered — submitted descriptor is required
   if (!submittedDescriptor || !Array.isArray(submittedDescriptor) || submittedDescriptor.length === 0) {
     return { valid: false, message: 'Face scan is required for Check-In/Out verification.' };
   }
+  // Compare submitted face against registered face descriptor
   const distance = calculateEuclideanDistance(user.faceDescriptor, submittedDescriptor);
   if (distance > 0.55) {
-    return { valid: false, message: `Face verification failed! Face does not match registered profile.` };
+    return { valid: false, message: 'Face verification failed! Face does not match the registered profile. Please use your own registered face.' };
   }
   return { valid: true, distance };
 };
