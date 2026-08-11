@@ -16,7 +16,6 @@ import {
   FileText,
   Plus,
   Search,
-  Calendar,
   CheckCircle2,
   Clock,
   Filter,
@@ -434,9 +433,8 @@ export const DailyReports = () => {
               type="date"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="px-4 py-2 pr-8 bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white rounded-full outline-none cursor-pointer appearance-none"
+              className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white rounded-full outline-none cursor-pointer"
             />
-            <Calendar className="w-3.5 h-3.5 text-slate-500 absolute right-3 pointer-events-none" />
           </div>
 
           <div className="relative flex items-center">
