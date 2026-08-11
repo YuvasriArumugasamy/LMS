@@ -92,6 +92,7 @@ export const Login = () => {
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid credentials. Check email and password.');
+      setPassword('');
     } finally {
       setLoading(false);
     }
@@ -615,7 +616,7 @@ export const Login = () => {
                   )}
 
                   {/* Real Production Login Form */}
-                  <form onSubmit={handleSubmit} className="w-full space-y-3 text-left">
+                  <form onSubmit={handleSubmit} autoComplete="off" className="w-full space-y-3 text-left">
                     {/* Input 1: Corporate Email / Username */}
                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
