@@ -269,10 +269,18 @@ export const Attendance = () => {
       groupedEmployeeMap[empId].logs.push(log);
       groupedEmployeeMap[empId].totalDays += 1;
       if (log.workLocation === 'WFH') groupedEmployeeMap[empId].wfhCount += 1;
-      if (log.status === 'LATE') groupedEmployeeMap[empId].lateCount += 1;
-      else if (log.status === 'HALF_DAY') groupedEmployeeMap[empId].halfDayCount += 1;
-      else if (log.status === 'ABSENT') groupedEmployeeMap[empId].absentCount += 1;
-      else groupedEmployeeMap[empId].presentCount += 1;
+      if (log.status === 'LATE') {
+        groupedEmployeeMap[empId].lateCount += 1;
+        groupedEmployeeMap[empId].presentCount += 1; // LATE = present with late arrival
+      } else if (log.status === 'HALF_DAY') {
+        groupedEmployeeMap[empId].halfDayCount += 1;
+        groupedEmployeeMap[empId].presentCount += 1; // HALF_DAY = still came in
+      } else if (log.status === 'ABSENT') {
+        groupedEmployeeMap[empId].absentCount += 1;
+      } else {
+        // PRESENT, OVER_DUTY, OD — all count as present
+        groupedEmployeeMap[empId].presentCount += 1;
+      }
     }
   });
 
