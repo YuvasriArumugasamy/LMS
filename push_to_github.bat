@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "fix(daily-reports): fix Notification validation error by using recipient field and DAILY_REPORT type"
+git commit -m "fix(vercel): add api/index.js entry point and update vercel.json rewrites for backend serverless deployment"
 git push -u origin main
 echo Completed Git Push!
 pause

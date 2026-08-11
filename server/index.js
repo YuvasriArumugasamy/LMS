@@ -90,9 +90,13 @@ setInterval(() => {
 }, ESCALATION_INTERVAL);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`\n======================================================`);
-  console.log(`🚀 [ELMS Server] Running on http://localhost:${PORT}`);
-  console.log(`🚨 [Emergency Escalation Engine] Active (Check every ${ESCALATION_INTERVAL / 1000}s)`);
-  console.log(`======================================================\n`);
-});
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`\n======================================================`);
+    console.log(`🚀 [ELMS Server] Running on http://localhost:${PORT}`);
+    console.log(`🚨 [Emergency Escalation Engine] Active (Check every ${ESCALATION_INTERVAL / 1000}s)`);
+    console.log(`======================================================\n`);
+  });
+}
+
+export default app;
