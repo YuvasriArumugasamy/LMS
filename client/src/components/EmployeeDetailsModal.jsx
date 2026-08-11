@@ -34,8 +34,9 @@ export const EmployeeDetailsModal = ({
   const canManageFaceLock = ['CEO', 'HR', 'SUPER_ADMIN'].includes(user?.role);
 
   const handlePhoneChange = (value) => {
-    const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
-    setEditForm({ ...editForm, phone: digitsOnly });
+    // Allow +, digits, spaces, hyphens — max 15 chars (international format)
+    const cleaned = value.replace(/[^\d\s\+\-\(\)]/g, '').slice(0, 15);
+    setEditForm({ ...editForm, phone: cleaned });
   };
 
   useEffect(() => {
@@ -346,8 +347,8 @@ export const EmployeeDetailsModal = ({
                 type="tel"
                 value={editForm.phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
-                maxLength={10}
-                placeholder="1234567890"
+                maxLength={15}
+                placeholder="+91 9876543210"
                 className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
               />
             </div>
