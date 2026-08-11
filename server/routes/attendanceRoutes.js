@@ -2,6 +2,8 @@ import express from 'express';
 import {
   clockIn,
   clockOut,
+  lunchOut,
+  lunchIn,
   getTodayAttendance,
   getAttendanceLogs,
   updateAttendance
@@ -14,6 +16,8 @@ router.use(protect);
 
 router.post('/clock-in', clockIn);
 router.post('/clock-out', clockOut);
+router.post('/lunch-out', lunchOut);
+router.post('/lunch-in', lunchIn);
 router.get('/today', getTodayAttendance);
 router.get('/logs', getAttendanceLogs);
 router.patch('/:id', updateAttendance);

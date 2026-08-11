@@ -85,6 +85,78 @@ export const clockIn = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Lunch Out
+export const lunchOut = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const { faceDescriptor } = req.body;
+  const { start } = getTodayDateRange();
+
+  // Face Verification Check
+  const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
+  if (!faceVerification.valid) {
+    return next(new AppError(faceVerification.message, 400));
+  }
+
+  const attendance = await Attendance.findOne({ user: userId, date: start });
+  if (!attendance) {
+    return next(new AppError('No clock-in record found for today.', 404));
+  }
+
+  if (attendance.clockOut) {
+    return next(new AppError('You have already clocked out for today.', 400));
+  }
+
+  if (attendance.lunchOut) {
+    return next(new AppError('You have already taken lunch out.', 400));
+  }
+
+  attendance.lunchOut = new Date();
+  await attendance.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: { attendance }
+  });
+});
+
+// Lunch In
+export const lunchIn = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const { faceDescriptor } = req.body;
+  const { start } = getTodayDateRange();
+
+  // Face Verification Check
+  const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
+  if (!faceVerification.valid) {
+    return next(new AppError(faceVerification.message, 400));
+  }
+
+  const attendance = await Attendance.findOne({ user: userId, date: start });
+  if (!attendance) {
+    return next(new AppError('No clock-in record found for today.', 404));
+  }
+
+  if (attendance.clockOut) {
+    return next(new AppError('You have already clocked out for today.', 400));
+  }
+
+  if (!attendance.lunchOut) {
+    return next(new AppError('You have not taken lunch out yet.', 400));
+  }
+
+  if (attendance.lunchIn) {
+    return next(new AppError('You have already taken lunch in.', 400));
+  }
+
+  attendance.lunchIn = new Date();
+  await attendance.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: { attendance }
+  });
+});
+
 // Clock Out
 export const clockOut = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
@@ -106,8 +178,18 @@ export const clockOut = asyncHandler(async (req, res, next) => {
     return next(new AppError('You have already clocked out for today.', 400));
   }
 
+  if (attendance.lunchOut && !attendance.lunchIn) {
+    return next(new AppError('Please Lunch In before checking out.', 400));
+  }
+
   const now = new Date();
-  const diffMs = now - new Date(attendance.clockIn);
+  let diffMs = now - new Date(attendance.clockIn);
+
+  if (attendance.lunchOut && attendance.lunchIn) {
+    const lunchBreakMs = new Date(attendance.lunchIn) - new Date(attendance.lunchOut);
+    diffMs -= lunchBreakMs;
+  }
+
   const totalHours = Number((diffMs / (1000 * 60 * 60)).toFixed(2));
 
   attendance.clockOut = now;

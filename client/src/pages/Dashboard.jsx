@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { ASSETS } from '../assets';
@@ -135,6 +135,16 @@ export const Dashboard = () => {
     setIsFaceModalOpen(true);
   };
 
+  const handleQuickLunchOut = () => {
+    setPendingClockAction('lunchOut');
+    setIsFaceModalOpen(true);
+  };
+
+  const handleQuickLunchIn = () => {
+    setPendingClockAction('lunchIn');
+    setIsFaceModalOpen(true);
+  };
+
   const handleFaceVerificationSuccess = async (faceDescriptor) => {
     setActionLoading(true);
     try {
@@ -142,12 +152,16 @@ export const Dashboard = () => {
         await api.post('/attendance/clock-in', { workLocation: dashWorkLocation, faceDescriptor });
       } else if (pendingClockAction === 'clockOut') {
         await api.post('/attendance/clock-out', { faceDescriptor });
+      } else if (pendingClockAction === 'lunchOut') {
+        await api.post('/attendance/lunch-out', { faceDescriptor });
+      } else if (pendingClockAction === 'lunchIn') {
+        await api.post('/attendance/lunch-in', { faceDescriptor });
       }
       setIsFaceModalOpen(false);
       setPendingClockAction(null);
       await fetchDashboard();
     } catch (err) {
-      alert(err.response?.data?.message || `Failed to ${pendingClockAction === 'clockIn' ? 'check in' : 'check out'}.`);
+      alert(err.response?.data?.message || `Failed to ${pendingClockAction.replace(/([A-Z])/g, ' $1').toLowerCase()}.`);
     } finally {
       setActionLoading(false);
     }
@@ -342,13 +356,42 @@ export const Dashboard = () => {
                         </UiverseStarButton>
                       </div>
                     ) : !todayAttendance?.clockOut ? (
-                      <UiverseStarButton
-                        disabled={actionLoading}
-                        onClick={handleQuickClockOut}
-                        variant="checkout"
-                      >
-                        Check Out
-                      </UiverseStarButton>
+                      <div className="flex items-center gap-2">
+                        {!todayAttendance?.lunchOut ? (
+                          <>
+                            <UiverseStarButton
+                              disabled={actionLoading}
+                              onClick={handleQuickLunchOut}
+                              variant="checkout"
+                            >
+                              Lunch Out
+                            </UiverseStarButton>
+                            <UiverseStarButton
+                              disabled={actionLoading}
+                              onClick={handleQuickClockOut}
+                              variant="checkout"
+                            >
+                              Check Out
+                            </UiverseStarButton>
+                          </>
+                        ) : !todayAttendance?.lunchIn ? (
+                          <UiverseStarButton
+                            disabled={actionLoading}
+                            onClick={handleQuickLunchIn}
+                            variant="checkin"
+                          >
+                            Lunch In
+                          </UiverseStarButton>
+                        ) : (
+                          <UiverseStarButton
+                            disabled={actionLoading}
+                            onClick={handleQuickClockOut}
+                            variant="checkout"
+                          >
+                            Check Out
+                          </UiverseStarButton>
+                        )}
+                      </div>
                     ) : (
                       <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs font-black rounded-xl flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Checked Out

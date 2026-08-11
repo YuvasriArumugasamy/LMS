@@ -20,6 +20,12 @@ const attendanceSchema = new mongoose.Schema(
     clockOut: {
       type: Date
     },
+    lunchOut: {
+      type: Date
+    },
+    lunchIn: {
+      type: Date
+    },
     workLocation: {
       type: String,
       enum: ['IN_OFFICE', 'WFH', 'ON_FIELD'],
