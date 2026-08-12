@@ -85,7 +85,7 @@ const leaveRequestSchema = new mongoose.Schema(
         },
         reviewerRole: {
           type: String,
-          enum: ['EMPLOYEE', 'TEAM_LEAD', 'HR', 'ADMIN', 'CEO', 'SYSTEM']
+          enum: ['EMPLOYEE', 'TEAM_LEAD', 'MANAGER', 'HR', 'ADMIN', 'SUPER_ADMIN', 'CEO', 'SYSTEM']
         },
         action: {
           type: String,
@@ -93,6 +93,8 @@ const leaveRequestSchema = new mongoose.Schema(
             'APPLIED',
             'TEAM_LEAD_APPROVE',
             'TEAM_LEAD_REJECT',
+            'MANAGER_APPROVE',
+            'MANAGER_REJECT',
             'ESCALATED',
             'HR_APPROVE',
             'HR_REJECT',
