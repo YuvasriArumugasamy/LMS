@@ -364,9 +364,9 @@ export const Dashboard = () => {
 
                 {/* Action Check In / Check Out Button (Hidden for CEO) */}
                 {user?.role !== 'CEO' && (
-                  <div className="shrink-0">
+                  <div className="shrink-0 flex justify-center sm:justify-end w-full sm:w-auto">
                     {!todayAttendance?.clockIn ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
                         <select
                           value={dashWorkLocation}
                           onChange={(e) => setDashWorkLocation(e.target.value)}
@@ -384,7 +384,7 @@ export const Dashboard = () => {
                         </UiverseStarButton>
                       </div>
                     ) : !todayAttendance?.clockOut ? (
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
                         {!todayAttendance?.lunchOut ? (
                           <>
                             <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchOut} variant="checkout">
