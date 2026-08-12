@@ -115,14 +115,17 @@ export const Attendance = () => {
   const handleModalPageChange = (newPage) => {
     setModalPage(newPage);
     setTimeout(() => {
-      const scrollContainer = modalTopRef.current?.closest('.overflow-y-auto') || modalTopRef.current?.parentElement;
-      if (scrollContainer) {
-        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-      }
       if (modalTopRef.current) {
-        modalTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const scrollContainer = modalTopRef.current.closest('[class*="overflow-y"]') 
+          || modalTopRef.current.closest('.overflow-y-auto')
+          || modalTopRef.current.closest('.overflow-auto');
+        if (scrollContainer) {
+          scrollContainer.scrollTop = 0;
+        } else {
+          modalTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
-    }, 10);
+    }, 50);
   };
 
   const getVisiblePages = (current, total) => {
