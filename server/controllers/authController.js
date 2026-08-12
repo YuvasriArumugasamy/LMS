@@ -121,12 +121,14 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
     if (allowedFields.includes(key)) updateData[key] = req.body[key];
   });
 
-  const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, {
+  const updatedUser = await User.findByIdAndUpdate(req.user._id, { $set: updateData }, {
     new: true,
-    runValidators: true
+    runValidators: true,
+    context: 'query'
   })
     .populate('department', 'name code')
-    .populate('designation', 'name code');
+    .populate('designation', 'name code')
+    .populate('reportingManager', 'firstName lastName email');
 
   res.status(200).json({
     status: 'success',
