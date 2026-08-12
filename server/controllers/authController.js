@@ -118,7 +118,11 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
   const allowedFields = ['firstName', 'lastName', 'phone', 'address', 'emergencyContact', 'profileImage'];
   const updateData = {};
   Object.keys(req.body).forEach((key) => {
-    if (allowedFields.includes(key)) updateData[key] = req.body[key];
+    if (allowedFields.includes(key)) {
+      // Don't update required fields with empty string
+      if ((key === 'firstName' || key === 'lastName') && !req.body[key]?.trim()) return;
+      updateData[key] = req.body[key];
+    }
   });
 
   const updatedUser = await User.findByIdAndUpdate(req.user._id, { $set: updateData }, {

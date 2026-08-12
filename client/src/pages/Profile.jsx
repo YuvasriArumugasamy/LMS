@@ -456,12 +456,11 @@ export const Profile = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Last Name <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Last Name</label>
             <input
               type="text"
               value={formData.lastName}
               onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-              required
               className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold outline-none focus:border-primary"
             />
           </div>
