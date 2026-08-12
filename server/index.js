@@ -37,11 +37,21 @@ if (process.env.VERCEL !== '1') {
     const dailyReportPath = path.resolve(process.cwd(), 'client/src/pages/DailyReports.jsx');
     if (fs.existsSync(dailyReportPath)) {
       const buf = fs.readFileSync(dailyReportPath);
+      let utf8Str = '';
       if (buf[0] === 0xff && buf[1] === 0xfe) {
-        const utf8Str = buf.toString('utf16le').replace(/[^\x00-\x7F]/g, '');
-        fs.writeFileSync(dailyReportPath, utf8Str, 'utf8');
-        console.log('[UTF-8 Fix] DailyReports.jsx converted to clean UTF-8');
+        utf8Str = buf.toString('utf16le');
+      } else {
+        utf8Str = buf.toString('utf8');
       }
+      utf8Str = utf8Str.replace(/[^\x00-\x7F]/g, '');
+      utf8Str = utf8Str.replace(/-ml-(?:\[[^\]]+\]|\S+)/g, 'ml-0');
+      utf8Str = utf8Str.replace(/-left-(?:\[[^\]]+\]|\S+)/g, 'left-0');
+      utf8Str = utf8Str.replace(/-translate-x-(?:\[[^\]]+\]|\S+)/g, 'translate-x-0');
+      utf8Str = utf8Str.replace(/marginLeft\s*:\s*['"]-[^'"]+['"]/g, "marginLeft: '0px'");
+      utf8Str = utf8Str.replace(/left\s*:\s*['"]-[^'"]+['"]/g, "left: '0px'");
+
+      fs.writeFileSync(dailyReportPath, utf8Str, 'utf8');
+      console.log('[UTF-8 Fix] DailyReports.jsx converted to clean UTF-8 and sanitized negative margins.');
     }
   } catch (_) {}
 

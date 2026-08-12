@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "fix(ui): fix date picker left edge cutoff in DailyReports filter bar"
+git commit -m "fix(ui): sanitize all negative margins and left offsets in DailyReports date picker"
 git push -u origin main
 echo Completed Git Push!
 pause
