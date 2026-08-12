@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "style(ui): add clean spacing between radial speed dial buttons"
+git commit -m "fix(ui): adjust radial arc coordinates to prevent right-edge cutoff"
 git push -u origin main
 echo Completed Git Push!
 pause

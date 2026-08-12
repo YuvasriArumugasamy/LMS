@@ -586,34 +586,34 @@ html, body, #root {
   opacity: 1;
 }
 
-/* Radial Arc positions for 44px Bottom-Right Floating Action Button with clean spacing */
+/* Radial Arc positions for 44px Bottom-Right Floating Action Button (Clean Spacing & No Edge Cutoff) */
 .speed-dial-wrapper .hidden-trigger:checked ~ .subs .sub-circle:nth-of-type(1) {
-  transform: translate(-95px, 2px) scale(1);
+  transform: translate(-115px, 0px) scale(1);
   transition-delay: 0.04s;
 }
 
 .speed-dial-wrapper .hidden-trigger:checked ~ .subs .sub-circle:nth-of-type(2) {
-  transform: translate(-78px, -52px) scale(1);
+  transform: translate(-98px, -55px) scale(1);
   transition-delay: 0.08s;
 }
 
 .speed-dial-wrapper .hidden-trigger:checked ~ .subs .sub-circle:nth-of-type(3) {
-  transform: translate(-46px, -86px) scale(1);
+  transform: translate(-68px, -96px) scale(1);
   transition-delay: 0.12s;
 }
 
 .speed-dial-wrapper .hidden-trigger:checked ~ .subs .sub-circle:nth-of-type(4) {
-  transform: translate(-2px, -98px) scale(1);
+  transform: translate(-34px, -118px) scale(1);
   transition-delay: 0.16s;
 }
 
 .speed-dial-wrapper .hidden-trigger:checked ~ .subs .sub-circle:nth-of-type(5) {
-  transform: translate(42px, -82px) scale(1);
+  transform: translate(2px, -138px) scale(1);
   transition-delay: 0.20s;
 }
 
 .speed-dial-wrapper .hidden-trigger:checked ~ .subs .sub-circle:nth-of-type(6) {
-  transform: translate(72px, -45px) scale(1);
+  transform: translate(8px, -178px) scale(1);
   transition-delay: 0.24s;
 }
 
