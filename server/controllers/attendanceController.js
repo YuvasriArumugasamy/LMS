@@ -135,13 +135,6 @@ export const lunchOut = asyncHandler(async (req, res, next) => {
     return next(new AppError('You have already taken lunch out.', 400));
   }
 
-  const now = new Date();
-  const { hours, minutes } = getISTTime(now);
-  // Strict Block: Cannot Lunch Out before 1:30 PM IST (13:30)
-  if (hours < 13 || (hours === 13 && minutes < 30)) {
-    return next(new AppError('Lunch Out is only allowed after 1:30 PM.', 400));
-  }
-
   attendance.lunchOut = now;
   await attendance.save();
 
@@ -180,13 +173,6 @@ export const lunchIn = asyncHandler(async (req, res, next) => {
     return next(new AppError('You have already taken lunch in.', 400));
   }
 
-  const now = new Date();
-  const { hours, minutes } = getISTTime(now);
-  // Strict Block: Cannot Lunch In before 2:15 PM IST (14:15)
-  if (hours < 14 || (hours === 14 && minutes < 15)) {
-    return next(new AppError('Lunch In is only allowed after 2:15 PM.', 400));
-  }
-
   attendance.lunchIn = now;
   await attendance.save();
 
@@ -222,12 +208,6 @@ export const clockOut = asyncHandler(async (req, res, next) => {
   }
 
   const now = new Date();
-  const { hours, minutes } = getISTTime(now);
-  // Strict Block: Cannot Clock Out before 6:30 PM IST (18:30)
-  if (hours < 18 || (hours === 18 && minutes < 30)) {
-    return next(new AppError('Check-Out is only allowed after 6:30 PM.', 400));
-  }
-
   let diffMs = now - new Date(attendance.clockIn);
 
   if (attendance.lunchOut && attendance.lunchIn) {
