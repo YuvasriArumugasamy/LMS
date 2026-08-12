@@ -355,8 +355,8 @@ export const Dashboard = () => {
           {/* Left Content */}
           <div className="relative z-10 flex-1 flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-wrap">
+                <div className="flex items-center justify-center sm:justify-start gap-2">
                   <span className="px-3 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
                     {user?.role?.replace('_', ' ')}
                   </span>
