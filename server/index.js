@@ -50,11 +50,20 @@ if (process.env.VERCEL !== '1') {
       utf8Str = utf8Str.replace(/marginLeft\s*:\s*['"]-[^'"]+['"]/g, "marginLeft: '0px'");
       utf8Str = utf8Str.replace(/left\s*:\s*['"]-[^'"]+['"]/g, "left: '0px'");
       utf8Str = utf8Str.replace(
-        /<option value="">All Statuses \(All Employees\)<\/option>/g,
-        `<option value="">{user?.role === 'EMPLOYEE' ? 'All Statuses (My Reports)' : 'All Statuses (All Employees)'}</option>`
+        /(<div[^>]*className=["'][^"']*relative[^"']*w-full[^"']*["'][^>]*>[\s\S]*?<input[^>]*placeholder=["']Search by employee name[^>]*>[\s\S]*?<\/div>)/g,
+        `{user?.role !== 'EMPLOYEE' && ( $1 )}`
+      );
+      utf8Str = utf8Str.replace(
+        /(<input[^>]*placeholder=["']Search by employee name[^>]*>)/g,
+        `{user?.role !== 'EMPLOYEE' ? $1 : null}`
+      );
+      utf8Str = utf8Str.replace(
+        /(<select[^>]*value={statusFilter}[^>]*>[\s\S]*?<\/select>)/g,
+        `{user?.role !== 'EMPLOYEE' && ( $1 )}`
       );
 
       fs.writeFileSync(dailyReportPath, utf8Str, 'utf8');
+      fs.writeFileSync(path.resolve(process.cwd(), 'client/src/pages/DailyReports_utf8.txt'), utf8Str, 'utf8');
       console.log('[UTF-8 Fix] DailyReports.jsx converted to clean UTF-8 and sanitized negative margins.');
     }
   } catch (_) {}

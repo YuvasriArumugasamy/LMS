@@ -280,7 +280,7 @@ export const DailyReports = () => {
                 <span className="text-[10px] font-black tracking-wider text-emerald-600 dark:text-emerald-400 uppercase whitespace-nowrap">
                   TODAY'S REPORT
                 </span>
-                <span className="text-slate-300 dark:text-slate-700">•</span>
+                <span className="text-slate-300 dark:text-slate-700"></span>
                 <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase whitespace-nowrap">
                   {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
@@ -438,7 +438,7 @@ export const DailyReports = () => {
           </div>
 
           <div className="relative flex items-center">
-            <select
+            {user?.role !== 'EMPLOYEE' && ( <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2 pr-8 bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white rounded-full outline-none cursor-pointer appearance-none"
@@ -448,7 +448,7 @@ export const DailyReports = () => {
               <option value="REVIEWED">Reviewed</option>
               <option value="APPROVED">Approved</option>
               <option value="NOT_SUBMITTED">Pending / Not Submitted</option>
-            </select>
+            </select> )}
             <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-3 pointer-events-none" />
           </div>
         </div>

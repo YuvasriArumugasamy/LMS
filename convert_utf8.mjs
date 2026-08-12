@@ -30,10 +30,22 @@ if (fs.existsSync(filePath)) {
   text = text.replace(/marginLeft\s*:\s*['"]-[^'"]+['"]/g, "marginLeft: '0px'");
   text = text.replace(/left\s*:\s*['"]-[^'"]+['"]/g, "left: '0px'");
 
-  // 5. Dynamic dropdown label for Employee vs Manager/TL/HR/CEO
+  // 5. Hide the Search Bar for EMPLOYEE
   text = text.replace(
-    /<option value="">All Statuses \(All Employees\)<\/option>/g,
-    `<option value="">{user?.role === 'EMPLOYEE' ? 'All Statuses (My Reports)' : 'All Statuses (All Employees)'}</option>`
+    /(<div[^>]*className=["'][^"']*relative[^"']*w-full[^"']*["'][^>]*>[\s\S]*?<input[^>]*placeholder=["']Search by employee name[^>]*>[\s\S]*?<\/div>)/g,
+    `{user?.role !== 'EMPLOYEE' && ( $1 )}`
+  );
+
+  // Fallback if the parent div isn't matched exactly:
+  text = text.replace(
+    /(<input[^>]*placeholder=["']Search by employee name[^>]*>)/g,
+    `{user?.role !== 'EMPLOYEE' ? $1 : null}`
+  );
+
+  // 6. Hide the Select Dropdown for EMPLOYEE
+  text = text.replace(
+    /(<select[^>]*value={statusFilter}[^>]*>[\s\S]*?<\/select>)/g,
+    `{user?.role !== 'EMPLOYEE' && ( $1 )}`
   );
 
   fs.writeFileSync(filePath, text, 'utf8');
