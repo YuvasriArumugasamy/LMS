@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "fix(ui): adjust radial arc coordinates to prevent right-edge cutoff"
+git commit -m "fix(ui): optimize radial arc positions for all roles without cutoff"
 git push -u origin main
 echo Completed Git Push!
 pause
