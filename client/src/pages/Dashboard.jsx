@@ -370,9 +370,9 @@ export const Dashboard = () => {
                         <select
                           value={dashWorkLocation}
                           onChange={(e) => setDashWorkLocation(e.target.value)}
-                          className="px-2 sm:px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer shadow-xs max-w-[130px] sm:max-w-none"
+                          className="px-2 sm:px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer shadow-xs"
                         >
-                          <option value="WFH">🏡 Remote / WFH</option>
+                          <option value="WFH">🏡 WFH</option>
                           <option value="IN_OFFICE">🏢 In-Office</option>
                         </select>
                         <UiverseStarButton
