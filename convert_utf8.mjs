@@ -30,6 +30,12 @@ if (fs.existsSync(filePath)) {
   text = text.replace(/marginLeft\s*:\s*['"]-[^'"]+['"]/g, "marginLeft: '0px'");
   text = text.replace(/left\s*:\s*['"]-[^'"]+['"]/g, "left: '0px'");
 
+  // 5. Dynamic dropdown label for Employee vs Manager/TL/HR/CEO
+  text = text.replace(
+    /<option value="">All Statuses \(All Employees\)<\/option>/g,
+    `<option value="">{user?.role === 'EMPLOYEE' ? 'All Statuses (My Reports)' : 'All Statuses (All Employees)'}</option>`
+  );
+
   fs.writeFileSync(filePath, text, 'utf8');
-  console.log('[UTF-8 Fix] DailyReports.jsx sanitized completely!');
+  console.log('[UTF-8 Fix] DailyReports.jsx sanitized and role-specific dropdown label updated!');
 }

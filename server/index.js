@@ -49,6 +49,10 @@ if (process.env.VERCEL !== '1') {
       utf8Str = utf8Str.replace(/-translate-x-(?:\[[^\]]+\]|\S+)/g, 'translate-x-0');
       utf8Str = utf8Str.replace(/marginLeft\s*:\s*['"]-[^'"]+['"]/g, "marginLeft: '0px'");
       utf8Str = utf8Str.replace(/left\s*:\s*['"]-[^'"]+['"]/g, "left: '0px'");
+      utf8Str = utf8Str.replace(
+        /<option value="">All Statuses \(All Employees\)<\/option>/g,
+        `<option value="">{user?.role === 'EMPLOYEE' ? 'All Statuses (My Reports)' : 'All Statuses (All Employees)'}</option>`
+      );
 
       fs.writeFileSync(dailyReportPath, utf8Str, 'utf8');
       console.log('[UTF-8 Fix] DailyReports.jsx converted to clean UTF-8 and sanitized negative margins.');
