@@ -140,6 +140,19 @@ export const Profile = () => {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Sync formData when user context loads/updates
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phone: user.phone || '',
+        address: user.address || ''
+      });
+      setProfileImage(user.profileImage || '');
+    }
+  }, [user]);
+
   const handlePhoneChange = (value) => {
     // Allow +, digits, spaces, hyphens — max 15 chars (international format)
     const cleaned = value.replace(/[^\d\s\+\-\(\)]/g, '').slice(0, 15);
@@ -443,12 +456,13 @@ export const Profile = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Last Name</label>
+            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Last Name <span className="text-rose-500">*</span></label>
             <input
               type="text"
               value={formData.lastName}
               onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-              className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold outline-none"
+              required
+              className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold outline-none focus:border-primary"
             />
           </div>
         </div>
