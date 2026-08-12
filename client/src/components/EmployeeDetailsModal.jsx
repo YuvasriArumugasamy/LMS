@@ -28,9 +28,11 @@ export const EmployeeDetailsModal = ({
     department: '',
     designation: '',
     role: 'EMPLOYEE',
-    employmentType: 'Full Time'
+    employmentType: 'Full Time',
+    reportingManager: ''
   });
 
+  const [managers, setManagers] = useState([]);
   const canManageFaceLock = ['CEO', 'HR', 'SUPER_ADMIN'].includes(user?.role);
 
   const handlePhoneChange = (value) => {
@@ -48,11 +50,21 @@ export const EmployeeDetailsModal = ({
         department: employee.department?._id || employee.department || '',
         designation: employee.designation?._id || employee.designation || '',
         role: employee.role || 'EMPLOYEE',
-        employmentType: employee.employmentType || 'Full Time'
+        employmentType: employee.employmentType || 'Full Time',
+        reportingManager: employee.reportingManager?._id || employee.reportingManager || ''
       });
       setIsEditing(false);
     }
   }, [employee, isOpen]);
+
+  // Load managers list when editing starts
+  useEffect(() => {
+    if (isOpen) {
+      api.get('/employees?role=MANAGER&limit=100&status=ACTIVE')
+        .then((res) => setManagers(res.data?.data?.employees || []))
+        .catch(() => setManagers([]));
+    }
+  }, [isOpen]);
 
   if (!employee) return null;
 
@@ -131,6 +143,7 @@ export const EmployeeDetailsModal = ({
       const payload = { ...editForm };
       if (!payload.department) delete payload.department;
       if (!payload.designation) delete payload.designation;
+      if (!payload.reportingManager) delete payload.reportingManager;
       await api.put(`/employees/${employee._id}`, payload);
       alert('✅ Employee details updated successfully!');
       setIsEditing(false);
@@ -267,6 +280,18 @@ export const EmployeeDetailsModal = ({
                 <p className="text-sm font-bold text-slate-900 dark:text-white mt-1 flex items-center gap-1.5 font-mono truncate">
                   <Calendar className="w-4 h-4 text-purple-500" />
                   <span className="truncate">{employee.joiningDate ? new Date(employee.joiningDate).toLocaleDateString() : 'N/A'}</span>
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80">
+                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Reporting Manager (TL)</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white mt-1 flex items-center gap-1.5 truncate">
+                  <UserCheck className="w-4 h-4 text-indigo-500" />
+                  <span className="truncate">
+                    {employee.reportingManager
+                      ? `${employee.reportingManager.firstName} ${employee.reportingManager.lastName}`
+                      : <span className="text-amber-500 font-semibold">Not Assigned</span>}
+                  </span>
                 </p>
               </div>
             </div>
@@ -411,6 +436,23 @@ export const EmployeeDetailsModal = ({
                   <option value="Intern">Intern</option>
                 </select>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Reporting Manager (TL)</label>
+              <select
+                value={editForm.reportingManager}
+                onChange={(e) => setEditForm({ ...editForm, reportingManager: e.target.value })}
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+              >
+                <option value="">-- No Reporting Manager --</option>
+                {managers.map((m) => (
+                  <option key={m._id} value={m._id}>
+                    {m.firstName} {m.lastName} ({m.employeeId})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] text-slate-400 mt-1">Assign a TL/Manager — leave requests will route to them first.</p>
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
