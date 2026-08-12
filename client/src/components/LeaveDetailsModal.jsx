@@ -120,7 +120,7 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
           </div>
 
           <div className="shrink-0 flex items-center justify-between sm:justify-end border-t sm:border-t-0 pt-2.5 sm:pt-0 border-slate-200/60 dark:border-slate-700/60">
-            <StatusBadge status={leave.status} />
+            <StatusBadge status={leave.status} applicantRole={leave.user?.role} />
           </div>
         </div>
 

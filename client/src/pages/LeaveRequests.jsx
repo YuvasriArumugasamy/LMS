@@ -188,13 +188,13 @@ export const LeaveRequests = () => {
 
                 {/* Status Badge right-aligned on mobile only */}
                 <div className="md:hidden shrink-0">
-                  <StatusBadge status={leave.status} />
+                  <StatusBadge status={leave.status} applicantRole={leave.user?.role} />
                 </div>
               </div>
 
               {/* Status Badge Column: 3 Columns on Tablet & Desktop */}
               <div className="hidden md:flex md:col-span-3 items-center">
-                <StatusBadge status={leave.status} />
+                <StatusBadge status={leave.status} applicantRole={leave.user?.role} />
               </div>
 
               {/* Leave Type Column: 3 Columns on Tablet & Desktop */}
