@@ -39,7 +39,7 @@ export const submitDailyReport = asyncHandler(async (req, res, next) => {
     report.tasksCompleted = tasksCompleted.trim();
     report.pendingTasks = (pendingTasks || '').trim();
     report.blockers = (blockers || '').trim();
-    report.hoursWorked = Number(hoursWorked) || 8;
+    report.hoursWorked = Math.min(24, Math.max(0.5, Number(hoursWorked) || 8));
     if (workStatus) report.workStatus = workStatus;
     report.status = 'SUBMITTED';
     await report.save();
