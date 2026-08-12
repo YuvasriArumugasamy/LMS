@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "cd client && npm install --include=dev && npm run build"
+    "build": "node convert_utf8.mjs && cd client && npm install --include=dev && npm run build"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

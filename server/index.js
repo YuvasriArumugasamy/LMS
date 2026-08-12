@@ -1,4 +1,6 @@
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 // LMS Server Entry Point - Updated CEO Exclude Filter
 import express from 'express';
 import cors from 'cors';
@@ -31,6 +33,18 @@ const app = express();
 
 // Database Connection (Only run top-level connection on non-Vercel environments)
 if (process.env.VERCEL !== '1') {
+  try {
+    const dailyReportPath = path.resolve(process.cwd(), 'client/src/pages/DailyReports.jsx');
+    if (fs.existsSync(dailyReportPath)) {
+      const buf = fs.readFileSync(dailyReportPath);
+      if (buf[0] === 0xff && buf[1] === 0xfe) {
+        const utf8Str = buf.toString('utf16le').replace(/[^\x00-\x7F]/g, '');
+        fs.writeFileSync(dailyReportPath, utf8Str, 'utf8');
+        console.log('[UTF-8 Fix] DailyReports.jsx converted to clean UTF-8');
+      }
+    }
+  } catch (_) {}
+
   connectDB().then(() => {
     updateEarnedLeaveToPaidLeave();
     updateCeoName();
