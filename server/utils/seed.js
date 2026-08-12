@@ -35,9 +35,21 @@ export const updateEarnedLeaveToPaidLeave = async () => {
   }
 };
 
+export const updateCeoName = async () => {
+  try {
+    await User.updateMany(
+      { role: 'CEO' },
+      { firstName: 'Alban', lastName: 'Santhosh A' }
+    );
+  } catch (err) {
+    console.error('[CEO Name Migration Error]', err);
+  }
+};
+
 export const runAutoSeed = async () => {
   try {
     await updateEarnedLeaveToPaidLeave();
+    await updateCeoName();
 
     const userCount = await User.countDocuments();
     if (userCount > 0) {
@@ -113,8 +125,8 @@ export const runAutoSeed = async () => {
     // 4. Create Production Demo Accounts
     const ceoUser = await User.create({
       employeeId: 'EMP001',
-      firstName: 'Alexander',
-      lastName: 'Pierce',
+      firstName: 'Alban',
+      lastName: 'Santhosh A',
       email: 'ceo@enterprise.com',
       password: 'CEO@123',
       role: 'CEO',

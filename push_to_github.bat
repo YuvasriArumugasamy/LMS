@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "feat(ceo): exempt CEO role from biometric face lock requirements across profile and attendance"
+git commit -m "feat(ceo): update CEO profile name to Alban Santhosh A"
 git push -u origin main
 echo Completed Git Push!
 pause
