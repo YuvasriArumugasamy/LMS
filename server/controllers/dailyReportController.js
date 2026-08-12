@@ -93,7 +93,7 @@ export const sendDailyReportReminder = asyncHandler(async (req, res, next) => {
     return next(new AppError('Employee not found.', 404));
   }
 
-  const senderRole = req.user.role === 'CEO' ? 'CEO' : req.user.role === 'MANAGER' ? 'Manager' : 'HR';
+  const senderRole = req.user.role === 'CEO' ? 'CEO' : req.user.role === 'TEAM_LEAD' ? 'TEAM_LEAD' : 'HR';
   await Notification.safeCreate({
     recipient: userId,
     title: 'Daily Report Reminder 🔔',
@@ -135,7 +135,7 @@ export const getDailyReports = asyncHandler(async (req, res, next) => {
   let userQuery = { role: { $ne: 'CEO' } };
   if (role === 'EMPLOYEE') {
     userQuery._id = userId;
-  } else if (role === 'MANAGER') {
+  } else if (role === 'TEAM_LEAD') {
     const teamMembers = await User.find({ reportingManager: userId }).select('_id');
     const teamIds = teamMembers.map((m) => m._id);
     teamIds.push(userId);
@@ -269,7 +269,7 @@ export const reviewDailyReport = asyncHandler(async (req, res, next) => {
 
   // Send real-time notification to the employee about the feedback
   try {
-    const reviewerRole = req.user.role === 'CEO' ? 'CEO' : req.user.role === 'MANAGER' ? 'Manager' : 'HR';
+    const reviewerRole = req.user.role === 'CEO' ? 'CEO' : req.user.role === 'TEAM_LEAD' ? 'TEAM_LEAD' : 'HR';
     await Notification.safeCreate({
       recipient: report.user,
       title: `Daily Report ${status || 'Reviewed'}`,

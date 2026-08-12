@@ -12,8 +12,8 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', getLeaveTypes);
-router.post('/', restrictTo('SUPER_ADMIN', 'CEO'), createLeaveType);
-router.put('/:id', restrictTo('SUPER_ADMIN', 'CEO'), updateLeaveType);
-router.delete('/:id', restrictTo('SUPER_ADMIN', 'CEO'), deleteLeaveType);
+router.post('/', restrictTo('ADMIN', 'CEO'), createLeaveType);
+router.put('/:id', restrictTo('ADMIN', 'CEO'), updateLeaveType);
+router.delete('/:id', restrictTo('ADMIN', 'CEO'), deleteLeaveType);
 
 export default router;

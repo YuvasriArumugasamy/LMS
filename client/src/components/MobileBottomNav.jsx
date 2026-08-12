@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LeaveApplyModal } from './LeaveApplyModal';
@@ -116,7 +116,7 @@ export const MobileBottomNav = ({ onToggleSidebar, sidebarOpen }) => {
             </button>
 
             {/* Add Employee (HR/Admin/CEO only) */}
-            {!isEmployeePage && ['CEO', 'HR', 'SUPER_ADMIN'].includes(user?.role) && (
+            {!isEmployeePage && ['CEO', 'HR', 'ADMIN'].includes(user?.role) && (
               <button type="button" className="sub-circle bg-purple-600 hover:bg-purple-700" title="Employees"
                 onClick={(e) => { e.stopPropagation(); goTo('/employees'); }}>
                 <UserPlus className="w-4 h-4 text-white" />

@@ -18,8 +18,8 @@ export const connectDB = async () => {
 
   if (!mongoUri) {
     if (process.env.VERCEL === '1') {
-      console.warn('[MongoDB Warning] MONGODB_URI environment variable is missing on Vercel.');
-      return;
+      console.error('[MongoDB Error] MONGODB_URI environment variable is missing on Vercel.');
+      throw new Error('MONGODB_URI environment variable is not configured.');
     }
   }
 

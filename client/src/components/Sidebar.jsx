@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from './UserAvatar';
@@ -56,34 +56,34 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
     {
       title: 'MAIN',
       items: [
-        { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['SUPER_ADMIN', 'CEO', 'HR', 'MANAGER', 'EMPLOYEE'] },
-        { label: 'Attendance & Punch', path: '/attendance', icon: Clock, roles: ['SUPER_ADMIN', 'CEO', 'HR', 'MANAGER', 'EMPLOYEE'] },
-        { label: 'Leave Requests', path: '/leaves', icon: FileCheck2, roles: ['SUPER_ADMIN', 'CEO', 'HR', 'MANAGER', 'EMPLOYEE'] },
+        { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD', 'EMPLOYEE'] },
+        { label: 'Attendance & Punch', path: '/attendance', icon: Clock, roles: ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD', 'EMPLOYEE'] },
+        { label: 'Leave Requests', path: '/leaves', icon: FileCheck2, roles: ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD', 'EMPLOYEE'] },
       ]
     },
     {
       title: 'MANAGEMENT',
       items: [
-        { label: 'Employee Management', path: '/employees', icon: Users, roles: ['SUPER_ADMIN', 'CEO', 'HR'] },
-        { label: 'Departments', path: '/departments', icon: Building2, roles: ['SUPER_ADMIN', 'CEO', 'HR'] },
-        { label: 'Designations', path: '/designations', icon: Award, roles: ['SUPER_ADMIN', 'CEO', 'HR'] },
+        { label: 'Employee Management', path: '/employees', icon: Users, roles: ['ADMIN', 'CEO', 'HR'] },
+        { label: 'Departments', path: '/departments', icon: Building2, roles: ['ADMIN', 'CEO', 'HR'] },
+        { label: 'Designations', path: '/designations', icon: Award, roles: ['ADMIN', 'CEO', 'HR'] },
       ]
     },
     {
       title: 'SETUP & REPORTS',
       items: [
-        { label: 'Leave Types', path: '/leave-types', icon: CalendarDays, roles: ['SUPER_ADMIN', 'CEO', 'HR'] },
-        { label: 'Holidays', path: '/holidays', icon: CalendarCheck, roles: ['SUPER_ADMIN', 'CEO', 'HR', 'MANAGER', 'EMPLOYEE'] },
-        { label: 'Daily Work Reports', path: '/daily-reports', icon: FileText, roles: ['SUPER_ADMIN', 'CEO', 'HR', 'MANAGER', 'EMPLOYEE'] },
-        { label: 'Reports', path: '/reports', icon: BarChart3, roles: ['SUPER_ADMIN', 'CEO', 'HR', 'MANAGER'] },
+        { label: 'Leave Types', path: '/leave-types', icon: CalendarDays, roles: ['ADMIN', 'CEO', 'HR'] },
+        { label: 'Holidays', path: '/holidays', icon: CalendarCheck, roles: ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD', 'EMPLOYEE'] },
+        { label: 'Daily Work Reports', path: '/daily-reports', icon: FileText, roles: ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD', 'EMPLOYEE'] },
+        { label: 'Reports', path: '/reports', icon: BarChart3, roles: ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD'] },
       ]
     },
     {
       title: 'SYSTEM',
       items: [
-        { label: 'Notifications', path: '/notifications', icon: Bell, roles: ['SUPER_ADMIN', 'CEO', 'HR', 'MANAGER', 'EMPLOYEE'], badge: unreadCount > 0 ? { text: String(unreadCount), color: 'bg-rose-500 text-white font-black' } : null },
-        { label: 'Audit Logs', path: '/audit-logs', icon: ShieldAlert, roles: ['SUPER_ADMIN', 'CEO', 'HR'], badge: { text: 'LIVE', color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' } },
-        { label: 'Settings', path: '/settings', icon: Settings, roles: ['SUPER_ADMIN', 'CEO', 'HR'] },
+        { label: 'Notifications', path: '/notifications', icon: Bell, roles: ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD', 'EMPLOYEE'], badge: unreadCount > 0 ? { text: String(unreadCount), color: 'bg-rose-500 text-white font-black' } : null },
+        { label: 'Audit Logs', path: '/audit-logs', icon: ShieldAlert, roles: ['ADMIN', 'CEO', 'HR'], badge: { text: 'LIVE', color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' } },
+        { label: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN', 'CEO', 'HR'] },
       ]
     }
   ];
@@ -215,7 +215,7 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="inline-block px-1.5 py-0.5 text-[9px] font-black rounded-md bg-blue-600/10 text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                  {user?.designation?.name || (role === 'SUPER_ADMIN' ? 'Administrator' : role === 'EMPLOYEE' ? 'Developer' : role?.replace('_', ' '))}
+                  {user?.designation?.name || (role === 'ADMIN' ? 'Administrator' : role === 'EMPLOYEE' ? 'Developer' : role?.replace('_', ' '))}
                 </span>
               </div>
             </div>

@@ -19,7 +19,7 @@ export const getSettings = asyncHandler(async (req, res) => {
 
 // @desc    Update system settings
 // @route   PUT /api/settings
-// @access  Private (CEO, SUPER_ADMIN)
+// @access  Private (CEO, ADMIN)
 export const updateSettings = asyncHandler(async (req, res) => {
   let settings = await Settings.findOne();
   

@@ -113,7 +113,7 @@ export const Holidays = () => {
             </button>
           </div>
 
-          {['HR', 'SUPER_ADMIN', 'CEO'].includes(user?.role) && (
+          {['HR', 'ADMIN', 'CEO'].includes(user?.role) && (
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="px-5 py-2.5 bg-primary hover:bg-blue-700 text-white text-xs font-bold rounded-enterprise shadow-lg shadow-primary/25 flex items-center gap-2 transition-all"

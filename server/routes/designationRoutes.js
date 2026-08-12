@@ -12,8 +12,8 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', getDesignations);
-router.post('/', restrictTo('SUPER_ADMIN', 'HR', 'CEO', 'MANAGER'), createDesignation);
-router.put('/:id', restrictTo('SUPER_ADMIN', 'HR', 'CEO', 'MANAGER'), updateDesignation);
-router.delete('/:id', restrictTo('SUPER_ADMIN', 'HR', 'CEO', 'MANAGER'), deleteDesignation);
+router.post('/', restrictTo('ADMIN', 'HR', 'CEO', 'TEAM_LEAD'), createDesignation);
+router.put('/:id', restrictTo('ADMIN', 'HR', 'CEO', 'TEAM_LEAD'), updateDesignation);
+router.delete('/:id', restrictTo('ADMIN', 'HR', 'CEO', 'TEAM_LEAD'), deleteDesignation);
 
 export default router;

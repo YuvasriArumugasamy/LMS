@@ -264,7 +264,7 @@ export const getAttendanceLogs = asyncHandler(async (req, res, next) => {
 
   if (role === 'EMPLOYEE') {
     query.user = userId;
-  } else if (role === 'MANAGER') {
+  } else if (role === 'TEAM_LEAD') {
     const teamMembers = await User.find({ reportingManager: userId }).select('_id');
     const teamIds = teamMembers.map((m) => m._id);
     teamIds.push(userId);

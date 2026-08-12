@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Modal } from './Modal';
 import { UserAvatar } from './UserAvatar';
 import {
@@ -49,7 +49,7 @@ export const DailyReportDetailsModal = ({
 
   if (!report) return null;
 
-  const isReviewer = ['SUPER_ADMIN', 'CEO', 'HR', 'MANAGER'].includes(currentUser?.role);
+  const isReviewer = ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD'].includes(currentUser?.role);
   const reportUserId = report.user?._id ? report.user._id.toString() : report.user ? report.user.toString() : '';
   const currentUserId = currentUser?._id ? currentUser._id.toString() : '';
   const isOwner = reportUserId && currentUserId && reportUserId === currentUserId;
@@ -346,7 +346,7 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
                 </span>
                 {report.reviewedBy && (
                   <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 bg-indigo-100/70 dark:bg-indigo-900/50 px-2.5 py-0.5 rounded-full">
-                    By {report.reviewedBy.firstName || 'User'} {report.reviewedBy.lastName || ''} ({report.reviewedBy.role === 'CEO' ? 'CEO Executive' : report.reviewedBy.role === 'MANAGER' ? 'Manager' : report.reviewedBy.role === 'HR' ? 'HR Manager' : 'Admin'})
+                    By {report.reviewedBy.firstName || 'User'} {report.reviewedBy.lastName || ''} ({report.reviewedBy.role === 'CEO' ? 'CEO Executive' : report.reviewedBy.role === 'TEAM_LEAD' ? 'TEAM_LEAD' : report.reviewedBy.role === 'HR' ? 'HR Manager' : 'Admin'})
                   </span>
                 )}
               </div>

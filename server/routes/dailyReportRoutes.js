@@ -16,12 +16,12 @@ const router = express.Router();
 router.use(protect);
 
 router.post('/', submitDailyReport);
-router.post('/remind', restrictTo('SUPER_ADMIN', 'HR', 'CEO', 'MANAGER'), sendDailyReportReminder);
+router.post('/remind', restrictTo('ADMIN', 'HR', 'CEO', 'TEAM_LEAD'), sendDailyReportReminder);
 router.get('/today', getTodayReportStatus);
 router.get('/history/:userId', getEmployeeReportHistory);
 router.get('/', getDailyReports);
 router.put('/:id', updateDailyReport);
-router.patch('/:id', restrictTo('SUPER_ADMIN', 'HR', 'CEO', 'MANAGER'), reviewDailyReport);
+router.patch('/:id', restrictTo('ADMIN', 'HR', 'CEO', 'TEAM_LEAD'), reviewDailyReport);
 router.delete('/:id', deleteDailyReport);
 
 export default router;

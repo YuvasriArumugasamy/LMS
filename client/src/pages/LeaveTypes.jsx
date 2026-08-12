@@ -33,7 +33,7 @@ const initialFormData = {
 
 export const LeaveTypes = () => {
   const { user } = useAuth();
-  const canEdit = user?.role === 'CEO' || user?.role === 'SUPER_ADMIN';
+  const canEdit = user?.role === 'CEO' || user?.role === 'ADMIN';
 
   const [leaveTypes, setLeaveTypes] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -12,8 +12,8 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', getDepartments);
-router.post('/', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), createDepartment);
-router.put('/:id', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), updateDepartment);
-router.delete('/:id', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), deleteDepartment);
+router.post('/', restrictTo('ADMIN', 'HR', 'CEO'), createDepartment);
+router.put('/:id', restrictTo('ADMIN', 'HR', 'CEO'), updateDepartment);
+router.delete('/:id', restrictTo('ADMIN', 'HR', 'CEO'), deleteDepartment);
 
 export default router;

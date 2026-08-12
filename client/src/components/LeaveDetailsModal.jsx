@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Modal } from './Modal';
 import { UserAvatar } from './UserAvatar';
 import { StatusBadge } from './Badge';
@@ -10,7 +10,7 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
 
   if (!leave) return null;
 
-  const isManagerOrHR = ['MANAGER', 'HR', 'SUPER_ADMIN', 'CEO'].includes(currentUser?.role);
+  const isManagerOrHR = ['TEAM_LEAD', 'HR', 'ADMIN', 'CEO'].includes(currentUser?.role);
   const isOwner = leave.user?._id === currentUser?._id;
   const applicantRole = leave.user?.role || 'EMPLOYEE';
 
@@ -18,25 +18,25 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
   const getApprovalChain = () => {
     if (applicantRole === 'EMPLOYEE') {
       return [
-        { role: 'MANAGER', label: '1. TL (Manager)', statusKey: 'MANAGER_APPROVED' },
+        { role: 'TEAM_LEAD', label: '1. TL (Manager)', statusKey: 'TEAM_LEAD_APPROVED' },
         { role: 'HR', label: '2. HR Approval', statusKey: 'HR_APPROVED' },
-        { role: 'SUPER_ADMIN', label: '3. Admin Approval', statusKey: 'ADMIN_APPROVED' },
+        { role: 'ADMIN', label: '3. Admin Approval', statusKey: 'ADMIN_APPROVED' },
         { role: 'CEO', label: '4. CEO Final', statusKey: 'CEO_APPROVED' }
       ];
-    } else if (applicantRole === 'MANAGER') {
+    } else if (applicantRole === 'TEAM_LEAD') {
       return [
         { role: 'HR', label: '1. HR Approval', statusKey: 'HR_APPROVED' },
-        { role: 'SUPER_ADMIN', label: '2. Admin Approval', statusKey: 'ADMIN_APPROVED' },
+        { role: 'ADMIN', label: '2. Admin Approval', statusKey: 'ADMIN_APPROVED' },
         { role: 'CEO', label: '3. CEO Final', statusKey: 'CEO_APPROVED' }
       ];
-    } else if (applicantRole === 'SUPER_ADMIN') {
+    } else if (applicantRole === 'ADMIN') {
       return [
         { role: 'HR', label: '1. HR Approval', statusKey: 'HR_APPROVED' },
         { role: 'CEO', label: '2. CEO Final', statusKey: 'CEO_APPROVED' }
       ];
     } else if (applicantRole === 'HR') {
       return [
-        { role: 'SUPER_ADMIN', label: '1. Admin Approval', statusKey: 'ADMIN_APPROVED' },
+        { role: 'ADMIN', label: '1. Admin Approval', statusKey: 'ADMIN_APPROVED' },
         { role: 'CEO', label: '2. CEO Final', statusKey: 'CEO_APPROVED' }
       ];
     }
@@ -48,12 +48,12 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
   // Determine current active turn index in sequence
   const getCurrentStepIndex = () => {
     if (leave.status === 'PENDING' || leave.status === 'ESCALATED_TO_HR') return 0;
-    if (leave.status === 'MANAGER_APPROVED') {
+    if (leave.status === 'TEAM_LEAD_APPROVED') {
       const idx = approvalChain.findIndex((s) => s.role === 'HR');
       return idx !== -1 ? idx : 1;
     }
     if (leave.status === 'HR_APPROVED') {
-      const idx = approvalChain.findIndex((s) => s.role === 'SUPER_ADMIN');
+      const idx = approvalChain.findIndex((s) => s.role === 'ADMIN');
       return idx !== -1 ? idx : approvalChain.length - 1;
     }
     if (leave.status === 'ADMIN_APPROVED') {
@@ -67,7 +67,7 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
   const currentTurnRole = approvalChain[currentStepIndex]?.role || 'CEO';
   const currentTurnLabel = approvalChain[currentStepIndex]?.label || 'CEO Approval';
 
-  const isRejectedOrCancelled = ['MANAGER_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status);
+  const isRejectedOrCancelled = ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status);
   const isFinalApproved = leave.status === 'CEO_APPROVED';
 
   // Check if current user is allowed to approve/reject right now in the sequence

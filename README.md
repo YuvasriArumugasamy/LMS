@@ -5,7 +5,7 @@ A modern full-stack Enterprise Leave & Attendance Management System built with R
 ## 🚀 Key Features
 
 - **Biometric Face Lock Attendance**: Face recognition camera scan for Check-In / Check-Out verification.
-- **Role-Based Access Control**: Executive roles (`CEO`, `HR`, `MANAGER`, `EMPLOYEE`, `SUPER_ADMIN`).
+- **Role-Based Access Control**: Executive roles (`CEO`, `HR`, `TEAM_LEAD`, `EMPLOYEE`, `ADMIN`).
 - **Sunday Over Duty (OD) Auto-Detection**: Special tracking and badges for weekend duty.
 - **Leave Request Workflow**: Multi-tier approvals, leave balances, and instant notifications.
 - **Daily Work Reports**: Progress logging and team productivity tracking.

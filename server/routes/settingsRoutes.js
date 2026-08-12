@@ -8,6 +8,6 @@ router.use(protect);
 
 router.route('/')
   .get(getSettings)
-  .put(restrictTo('CEO', 'SUPER_ADMIN', 'HR'), updateSettings);
+  .put(restrictTo('CEO', 'ADMIN', 'HR'), updateSettings);
 
 export default router;

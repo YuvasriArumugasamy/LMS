@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { ASSETS } from '../assets';
@@ -100,7 +100,7 @@ export const Dashboard = () => {
   const [pendingClockAction, setPendingClockAction] = useState(null); // 'clockIn' | 'clockOut'
   const [dashWorkLocation, setDashWorkLocation] = useState('WFH');
 
-  // Leave Distribution Edit Modal State (CEO & SUPER_ADMIN Exclusive)
+  // Leave Distribution Edit Modal State (CEO & ADMIN Exclusive)
   const [isEditDistributionModalOpen, setIsEditDistributionModalOpen] = useState(false);
   const [editDistributionData, setEditDistributionData] = useState([]);
   const [savingDistribution, setSavingDistribution] = useState(false);
@@ -515,7 +515,7 @@ export const Dashboard = () => {
             )}
 
             {/* Action 3: Add Holiday (Management Only) */}
-            {(user?.role === 'CEO' || user?.role === 'SUPER_ADMIN' || user?.role === 'HR' || user?.role === 'MANAGER') && (
+            {(user?.role === 'CEO' || user?.role === 'ADMIN' || user?.role === 'HR' || user?.role === 'TEAM_LEAD') && (
               <button
                 onClick={() => navigate('/holidays')}
                 className="w-full p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-amber-50/60 dark:hover:bg-amber-950/40 flex items-center justify-between group transition-all"
@@ -533,7 +533,7 @@ export const Dashboard = () => {
             )}
 
             {/* Action 4: Generate Report (Management Only) */}
-            {(user?.role === 'CEO' || user?.role === 'SUPER_ADMIN' || user?.role === 'HR' || user?.role === 'MANAGER') && (
+            {(user?.role === 'CEO' || user?.role === 'ADMIN' || user?.role === 'HR' || user?.role === 'TEAM_LEAD') && (
               <button
                 onClick={() => navigate('/reports')}
                 className="w-full p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/40 flex items-center justify-between group transition-all"
@@ -572,8 +572,8 @@ export const Dashboard = () => {
 
       </div>
 
-      {/* ================= ROW 2: OVERVIEW 4 KPI METRIC CARDS (CEO, HR, ADMIN, MANAGER ONLY) ================= */}
-      {(user?.role === 'CEO' || user?.role === 'SUPER_ADMIN' || user?.role === 'HR' || user?.role === 'MANAGER') && (
+      {/* ================= ROW 2: OVERVIEW 4 KPI METRIC CARDS (CEO, HR, ADMIN, TEAM_LEAD ONLY) ================= */}
+      {(user?.role === 'CEO' || user?.role === 'ADMIN' || user?.role === 'HR' || user?.role === 'TEAM_LEAD') && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Overview</h3>
@@ -789,11 +789,11 @@ export const Dashboard = () => {
 
       </div>
 
-      {/* ================= ROW 4: MONTHLY TREND + LEAVE DISTRIBUTION (CEO, HR, ADMIN, MANAGER ONLY) + UPCOMING HOLIDAYS ================= */}
+      {/* ================= ROW 4: MONTHLY TREND + LEAVE DISTRIBUTION (CEO, HR, ADMIN, TEAM_LEAD ONLY) + UPCOMING HOLIDAYS ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left Side: 2 Analytics Charts Grid (CEO, SUPER_ADMIN, HR, MANAGER ONLY) */}
-        {(user?.role === 'CEO' || user?.role === 'SUPER_ADMIN' || user?.role === 'HR' || user?.role === 'MANAGER') && (
+        {/* Left Side: 2 Analytics Charts Grid (CEO, ADMIN, HR, TEAM_LEAD ONLY) */}
+        {(user?.role === 'CEO' || user?.role === 'ADMIN' || user?.role === 'HR' || user?.role === 'TEAM_LEAD') && (
           <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-12 gap-6">
             
             {/* Monthly Leave Trend Area Chart matching Image (7 Cols) */}
@@ -836,7 +836,7 @@ export const Dashboard = () => {
             <div className="md:col-span-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">Leave Distribution</h3>
-                {(user?.role === 'CEO' || user?.role === 'SUPER_ADMIN') && (
+                {(user?.role === 'CEO' || user?.role === 'ADMIN') && (
                   <button
                     onClick={handleOpenEditDistribution}
                     className="px-2.5 py-1 text-[11px] font-bold bg-blue-600/10 text-blue-600 hover:bg-blue-600 hover:text-white dark:text-blue-400 dark:hover:text-white rounded-xl flex items-center gap-1 transition-all cursor-pointer"
@@ -882,7 +882,7 @@ export const Dashboard = () => {
         )}
 
         {/* Upcoming Holidays Widget matching Image */}
-        <div className={`${(user?.role === 'CEO' || user?.role === 'SUPER_ADMIN' || user?.role === 'HR' || user?.role === 'MANAGER') ? 'lg:col-span-4' : 'lg:col-span-12'} bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between`}>
+        <div className={`${(user?.role === 'CEO' || user?.role === 'ADMIN' || user?.role === 'HR' || user?.role === 'TEAM_LEAD') ? 'lg:col-span-4' : 'lg:col-span-12'} bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Upcoming Holidays</h3>
@@ -978,7 +978,7 @@ export const Dashboard = () => {
         onCaptureSuccess={handleFaceVerificationSuccess}
         isSubmitting={actionLoading}
       />
-      {/* Leave Distribution Edit Modal (CEO & SUPER_ADMIN Only) */}
+      {/* Leave Distribution Edit Modal (CEO & ADMIN Only) */}
       <Modal
         isOpen={isEditDistributionModalOpen}
         onClose={() => setIsEditDistributionModalOpen(false)}

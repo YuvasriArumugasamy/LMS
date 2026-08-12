@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Modal } from './Modal';
 import { CalendarCheck, Calendar as CalendarIcon, MapPin, FileText, Trash2 } from 'lucide-react';
 
@@ -7,7 +7,7 @@ export const HolidayDetailsModal = ({ isOpen, onClose, holiday, currentUser, onD
 
   if (!holiday) return null;
 
-  const isHR = ['HR', 'SUPER_ADMIN', 'CEO'].includes(currentUser?.role);
+  const isHR = ['HR', 'ADMIN', 'CEO'].includes(currentUser?.role);
 
   const handleDeleteClick = async () => {
     if (window.confirm(`Are you sure you want to remove ${holiday.name}?`)) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
@@ -153,9 +153,9 @@ export const Attendance = () => {
       }
     }
 
-    if (u.role === 'MANAGER') return 'Team Lead (TL)';
+    if (u.role === 'TEAM_LEAD') return 'Team Lead (TL)';
     if (u.role === 'HR') return 'HR Manager';
-    if (u.role === 'SUPER_ADMIN') return 'System Admin';
+    if (u.role === 'ADMIN') return 'System Admin';
 
     return 'Employee Member';
   };
@@ -169,9 +169,9 @@ export const Attendance = () => {
     if (u && typeof u === 'object') {
       if (u.department?.name) return u.department.name;
       if (typeof u.department === 'string' && u.department) return u.department;
-      if (u.role === 'SUPER_ADMIN') return 'Executive Board';
+      if (u.role === 'ADMIN') return 'Executive Board';
       if (u.role === 'HR') return 'Human Resources';
-      if (u.role === 'MANAGER') return 'Operations & Tech';
+      if (u.role === 'TEAM_LEAD') return 'Operations & Tech';
     }
     return 'Engineering Department';
   };
@@ -203,8 +203,8 @@ export const Attendance = () => {
 
   // Role based employee filtering:
   // - EMPLOYEE: Only show self
-  // - MANAGER: Only show self and direct reports
-  // - HR / SUPER_ADMIN / ADMIN / CEO: Show all non-CEO employees
+  // - TEAM_LEAD: Only show self and direct reports
+  // - HR / ADMIN / ADMIN / CEO: Show all non-CEO employees
   let roleFilteredEmployees = allEmployees;
 
   if (userRole === 'EMPLOYEE') {
@@ -214,7 +214,7 @@ export const Attendance = () => {
     if (roleFilteredEmployees.length === 0 && user) {
       roleFilteredEmployees = [user];
     }
-  } else if (userRole === 'MANAGER') {
+  } else if (userRole === 'TEAM_LEAD') {
     roleFilteredEmployees = allEmployees.filter((emp) => {
       const isSelf = emp._id === currentUserId || emp.id === currentUserId;
       const rMgr = emp.reportingManager?._id || emp.reportingManager;

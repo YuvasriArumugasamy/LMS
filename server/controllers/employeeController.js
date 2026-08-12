@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import { LeaveBalance } from '../models/LeaveBalance.js';
 import { LeaveType } from '../models/LeaveType.js';
@@ -40,7 +41,7 @@ export const getEmployees = asyncHandler(async (req, res, next) => {
   if (status) query.status = status;
 
   // Filter for Manager role: show team members if requested
-  if (req.user.role === 'MANAGER' && req.query.teamOnly === 'true') {
+  if (req.user.role === 'TEAM_LEAD' && req.query.teamOnly === 'true') {
     query.reportingManager = req.user._id;
   }
 
@@ -180,6 +181,14 @@ export const updateEmployee = asyncHandler(async (req, res, next) => {
   const employee = await User.findById(req.params.id);
   if (!employee || employee.isDeleted) {
     return next(new AppError('Employee not found.', 404));
+  }
+
+  if (req.body.password) {
+    if (typeof req.body.password === 'string' && req.body.password.trim().length > 0) {
+      req.body.password = await bcrypt.hash(req.body.password, 12);
+    } else {
+      delete req.body.password;
+    }
   }
 
   const updatedEmployee = await User.findByIdAndUpdate(req.params.id, req.body, {

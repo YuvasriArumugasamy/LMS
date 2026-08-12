@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
@@ -166,7 +166,7 @@ export const DailyReports = () => {
     try {
       setRemindingUserId(targetUserId);
       const res = await api.post('/daily-reports/remind', { userId: targetUserId });
-      showToast(res.data.message || 'Reminder sent to employee! 🔔');
+      showToast(res.data.message || 'Reminder sent to employee! ??');
     } catch (err) {
       console.error('[Reminder Error]', err);
       showToast(err.response?.data?.message || 'Failed to send reminder.');
@@ -280,7 +280,7 @@ export const DailyReports = () => {
                 <span className="text-[10px] font-black tracking-wider text-emerald-600 dark:text-emerald-400 uppercase whitespace-nowrap">
                   TODAY'S REPORT
                 </span>
-                <span className="text-slate-300 dark:text-slate-700">•</span>
+                <span className="text-slate-300 dark:text-slate-700">�</span>
                 <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase whitespace-nowrap">
                   {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
@@ -576,10 +576,10 @@ export const DailyReports = () => {
                     <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 space-y-1.5">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-black border border-indigo-200 dark:border-indigo-800 truncate max-w-[150px]">
-                          📁 {item.report?.projectTitle || 'Attendance Project'}
+                          ?? {item.report?.projectTitle || 'Attendance Project'}
                         </span>
                         <span className="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[10px] font-black border border-purple-200 dark:border-purple-800 truncate max-w-[150px]">
-                          🧩 {item.report?.moduleName || 'Employee Management'}
+                          ?? {item.report?.moduleName || 'Employee Management'}
                         </span>
                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
                           item.report?.workStatus === 'PENDING'
@@ -588,19 +588,19 @@ export const DailyReports = () => {
                             ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
                             : 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-300 dark:border-blue-800'
                         }`}>
-                          {item.report?.workStatus === 'PENDING' ? '🟡 Pending' : item.report?.workStatus === 'COMPLETED' ? '🟢 Completed' : '🔵 On Progress'}
+                          {item.report?.workStatus === 'PENDING' ? '?? Pending' : item.report?.workStatus === 'COMPLETED' ? '?? Completed' : '?? On Progress'}
                         </span>
                       </div>
 
                       <div className="text-xs font-black text-slate-900 dark:text-white line-clamp-1 mt-1">
-                        📌 {item.report?.title || 'Daily Work Report'}
+                        ?? {item.report?.title || 'Daily Work Report'}
                       </div>
                       <div className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold line-clamp-2 leading-relaxed">
                         {item.report?.tasksCompleted}
                       </div>
                       {item.report?.blockers && (
                         <div className="text-[10px] text-rose-600 dark:text-rose-400 font-bold truncate">
-                          ⚠️ Blocker: {item.report.blockers}
+                          ?? Blocker: {item.report.blockers}
                         </div>
                       )}
                     </div>
@@ -688,7 +688,7 @@ export const DailyReports = () => {
           />
           <div>
             <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-              Great job, {user?.firstName || 'Alexander'}! 👏
+              Great job, {user?.firstName || 'Alexander'}! ??
             </h4>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
               Keep up the consistency and keep achieving your goals.

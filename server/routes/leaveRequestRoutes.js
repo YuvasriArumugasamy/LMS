@@ -18,8 +18,8 @@ router.get('/', getLeaveRequests);
 router.get('/balance', getLeaveBalances);
 router.get('/:id', getLeaveRequestById);
 router.post('/', applyLeave);
-router.post('/:id/approve', restrictTo('MANAGER', 'HR', 'SUPER_ADMIN', 'CEO'), approveLeave);
-router.post('/:id/reject', restrictTo('MANAGER', 'HR', 'SUPER_ADMIN', 'CEO'), rejectLeave);
+router.post('/:id/approve', restrictTo('TEAM_LEAD', 'HR', 'ADMIN', 'CEO'), approveLeave);
+router.post('/:id/reject', restrictTo('TEAM_LEAD', 'HR', 'ADMIN', 'CEO'), rejectLeave);
 router.post('/:id/cancel', cancelLeave);
 
 export default router;

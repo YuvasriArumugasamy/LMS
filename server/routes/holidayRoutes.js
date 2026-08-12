@@ -12,8 +12,8 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', getHolidays);
-router.post('/', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), createHoliday);
-router.put('/:id', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), updateHoliday);
-router.delete('/:id', restrictTo('SUPER_ADMIN', 'HR', 'CEO'), deleteHoliday);
+router.post('/', restrictTo('ADMIN', 'HR', 'CEO'), createHoliday);
+router.put('/:id', restrictTo('ADMIN', 'HR', 'CEO'), updateHoliday);
+router.delete('/:id', restrictTo('ADMIN', 'HR', 'CEO'), deleteHoliday);
 
 export default router;

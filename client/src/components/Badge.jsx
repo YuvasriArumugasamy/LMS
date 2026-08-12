@@ -1,10 +1,10 @@
-import React from 'react';
+﻿import React from 'react';
 
 export const StatusBadge = ({ status }) => {
   const styles = {
     PENDING: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-    MANAGER_APPROVED: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-    MANAGER_REJECTED: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+    TEAM_LEAD_APPROVED: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+    TEAM_LEAD_REJECTED: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
     ESCALATED_TO_HR: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 animate-pulse',
     HR_APPROVED: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
     HR_REJECTED: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
@@ -23,8 +23,8 @@ export const StatusBadge = ({ status }) => {
 
   const labels = {
     PENDING: 'Pending TL Approval',
-    MANAGER_APPROVED: 'TL Approved',
-    MANAGER_REJECTED: 'TL Rejected ❌',
+    TEAM_LEAD_APPROVED: 'TL Approved',
+    TEAM_LEAD_REJECTED: 'TL Rejected ❌',
     ESCALATED_TO_HR: 'Escalated to HR 🚨',
     HR_APPROVED: 'HR Approved',
     HR_REJECTED: 'HR Rejected ❌',

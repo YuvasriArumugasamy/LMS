@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { UserAvatar } from './UserAvatar';
@@ -136,7 +136,7 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
               {user?.role === 'CEO' ? 'CEO' : `${user?.firstName || ''} ${user?.lastName || ''}`.replace(/\d+/g, '').replace(/([a-z])([A-Z])/g, '$1 $2').trim() || 'User'}
             </p>
             <p className="text-[10px] text-slate-400 font-medium mt-0.5 uppercase tracking-wider">
-              {user?.designation?.name || (user?.role === 'SUPER_ADMIN' ? 'Administrator' : user?.role === 'EMPLOYEE' ? 'Developer' : user?.role?.replace('_', ' '))}
+              {user?.designation?.name || (user?.role === 'ADMIN' ? 'Administrator' : user?.role === 'EMPLOYEE' ? 'Developer' : user?.role?.replace('_', ' '))}
             </p>
           </div>
         </div>

@@ -121,7 +121,7 @@ export const Designations = () => {
           </div>
         </div>
 
-        {['HR', 'SUPER_ADMIN', 'CEO', 'MANAGER'].includes(user?.role) && (
+        {['HR', 'ADMIN', 'CEO', 'TEAM_LEAD'].includes(user?.role) && (
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="px-5 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-extrabold rounded-xl shadow-lg shadow-purple-500/25 flex items-center gap-2 transition-all w-full sm:w-auto justify-center cursor-pointer hover:scale-[1.02] active:scale-[0.98]"

@@ -1,4 +1,4 @@
-import { LeaveRequest } from '../models/LeaveRequest.js';
+﻿import { LeaveRequest } from '../models/LeaveRequest.js';
 import { LeaveBalance } from '../models/LeaveBalance.js';
 import { LeaveType } from '../models/LeaveType.js';
 import { User } from '../models/User.js';
@@ -16,7 +16,7 @@ export const getLeaveRequests = asyncHandler(async (req, res, next) => {
   // Role-based visibility scoping
   if (req.user.role === 'EMPLOYEE') {
     query.user = req.user._id;
-  } else if (req.user.role === 'MANAGER') {
+  } else if (req.user.role === 'TEAM_LEAD') {
     // Find all employees who have this manager as their reporting manager
     const teamMembers = await User.find({ reportingManager: req.user._id, isDeleted: false }).select('_id');
     const teamIds = teamMembers.map((m) => m._id);
@@ -36,7 +36,7 @@ export const getLeaveRequests = asyncHandler(async (req, res, next) => {
     if (status === 'APPROVED') {
       query.status = { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] };
     } else if (status === 'REJECTED') {
-      query.status = { $in: ['MANAGER_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] };
+      query.status = { $in: ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] };
     } else {
       query.status = status;
     }
@@ -111,7 +111,7 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
   const overlapping = await LeaveRequest.findOne({
     user: userId,
     isDeleted: false,
-    status: { $nin: ['CANCELLED', 'MANAGER_REJECTED', 'HR_REJECTED'] },
+    status: { $nin: ['CANCELLED', 'TEAM_LEAD_REJECTED', 'HR_REJECTED'] },
     $or: [
       { fromDate: { $lte: end }, toDate: { $gte: start } }
     ]
@@ -216,7 +216,7 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
   // 3. Notify HR and Super Admin Managers
   try {
     const hrAdmins = await User.find({
-      role: { $in: ['HR', 'SUPER_ADMIN'] },
+      role: { $in: ['HR', 'ADMIN'] },
       status: 'ACTIVE',
       _id: { $ne: userId }
     });
@@ -276,26 +276,26 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
   }
 
   // Prevent approval if leave request is already finalized or rejected
-  if (['CEO_APPROVED', 'MANAGER_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status)) {
+  if (['CEO_APPROVED', 'TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status)) {
     return next(new AppError(`This leave request is already finalized or rejected (${leave.status.replace('_', ' ')}).`, 400));
   }
 
   // Sequential Approval Flow Implementation based on Applicant Role
   if (applicantRole === 'EMPLOYEE') {
-    // Sequential Flow: TL (MANAGER) -> HR -> Admin (SUPER_ADMIN) -> CEO
+    // Sequential Flow: TL (TEAM_LEAD) -> HR -> Admin (ADMIN) -> CEO
     if (leave.status === 'PENDING' || leave.status === 'ESCALATED_TO_HR') {
-      if (!['MANAGER', 'CEO'].includes(reviewerRole)) {
+      if (!['TEAM_LEAD', 'CEO'].includes(reviewerRole)) {
         return next(new AppError('Employee leave request requires TL (Manager) approval first.', 403));
       }
-      leave.status = 'MANAGER_APPROVED';
+      leave.status = 'TEAM_LEAD_APPROVED';
       leave.approvalFlow.push({
         reviewer: req.user._id,
         reviewerRole: reviewerRole,
-        action: 'MANAGER_APPROVE',
+        action: 'TEAM_LEAD_APPROVE',
         comments: comments || 'Approved by Team Lead (Manager). Pending HR approval.',
         timestamp: now
       });
-    } else if (leave.status === 'MANAGER_APPROVED') {
+    } else if (leave.status === 'TEAM_LEAD_APPROVED') {
       if (!['HR', 'CEO'].includes(reviewerRole)) {
         return next(new AppError('Employee leave request requires HR approval next.', 403));
       }
@@ -308,7 +308,7 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
         timestamp: now
       });
     } else if (leave.status === 'HR_APPROVED') {
-      if (!['SUPER_ADMIN', 'CEO'].includes(reviewerRole)) {
+      if (!['ADMIN', 'CEO'].includes(reviewerRole)) {
         return next(new AppError('Employee leave request requires Admin (Super Admin) approval next.', 403));
       }
       leave.status = 'ADMIN_APPROVED';
@@ -332,8 +332,8 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
         timestamp: now
       });
     }
-  } else if (applicantRole === 'MANAGER') {
-    // Sequential Flow for TL/Manager: HR -> Admin (SUPER_ADMIN) -> CEO
+  } else if (applicantRole === 'TEAM_LEAD') {
+    // Sequential Flow for TL/Manager: HR -> Admin (ADMIN) -> CEO
     if (leave.status === 'PENDING' || leave.status === 'ESCALATED_TO_HR') {
       if (!['HR', 'CEO'].includes(reviewerRole)) {
         return next(new AppError('TL leave request requires HR approval first.', 403));
@@ -347,7 +347,7 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
         timestamp: now
       });
     } else if (leave.status === 'HR_APPROVED') {
-      if (!['SUPER_ADMIN', 'CEO'].includes(reviewerRole)) {
+      if (!['ADMIN', 'CEO'].includes(reviewerRole)) {
         return next(new AppError('TL leave request requires Admin (Super Admin) approval next.', 403));
       }
       leave.status = 'ADMIN_APPROVED';
@@ -371,7 +371,7 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
         timestamp: now
       });
     }
-  } else if (applicantRole === 'SUPER_ADMIN') {
+  } else if (applicantRole === 'ADMIN') {
     // Sequential Flow for Admin: HR -> CEO
     if (leave.status === 'PENDING' || leave.status === 'ESCALATED_TO_HR') {
       if (!['HR', 'CEO'].includes(reviewerRole)) {
@@ -399,9 +399,9 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
       });
     }
   } else if (applicantRole === 'HR') {
-    // Sequential Flow for HR: Admin (SUPER_ADMIN) -> CEO
+    // Sequential Flow for HR: Admin (ADMIN) -> CEO
     if (leave.status === 'PENDING' || leave.status === 'ESCALATED_TO_HR') {
-      if (!['SUPER_ADMIN', 'CEO'].includes(reviewerRole)) {
+      if (!['ADMIN', 'CEO'].includes(reviewerRole)) {
         return next(new AppError('HR leave request requires Admin (Super Admin) approval first.', 403));
       }
       leave.status = 'ADMIN_APPROVED';
@@ -506,17 +506,17 @@ export const rejectLeave = asyncHandler(async (req, res, next) => {
   const previousStatus = leave.status;
   const now = new Date();
 
-  if (['MANAGER_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status)) {
+  if (['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status)) {
     return next(new AppError(`This leave request has already been rejected/cancelled (${leave.status.replace('_', ' ')}).`, 400));
   }
 
-  let rejectStatus = 'MANAGER_REJECTED';
-  let rejectAction = 'MANAGER_REJECT';
+  let rejectStatus = 'TEAM_LEAD_REJECTED';
+  let rejectAction = 'TEAM_LEAD_REJECT';
 
   if (reviewerRole === 'HR') {
     rejectStatus = 'HR_REJECTED';
     rejectAction = 'HR_REJECT';
-  } else if (reviewerRole === 'SUPER_ADMIN') {
+  } else if (reviewerRole === 'ADMIN') {
     rejectStatus = 'ADMIN_REJECTED';
     rejectAction = 'ADMIN_REJECT';
   } else if (reviewerRole === 'CEO') {

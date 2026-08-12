@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Modal } from './Modal';
 import { Award, Building2, ShieldCheck, Hash, Trash2, Layers } from 'lucide-react';
 
@@ -7,7 +7,7 @@ export const DesignationDetailsModal = ({ isOpen, onClose, designation, currentU
 
   if (!designation) return null;
 
-  const isHR = ['HR', 'SUPER_ADMIN', 'CEO', 'MANAGER'].includes(currentUser?.role);
+  const isHR = ['HR', 'ADMIN', 'CEO', 'TEAM_LEAD'].includes(currentUser?.role);
 
   const handleDeleteClick = async () => {
     if (window.confirm(`Are you sure you want to delete ${designation.name}?`)) {

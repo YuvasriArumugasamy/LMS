@@ -21,7 +21,7 @@ const createAdmin = async () => {
       lastName: 'Admin',
       email: 'admin@enterprise.com',
       password: 'Admin@123',
-      role: 'SUPER_ADMIN',
+      role: 'ADMIN',
       status: 'ACTIVE'
     });
 

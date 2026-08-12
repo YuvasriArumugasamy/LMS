@@ -16,7 +16,7 @@ export const checkEmergencyEscalations = async () => {
     if (!overdueLeaves || overdueLeaves.length === 0) return;
 
     // Fetch HR users to notify
-    const hrUsers = await User.find({ role: { $in: ['HR', 'SUPER_ADMIN'] }, status: 'ACTIVE' });
+    const hrUsers = await User.find({ role: { $in: ['HR', 'ADMIN'] }, status: 'ACTIVE' });
     const hrIds = hrUsers.map((h) => h._id);
 
     for (const leave of overdueLeaves) {

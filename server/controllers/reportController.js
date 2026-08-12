@@ -11,7 +11,7 @@ export const getLeaveReports = asyncHandler(async (req, res, next) => {
     if (status === 'APPROVED' || status === 'HR_APPROVED') {
       matchQuery.status = { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] };
     } else if (status === 'REJECTED' || status === 'HR_REJECTED') {
-      matchQuery.status = { $in: ['MANAGER_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] };
+      matchQuery.status = { $in: ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] };
     } else {
       matchQuery.status = status;
     }

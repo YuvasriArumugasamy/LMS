@@ -628,9 +628,9 @@ export const Employees = () => {
                   >
                     <option value="EMPLOYEE">Select Role</option>
                     <option value="EMPLOYEE">Employee</option>
-                    <option value="MANAGER">Manager</option>
-                    <option value="HR">HR Manager</option>
-                    <option value="SUPER_ADMIN">Super Admin</option>
+                    <option value="TEAM_LEAD">Team Lead</option>
+                    <option value="HR">HR</option>
+                    <option value="ADMIN">Admin</option>
                   </select>
                 </div>
               </div>

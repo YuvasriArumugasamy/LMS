@@ -141,7 +141,7 @@ export const runAutoSeed = async () => {
       lastName: 'Miller',
       email: 'manager@enterprise.com',
       password: 'Password@123',
-      role: 'MANAGER',
+      role: 'TEAM_LEAD',
       department: engineering._id,
       designation: techLead._id,
       status: 'ACTIVE'
@@ -167,7 +167,7 @@ export const runAutoSeed = async () => {
       lastName: 'Vance',
       email: 'sales.lead@enterprise.com',
       password: 'Password@123',
-      role: 'MANAGER',
+      role: 'TEAM_LEAD',
       department: salesDept._id,
       designation: salesManagerDesig._id,
       status: 'ACTIVE'

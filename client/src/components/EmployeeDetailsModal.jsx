@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import { UserAvatar } from './UserAvatar';
 import { StatusBadge } from './Badge';
@@ -33,7 +33,7 @@ export const EmployeeDetailsModal = ({
   });
 
   const [managers, setManagers] = useState([]);
-  const canManageFaceLock = ['CEO', 'HR', 'SUPER_ADMIN'].includes(user?.role);
+  const canManageFaceLock = ['CEO', 'HR', 'ADMIN'].includes(user?.role);
 
   const handlePhoneChange = (value) => {
     // Allow +, digits, spaces, hyphens — max 15 chars (international format)
@@ -57,14 +57,14 @@ export const EmployeeDetailsModal = ({
     }
   }, [employee, isOpen]);
 
-  // Load all potential managers (MANAGER role) when modal opens
+  // Load all potential managers (TEAM_LEAD role) when modal opens
   useEffect(() => {
     if (isOpen) {
       api.get('/employees?limit=200&status=ACTIVE')
         .then((res) => {
           const all = res.data?.data?.employees || [];
-          // Show anyone who can be a reporting manager: MANAGER, HR, SUPER_ADMIN, CEO
-          const mgrs = all.filter((e) => ['MANAGER', 'HR', 'SUPER_ADMIN', 'CEO'].includes(e.role));
+          // Show anyone who can be a reporting manager: TEAM_LEAD, HR, ADMIN, CEO
+          const mgrs = all.filter((e) => ['TEAM_LEAD', 'HR', 'ADMIN', 'CEO'].includes(e.role));
           setManagers(mgrs);
         })
         .catch(() => setManagers([]));
@@ -422,9 +422,9 @@ export const EmployeeDetailsModal = ({
                   className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 >
                   <option value="EMPLOYEE">Employee</option>
-                  <option value="MANAGER">Manager</option>
+                  <option value="TEAM_LEAD">Manager</option>
                   <option value="HR">HR Manager</option>
-                  <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="ADMIN">Super Admin</option>
                 </select>
               </div>
 
