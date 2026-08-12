@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { runAutoSeed } from '../utils/seed.js';
+import { runAutoSeed, updateCeoName } from '../utils/seed.js';
 
 let isConnected = false;
 let connectionPromise = null;
@@ -34,6 +34,7 @@ export const connectDB = async () => {
       connectionPromise = null;
       console.log(`[MongoDB] Connected: ${conn.connection.host}`);
       runAutoSeed().catch((err) => console.error('[AutoSeed Error]', err));
+      updateCeoName().catch((err) => console.error('[CEO Update Error]', err));
     })
     .catch((error) => {
       isConnected = false;

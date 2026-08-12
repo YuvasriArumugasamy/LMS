@@ -37,10 +37,11 @@ export const updateEarnedLeaveToPaidLeave = async () => {
 
 export const updateCeoName = async () => {
   try {
-    await User.updateMany(
-      { role: 'CEO' },
+    const result = await User.updateMany(
+      { $or: [{ role: 'CEO' }, { email: 'ceo@enterprise.com' }, { employeeId: 'EMP001' }] },
       { firstName: 'Alban', lastName: 'Santhosh A' }
     );
+    console.log('[Seed Engine] Updated CEO Name to Alban Santhosh A:', result.modifiedCount || 0);
   } catch (err) {
     console.error('[CEO Name Migration Error]', err);
   }
