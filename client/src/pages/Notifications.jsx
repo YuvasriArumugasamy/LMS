@@ -6,13 +6,19 @@ import { requestFcmToken, onForegroundMessage } from '../firebase';
 export const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pushStatus, setPushStatus] = useState('UNKNOWN'); // UNKNOWN, ENABLED, DENIED, ENABLING
+  const [pushStatus, setPushStatus] = useState('UNKNOWN');
   const [pushMessage, setPushMessage] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const LIMIT = 20;
 
-  const fetchAndMarkNotifications = async () => {
+  const fetchAndMarkNotifications = async (currentPage = 1) => {
     try {
-      const res = await api.get('/notifications');
+      const res = await api.get('/notifications', { params: { page: currentPage, limit: LIMIT } });
       setNotifications(res.data.data.notifications || []);
+      setTotal(res.data.data.pagination?.total || 0);
+      setTotalPages(res.data.data.pagination?.pages || 1);
 
       // Auto-mark all notifications as read when opening Notifications page
       if (res.data.data.unreadCount > 0) {
@@ -26,7 +32,7 @@ export const Notifications = () => {
   };
 
   useEffect(() => {
-    fetchAndMarkNotifications();
+    fetchAndMarkNotifications(page);
 
     if ('Notification' in window) {
       if (Notification.permission === 'granted') {
@@ -73,7 +79,7 @@ export const Notifications = () => {
   const handleMarkAllRead = async () => {
     try {
       await api.patch('/notifications/all/read');
-      fetchAndMarkNotifications();
+      fetchAndMarkNotifications(page);
     } catch (err) {
       console.error(err);
     }
@@ -156,6 +162,29 @@ export const Notifications = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button
+            onClick={() => { setPage((p) => Math.max(1, p - 1)); fetchAndMarkNotifications(page - 1); }}
+            disabled={page === 1}
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center disabled:opacity-40 hover:bg-primary hover:text-white transition-all"
+          >
+            ‹
+          </button>
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+            Page {page} of {totalPages} <span className="text-slate-400 font-medium">({total} total)</span>
+          </span>
+          <button
+            onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); fetchAndMarkNotifications(page + 1); }}
+            disabled={page === totalPages}
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center disabled:opacity-40 hover:bg-primary hover:text-white transition-all"
+          >
+            ›
+          </button>
+        </div>
+      )}
     </div>
   );
 };
