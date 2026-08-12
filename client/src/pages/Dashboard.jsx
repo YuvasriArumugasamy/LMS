@@ -384,44 +384,48 @@ export const Dashboard = () => {
                         </UiverseStarButton>
                       </div>
                     ) : !todayAttendance?.clockOut ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {!todayAttendance?.lunchOut ? (
                           <>
-                            <UiverseStarButton
-                              disabled={actionLoading || isBeforeLunchOut}
-                              onClick={handleQuickLunchOut}
-                              variant="checkout"
-                              title={isBeforeLunchOut ? "Unlocks at 1:30 PM" : ""}
-                            >
-                              {isBeforeLunchOut ? "Wait till 1:30 PM" : "Lunch Out"}
-                            </UiverseStarButton>
-                            <UiverseStarButton
-                              disabled={actionLoading || isBeforeClockOut}
-                              onClick={handleQuickClockOut}
-                              variant="checkout"
-                              title={isBeforeClockOut ? "Unlocks at 6:30 PM" : ""}
-                            >
-                              {isBeforeClockOut ? "Wait till 6:30 PM" : "Check Out"}
-                            </UiverseStarButton>
+                            {isBeforeLunchOut ? (
+                              <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 text-[11px] font-bold rounded-xl flex items-center gap-1.5 cursor-not-allowed" title="Unlocks at 1:30 PM">
+                                🔒 1:30 PM
+                              </span>
+                            ) : (
+                              <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchOut} variant="checkout">
+                                Lunch Out
+                              </UiverseStarButton>
+                            )}
+                            {isBeforeClockOut ? (
+                              <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 text-[11px] font-bold rounded-xl flex items-center gap-1.5 cursor-not-allowed" title="Unlocks at 6:30 PM">
+                                🔒 6:30 PM
+                              </span>
+                            ) : (
+                              <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
+                                Check Out
+                              </UiverseStarButton>
+                            )}
                           </>
                         ) : !todayAttendance?.lunchIn ? (
-                          <UiverseStarButton
-                            disabled={actionLoading || isBeforeLunchIn}
-                            onClick={handleQuickLunchIn}
-                            variant="checkin"
-                            title={isBeforeLunchIn ? "Unlocks at 2:15 PM" : ""}
-                          >
-                            {isBeforeLunchIn ? "Wait till 2:15 PM" : "Lunch In"}
-                          </UiverseStarButton>
+                          isBeforeLunchIn ? (
+                            <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 text-[11px] font-bold rounded-xl flex items-center gap-1.5 cursor-not-allowed" title="Unlocks at 2:15 PM">
+                              🔒 2:15 PM
+                            </span>
+                          ) : (
+                            <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchIn} variant="checkin">
+                              Lunch In
+                            </UiverseStarButton>
+                          )
                         ) : (
-                          <UiverseStarButton
-                            disabled={actionLoading || isBeforeClockOut}
-                            onClick={handleQuickClockOut}
-                            variant="checkout"
-                            title={isBeforeClockOut ? "Unlocks at 6:30 PM" : ""}
-                          >
-                            {isBeforeClockOut ? "Wait till 6:30 PM" : "Check Out"}
-                          </UiverseStarButton>
+                          isBeforeClockOut ? (
+                            <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 text-[11px] font-bold rounded-xl flex items-center gap-1.5 cursor-not-allowed" title="Unlocks at 6:30 PM">
+                              🔒 6:30 PM
+                            </span>
+                          ) : (
+                            <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
+                              Check Out
+                            </UiverseStarButton>
+                          )
                         )}
                       </div>
                     ) : (
