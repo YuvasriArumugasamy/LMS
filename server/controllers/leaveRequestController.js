@@ -32,8 +32,29 @@ export const getLeaveRequests = asyncHandler(async (req, res, next) => {
   }
 
   if (user) query.user = user;
-  if (status) {
-    if (status === 'APPROVED') {
+
+  // Fix 1: Apply search filter on user name/employeeId
+  if (search) {
+    const matchingUsers = await User.find({
+      $or: [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { employeeId: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ],
+      isDeleted: false
+    }).select('_id');
+    const matchIds = matchingUsers.map((u) => u._id);
+    if (query.$or) {
+      // Already has $or for TEAM_LEAD — combine with search
+      query.$and = [{ $or: query.$or }, { user: { $in: matchIds } }];
+      delete query.$or;
+    } else {
+      query.user = { $in: matchIds };
+    }
+  }
+
+  if (status) {    if (status === 'APPROVED') {
       query.status = { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] };
     } else if (status === 'REJECTED') {
       query.status = { $in: ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] };
@@ -107,11 +128,11 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
   let daysCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
   if (isHalfDay) daysCount = 0.5;
 
-  // Prevent overlapping leave requests
+  // Fix 5: Prevent overlapping leave requests — exclude ALL rejected/cancelled statuses
   const overlapping = await LeaveRequest.findOne({
     user: userId,
     isDeleted: false,
-    status: { $nin: ['CANCELLED', 'TEAM_LEAD_REJECTED', 'HR_REJECTED'] },
+    status: { $nin: ['CANCELLED', 'TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] },
     $or: [
       { fromDate: { $lte: end }, toDate: { $gte: start } }
     ]
@@ -574,6 +595,11 @@ export const cancelLeave = asyncHandler(async (req, res, next) => {
   // Only the leave owner can cancel — managers/HR cannot cancel on behalf of employees
   if (leave.user.toString() !== req.user._id.toString()) {
     return next(new AppError('You can only cancel your own leave requests.', 403));
+  }
+
+  // Fix 3: Prevent cancellation of final approved (CEO_APPROVED) leaves
+  if (leave.status === 'CEO_APPROVED') {
+    return next(new AppError('Final approved leaves cannot be cancelled. Please contact HR.', 400));
   }
 
   const previousStatus = leave.status;

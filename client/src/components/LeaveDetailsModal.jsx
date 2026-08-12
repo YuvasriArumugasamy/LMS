@@ -11,7 +11,7 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
   if (!leave) return null;
 
   const isManagerOrHR = ['TEAM_LEAD', 'HR', 'ADMIN', 'CEO'].includes(currentUser?.role);
-  const isOwner = leave.user?._id === currentUser?._id;
+  const isOwner = leave.user?._id?.toString() === currentUser?._id?.toString();
   const applicantRole = leave.user?.role || 'EMPLOYEE';
 
   // Define approval chains based on applicant role
@@ -75,7 +75,7 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
   const showReviewSection = isManagerOrHR && (!isOwner || currentUser?.role === 'CEO');
   const isActionDisabled = actionLoading || !isMyTurn;
 
-  const canCancel = isOwner && !['CANCELLED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'].includes(leave.status);
+  const canCancel = isOwner && !['CANCELLED', 'CEO_APPROVED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'].includes(leave.status);
 
   const handleApproveAction = async () => {
     setActionLoading(true);
