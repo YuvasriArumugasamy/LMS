@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import api from '../services/api';
 import { UserAvatar } from './UserAvatar';
 import {
@@ -66,7 +67,7 @@ export const EmployeeReportHistoryModal = ({ isOpen, onClose, userId, onSelectRe
   const reports = historyData?.reports || [];
   const stats = historyData?.stats || {};
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header Bar */}
@@ -230,6 +231,7 @@ export const EmployeeReportHistoryModal = ({ isOpen, onClose, userId, onSelectRe
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
