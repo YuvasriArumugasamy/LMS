@@ -483,7 +483,8 @@ export const Profile = () => {
             <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Email (Read Only)</label>
             <input
               type="text"
-              value={user?.email || ''}
+              value=""
+              placeholder="Enter email"
               disabled
               className="w-full p-3 bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold text-slate-400 outline-none cursor-not-allowed"
             />
