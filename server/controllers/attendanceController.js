@@ -3,15 +3,36 @@ import { User } from '../models/User.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/appError.js';
 
-// Get today's start and end date
+// Get today's start and end date in IST (Asia/Kolkata timezone)
 const getTodayDateRange = () => {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date();
-  end.setHours(23, 59, 59, 999);
-
+  const now = new Date();
+  const istDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(now);
+  const start = new Date(`${istDateStr}T00:00:00.000+05:30`);
+  const end = new Date(`${istDateStr}T23:59:59.999+05:30`);
   return { start, end };
+};
+
+// Helper to get IST hours, minutes, and day regardless of server UTC environment
+const getISTTime = (date = new Date()) => {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    hour: 'numeric',
+    minute: 'numeric',
+    weekday: 'short',
+    hour12: false
+  });
+  const parts = formatter.formatToParts(date);
+  let hours = 0;
+  let minutes = 0;
+  let dayName = '';
+  for (const part of parts) {
+    if (part.type === 'hour') hours = parseInt(part.value, 10);
+    if (part.type === 'minute') minutes = parseInt(part.value, 10);
+    if (part.type === 'weekday') dayName = part.value;
+  }
+  if (hours === 24) hours = 0;
+  const isSunday = dayName === 'Sun';
+  return { hours, minutes, isSunday };
 };
 
 // Calculate Euclidean distance between two descriptor arrays
@@ -63,10 +84,9 @@ export const clockIn = asyncHandler(async (req, res, next) => {
   }
 
   const now = new Date();
-  const workStartHour = 9; // 9 AM
-  // Late if after 9:40 AM
-  const isLate = now.getHours() >= 9 && (now.getHours() > 9 || now.getMinutes() > 40);
-  const isSunday = now.getDay() === 0;
+  const { hours, minutes, isSunday } = getISTTime(now);
+  // Late if after 9:40 AM IST
+  const isLate = hours >= 9 && (hours > 9 || minutes > 40);
 
   // Auto-detect Sunday / Holiday Check-in as OVER_DUTY (OD)
   const attendanceStatus = isSunday ? 'OVER_DUTY' : (isLate ? 'LATE' : 'PRESENT');
@@ -112,8 +132,9 @@ export const lunchOut = asyncHandler(async (req, res, next) => {
   }
 
   const now = new Date();
-  // Strict Block: Cannot Lunch Out before 1:30 PM
-  if (now.getHours() < 13 || (now.getHours() === 13 && now.getMinutes() < 30)) {
+  const { hours, minutes } = getISTTime(now);
+  // Strict Block: Cannot Lunch Out before 1:30 PM IST (13:30)
+  if (hours < 13 || (hours === 13 && minutes < 30)) {
     return next(new AppError('Lunch Out is only allowed after 1:30 PM.', 400));
   }
 
@@ -156,8 +177,9 @@ export const lunchIn = asyncHandler(async (req, res, next) => {
   }
 
   const now = new Date();
-  // Strict Block: Cannot Lunch In before 2:15 PM
-  if (now.getHours() < 14 || (now.getHours() === 14 && now.getMinutes() < 15)) {
+  const { hours, minutes } = getISTTime(now);
+  // Strict Block: Cannot Lunch In before 2:15 PM IST (14:15)
+  if (hours < 14 || (hours === 14 && minutes < 15)) {
     return next(new AppError('Lunch In is only allowed after 2:15 PM.', 400));
   }
 
@@ -196,8 +218,9 @@ export const clockOut = asyncHandler(async (req, res, next) => {
   }
 
   const now = new Date();
-  // Strict Block: Cannot Clock Out before 6:30 PM
-  if (now.getHours() < 18 || (now.getHours() === 18 && now.getMinutes() < 30)) {
+  const { hours, minutes } = getISTTime(now);
+  // Strict Block: Cannot Clock Out before 6:30 PM IST (18:30)
+  if (hours < 18 || (hours === 18 && minutes < 30)) {
     return next(new AppError('Check-Out is only allowed after 6:30 PM.', 400));
   }
 

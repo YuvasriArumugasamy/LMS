@@ -4,12 +4,12 @@ import { Notification } from '../models/Notification.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/appError.js';
 
-// Get today's start and end date range
+// Get today's start and end date range in IST (Asia/Kolkata timezone)
 const getTodayRange = () => {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date();
-  end.setHours(23, 59, 59, 999);
+  const now = new Date();
+  const istDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(now);
+  const start = new Date(`${istDateStr}T00:00:00.000+05:30`);
+  const end = new Date(`${istDateStr}T23:59:59.999+05:30`);
   return { start, end };
 };
 

@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "fix(lms): resolve face detection camera sensitivity and validate daily report hours"
+git commit -m "fix(attendance): fix IST timezone handling for Lunch Out and attendance time checks"
 git push -u origin main
 echo Completed Git Push!
 pause
