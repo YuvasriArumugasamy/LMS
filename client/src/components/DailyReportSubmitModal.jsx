@@ -160,7 +160,7 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
               type="text"
               value={projectTitle}
               onChange={(e) => setProjectTitle(e.target.value)}
-              placeholder="e.g. Attendance Project / LMS Portal"
+              placeholder="Project name"
               className="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-2xs"
               required
             />
@@ -177,7 +177,7 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
               type="text"
               value={moduleName}
               onChange={(e) => setModuleName(e.target.value)}
-              placeholder="e.g. Employee Management / Daily Reports"
+              placeholder="Module name"
               className="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all shadow-2xs"
               required
             />
@@ -197,7 +197,7 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Frontend development & admin page updates"
+              placeholder="Today's work summary"
               className="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all shadow-2xs"
               required
             />
