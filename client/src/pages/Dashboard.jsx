@@ -387,45 +387,21 @@ export const Dashboard = () => {
                       <div className="flex flex-wrap items-center gap-2">
                         {!todayAttendance?.lunchOut ? (
                           <>
-                            {isBeforeLunchOut ? (
-                              <span className="px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 text-[11px] font-extrabold rounded-xl flex items-center gap-1.5 cursor-not-allowed select-none" title="Unlocks at 1:30 PM">
-                                <span>🕐</span> Lunch Out <span className="text-amber-400 font-medium">· 1:30 PM</span>
-                              </span>
-                            ) : (
-                              <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchOut} variant="checkout">
-                                Lunch Out
-                              </UiverseStarButton>
-                            )}
-                            {isBeforeClockOut ? (
-                              <span className="px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 text-[11px] font-extrabold rounded-xl flex items-center gap-1.5 cursor-not-allowed select-none" title="Unlocks at 6:30 PM">
-                                <span>🕕</span> Check Out <span className="text-amber-400 font-medium">· 6:30 PM</span>
-                              </span>
-                            ) : (
-                              <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
-                                Check Out
-                              </UiverseStarButton>
-                            )}
-                          </>
-                        ) : !todayAttendance?.lunchIn ? (
-                          isBeforeLunchIn ? (
-                            <span className="px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 text-[11px] font-extrabold rounded-xl flex items-center gap-1.5 cursor-not-allowed select-none" title="Unlocks at 2:15 PM">
-                              <span>🕑</span> Lunch In <span className="text-amber-400 font-medium">· 2:15 PM</span>
-                            </span>
-                          ) : (
-                            <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchIn} variant="checkin">
-                              Lunch In
+                            <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchOut} variant="checkout">
+                              Lunch Out
                             </UiverseStarButton>
-                          )
-                        ) : (
-                          isBeforeClockOut ? (
-                            <span className="px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 text-[11px] font-extrabold rounded-xl flex items-center gap-1.5 cursor-not-allowed select-none" title="Unlocks at 6:30 PM">
-                              <span>🕕</span> Check Out <span className="text-amber-400 font-medium">· 6:30 PM</span>
-                            </span>
-                          ) : (
                             <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
                               Check Out
                             </UiverseStarButton>
-                          )
+                          </>
+                        ) : !todayAttendance?.lunchIn ? (
+                          <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchIn} variant="checkin">
+                            Lunch In
+                          </UiverseStarButton>
+                        ) : (
+                          <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
+                            Check Out
+                          </UiverseStarButton>
                         )}
                       </div>
                     ) : (
