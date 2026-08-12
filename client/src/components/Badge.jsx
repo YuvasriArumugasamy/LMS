@@ -22,7 +22,7 @@ export const StatusBadge = ({ status }) => {
   };
 
   const labels = {
-    PENDING: 'Pending TL Approval',
+    PENDING: 'Pending Approval',
     TEAM_LEAD_APPROVED: 'TL Approved',
     TEAM_LEAD_REJECTED: 'TL Rejected ❌',
     ESCALATED_TO_HR: 'Escalated to HR 🚨',
