@@ -9,14 +9,6 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { AuditLog } from '../models/AuditLog.js';
 
 export const getEmployees = asyncHandler(async (req, res, next) => {
-  // Ensure CEO user name in database is updated to Alban Santhosh A
-  try {
-    await User.updateMany(
-      { $or: [{ role: 'CEO' }, { email: 'ceo@enterprise.com' }, { employeeId: 'EMP001' }] },
-      { firstName: 'Alban', lastName: 'Santhosh A' }
-    );
-  } catch (_) {}
-
   const { search, department, role, status, page = 1, limit = 10 } = req.query;
   const query = { isDeleted: false };
 
