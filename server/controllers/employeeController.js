@@ -183,18 +183,34 @@ export const updateEmployee = asyncHandler(async (req, res, next) => {
     return next(new AppError('Employee not found.', 404));
   }
 
-  if (req.body.password) {
-    if (typeof req.body.password === 'string' && req.body.password.trim().length > 0) {
-      req.body.password = await bcrypt.hash(req.body.password, 12);
+  const updateData = { ...req.body };
+
+  // Handle password separately
+  if (updateData.password) {
+    if (typeof updateData.password === 'string' && updateData.password.trim().length > 0) {
+      updateData.password = await bcrypt.hash(updateData.password, 12);
     } else {
-      delete req.body.password;
+      delete updateData.password;
     }
   }
 
-  const updatedEmployee = await User.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true
-  })
+  // Remove empty string ObjectId fields to avoid validation errors
+  if (!updateData.department) delete updateData.department;
+  if (!updateData.designation) delete updateData.designation;
+  if (!updateData.reportingManager) delete updateData.reportingManager;
+
+  // Remove empty required string fields to avoid overwriting with empty string
+  ['firstName', 'lastName', 'email', 'employeeId'].forEach((field) => {
+    if (field in updateData && !updateData[field]?.toString().trim()) {
+      delete updateData[field];
+    }
+  });
+
+  const updatedEmployee = await User.findByIdAndUpdate(
+    req.params.id,
+    { $set: updateData },
+    { new: true, runValidators: true, context: 'query' }
+  )
     .populate('department', 'name code')
     .populate('designation', 'name code')
     .populate('reportingManager', 'firstName lastName email');
