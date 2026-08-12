@@ -388,8 +388,8 @@ export const Dashboard = () => {
                         {!todayAttendance?.lunchOut ? (
                           <>
                             {isBeforeLunchOut ? (
-                              <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 text-[11px] font-bold rounded-xl flex items-center gap-1.5 cursor-not-allowed" title="Unlocks at 1:30 PM">
-                                🔒 1:30 PM
+                              <span className="px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 text-[11px] font-extrabold rounded-xl flex items-center gap-1.5 cursor-not-allowed select-none" title="Unlocks at 1:30 PM">
+                                <span>🕐</span> Lunch Out <span className="text-amber-400 font-medium">· 1:30 PM</span>
                               </span>
                             ) : (
                               <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchOut} variant="checkout">
@@ -397,8 +397,8 @@ export const Dashboard = () => {
                               </UiverseStarButton>
                             )}
                             {isBeforeClockOut ? (
-                              <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 text-[11px] font-bold rounded-xl flex items-center gap-1.5 cursor-not-allowed" title="Unlocks at 6:30 PM">
-                                🔒 6:30 PM
+                              <span className="px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 text-[11px] font-extrabold rounded-xl flex items-center gap-1.5 cursor-not-allowed select-none" title="Unlocks at 6:30 PM">
+                                <span>🕕</span> Check Out <span className="text-amber-400 font-medium">· 6:30 PM</span>
                               </span>
                             ) : (
                               <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
@@ -408,8 +408,8 @@ export const Dashboard = () => {
                           </>
                         ) : !todayAttendance?.lunchIn ? (
                           isBeforeLunchIn ? (
-                            <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 text-[11px] font-bold rounded-xl flex items-center gap-1.5 cursor-not-allowed" title="Unlocks at 2:15 PM">
-                              🔒 2:15 PM
+                            <span className="px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 text-[11px] font-extrabold rounded-xl flex items-center gap-1.5 cursor-not-allowed select-none" title="Unlocks at 2:15 PM">
+                              <span>🕑</span> Lunch In <span className="text-amber-400 font-medium">· 2:15 PM</span>
                             </span>
                           ) : (
                             <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchIn} variant="checkin">
@@ -418,8 +418,8 @@ export const Dashboard = () => {
                           )
                         ) : (
                           isBeforeClockOut ? (
-                            <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 text-[11px] font-bold rounded-xl flex items-center gap-1.5 cursor-not-allowed" title="Unlocks at 6:30 PM">
-                              🔒 6:30 PM
+                            <span className="px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-600 dark:text-amber-400 text-[11px] font-extrabold rounded-xl flex items-center gap-1.5 cursor-not-allowed select-none" title="Unlocks at 6:30 PM">
+                              <span>🕕</span> Check Out <span className="text-amber-400 font-medium">· 6:30 PM</span>
                             </span>
                           ) : (
                             <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
