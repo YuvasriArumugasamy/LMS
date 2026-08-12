@@ -47,6 +47,10 @@ const calculateEuclideanDistance = (desc1, desc2) => {
 };
 
 const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
+  // CEO is exempt from biometric face lock requirements
+  if (user?.role === 'CEO') {
+    return { valid: true, isExempt: true };
+  }
   // If face is not registered, block check-in — face registration is mandatory
   if (!user.isFaceRegistered || !user.faceDescriptor || user.faceDescriptor.length === 0) {
     return {

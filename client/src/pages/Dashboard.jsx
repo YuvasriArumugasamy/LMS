@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { ASSETS } from '../assets';
@@ -140,46 +140,43 @@ export const Dashboard = () => {
     }
   };
 
-  const handleQuickClockIn = () => {
-    setPendingClockAction('clockIn');
-    setIsFaceModalOpen(true);
+  const triggerClockAction = (actionType) => {
+    if (user?.role === 'CEO') {
+      // CEO is exempt from face verification camera requirement
+      setPendingClockAction(actionType);
+      handleFaceVerificationSuccess(null, actionType);
+    } else {
+      setPendingClockAction(actionType);
+      setIsFaceModalOpen(true);
+    }
   };
 
-  const handleQuickClockOut = () => {
-    setPendingClockAction('clockOut');
-    setIsFaceModalOpen(true);
-  };
-
-  const handleQuickLunchOut = () => {
-    setPendingClockAction('lunchOut');
-    setIsFaceModalOpen(true);
-  };
-
-  const handleQuickLunchIn = () => {
-    setPendingClockAction('lunchIn');
-    setIsFaceModalOpen(true);
-  };
+  const handleQuickClockIn = () => triggerClockAction('clockIn');
+  const handleQuickClockOut = () => triggerClockAction('clockOut');
+  const handleQuickLunchOut = () => triggerClockAction('lunchOut');
+  const handleQuickLunchIn = () => triggerClockAction('lunchIn');
 
   const [clockErrorMsg, setClockErrorMsg] = useState('');
 
-  const handleFaceVerificationSuccess = async (faceDescriptor) => {
+  const handleFaceVerificationSuccess = async (faceDescriptor, directAction = null) => {
+    const actionToPerform = directAction || pendingClockAction;
     setActionLoading(true);
     setClockErrorMsg('');
     try {
-      if (pendingClockAction === 'clockIn') {
+      if (actionToPerform === 'clockIn') {
         await api.post('/attendance/clock-in', { workLocation: dashWorkLocation, faceDescriptor });
-      } else if (pendingClockAction === 'clockOut') {
+      } else if (actionToPerform === 'clockOut') {
         await api.post('/attendance/clock-out', { faceDescriptor });
-      } else if (pendingClockAction === 'lunchOut') {
+      } else if (actionToPerform === 'lunchOut') {
         await api.post('/attendance/lunch-out', { faceDescriptor });
-      } else if (pendingClockAction === 'lunchIn') {
+      } else if (actionToPerform === 'lunchIn') {
         await api.post('/attendance/lunch-in', { faceDescriptor });
       }
       setIsFaceModalOpen(false);
       setPendingClockAction(null);
       await fetchDashboard();
     } catch (err) {
-      const msg = err.response?.data?.message || `Failed to ${pendingClockAction?.replace(/([A-Z])/g, ' $1').toLowerCase() || 'complete action'}.`;
+      const msg = err.response?.data?.message || `Failed to ${actionToPerform?.replace(/([A-Z])/g, ' $1').toLowerCase() || 'complete action'}.`;
       setClockErrorMsg(msg);
       setIsFaceModalOpen(false); // close camera modal on error
       setTimeout(() => setClockErrorMsg(''), 6000);
