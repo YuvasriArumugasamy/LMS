@@ -17,11 +17,17 @@ export const getLeaveRequests = asyncHandler(async (req, res, next) => {
   if (req.user.role === 'EMPLOYEE') {
     query.user = req.user._id;
   } else if (req.user.role === 'MANAGER') {
-    // Managers can see their own requests OR requests from employees reporting to them (or all if team unassigned)
+    // Find all employees who have this manager as their reporting manager
     const teamMembers = await User.find({ reportingManager: req.user._id, isDeleted: false }).select('_id');
     const teamIds = teamMembers.map((m) => m._id);
+
+    // Always show: own requests + direct reportees' requests
+    // If no reportees assigned, still show own requests
     if (teamIds.length > 0) {
       query.$or = [{ user: req.user._id }, { user: { $in: teamIds } }];
+    } else {
+      // No direct reportees — show own requests only
+      query.user = req.user._id;
     }
   }
 
