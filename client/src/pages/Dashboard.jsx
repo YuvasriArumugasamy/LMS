@@ -366,11 +366,11 @@ export const Dashboard = () => {
                 {user?.role !== 'CEO' && (
                   <div className="shrink-0 flex justify-center sm:justify-end w-full sm:w-auto">
                     {!todayAttendance?.clockIn ? (
-                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                      <div className="flex items-center justify-center sm:justify-end gap-2 flex-wrap">
                         <select
                           value={dashWorkLocation}
                           onChange={(e) => setDashWorkLocation(e.target.value)}
-                          className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer shadow-xs"
+                          className="px-2 sm:px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer shadow-xs max-w-[130px] sm:max-w-none"
                         >
                           <option value="WFH">🏡 Remote / WFH</option>
                           <option value="IN_OFFICE">🏢 In-Office</option>
