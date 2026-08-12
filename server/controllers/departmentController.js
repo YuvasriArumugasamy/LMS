@@ -38,10 +38,20 @@ export const createDepartment = asyncHandler(async (req, res, next) => {
 });
 
 export const updateDepartment = asyncHandler(async (req, res, next) => {
-  const department = await Department.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true
-  }).populate('departmentHead', 'firstName lastName email');
+  const updateData = { ...req.body };
+
+  // Remove empty required fields to avoid validation errors
+  ['name', 'code'].forEach((field) => {
+    if (field in updateData && !updateData[field]?.toString().trim()) {
+      delete updateData[field];
+    }
+  });
+
+  const department = await Department.findByIdAndUpdate(
+    req.params.id,
+    { $set: updateData },
+    { new: true, runValidators: true, context: 'query' }
+  ).populate('departmentHead', 'firstName lastName email');
 
   if (!department) return next(new AppError('Department not found.', 404));
 

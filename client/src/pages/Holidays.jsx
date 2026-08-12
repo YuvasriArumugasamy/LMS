@@ -3,7 +3,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/Modal';
 import { HolidayDetailsModal } from '../components/HolidayDetailsModal';
-import { CalendarCheck, Plus, Calendar as CalendarIcon, Table as TableIcon, Trash2, ChevronRight } from 'lucide-react';
+import { CalendarCheck, Plus, Calendar as CalendarIcon, Table as TableIcon, Trash2, ChevronRight, AlertTriangle, X } from 'lucide-react';
 
 export const Holidays = () => {
   const { user } = useAuth();
@@ -14,6 +14,9 @@ export const Holidays = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
+  const [holidayToDelete, setHolidayToDelete] = useState(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -49,27 +52,34 @@ export const Holidays = () => {
       await api.post('/holidays', formData);
       setIsCreateModalOpen(false);
       fetchHolidays();
-      setFormData({
-        name: '',
-        date: '',
-        type: 'NATIONAL',
-        description: '',
-        branch: 'All Branches'
-      });
+      setFormData({ name: '', date: '', type: 'NATIONAL', description: '', branch: 'All Branches' });
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to add holiday');
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this holiday? This cannot be undone.')) return;
+  const handleDeleteClick = (id) => {
+    setHolidayToDelete(id);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!holidayToDelete) return;
+    setDeleteLoading(true);
     try {
-      await api.delete(`/holidays/${id}`);
+      await api.delete(`/holidays/${holidayToDelete}`);
+      setIsDeleteConfirmOpen(false);
+      setHolidayToDelete(null);
       fetchHolidays();
     } catch (err) {
       alert('Failed to delete holiday.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
+
+  // Keep old handleDelete for HolidayDetailsModal compatibility
+  const handleDelete = handleDeleteClick;
 
   return (
     <div className="space-y-6">
@@ -267,6 +277,37 @@ export const Holidays = () => {
             <button type="submit" className="px-5 py-2 text-xs font-bold text-white bg-primary rounded-xl shadow-lg shadow-primary/25">Save</button>
           </div>
         </form>
+      </Modal>
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={isDeleteConfirmOpen} onClose={() => !deleteLoading && setIsDeleteConfirmOpen(false)} maxWidth="max-w-sm">
+        <div className="space-y-4 text-center">
+          <div className="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-950/40 flex items-center justify-center mx-auto">
+            <AlertTriangle className="w-7 h-7 text-rose-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">Delete Holiday?</h3>
+            <p className="text-sm text-slate-500 mt-1">This action cannot be undone.</p>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              disabled={deleteLoading}
+              onClick={() => setIsDeleteConfirmOpen(false)}
+              className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all hover:bg-slate-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={deleteLoading}
+              onClick={handleConfirmDelete}
+              className="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              {deleteLoading ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
