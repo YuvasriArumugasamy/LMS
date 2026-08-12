@@ -110,10 +110,10 @@ export const Reports = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+      <div className="glass-card p-4 flex flex-col sm:flex-row items-center justify-between gap-3 overflow-hidden max-w-full">
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto min-w-0">
           {/* Interactive Calendar Button with Overlay Date Input so picker opens right at the button */}
-          <div className="relative inline-flex items-center">
+          <div className="relative inline-flex items-center shrink-0">
             <button
               type="button"
               className="p-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-200 dark:border-slate-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shrink-0 shadow-2xs"
@@ -137,7 +137,7 @@ export const Reports = () => {
               setYear(Number(e.target.value));
               setSelectedCustomDate('');
             }}
-            className="w-full sm:w-auto px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500 shadow-2xs"
+            className="w-auto px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500 shadow-2xs shrink-0"
           >
             {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((yr) => (
               <option key={yr} value={yr}>Year {yr}</option>
@@ -145,12 +145,12 @@ export const Reports = () => {
           </select>
 
           {selectedCustomDate && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[10px] font-black shadow-2xs">
-              <span>{selectedCustomDate}</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-extrabold shadow-2xs shrink-0 max-w-full overflow-hidden">
+              <span className="truncate">{selectedCustomDate}</span>
               <button
                 type="button"
                 onClick={() => setSelectedCustomDate('')}
-                className="hover:opacity-75 ml-1 text-xs font-bold"
+                className="hover:opacity-75 ml-1 text-xs font-black shrink-0"
                 title="Clear date filter"
               >
                 ×
@@ -159,7 +159,7 @@ export const Reports = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0 min-w-0">
           <Filter className="w-4 h-4 text-slate-400 shrink-0" />
           <select
             value={status}
