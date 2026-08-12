@@ -22,8 +22,8 @@ import api from '../services/api';
 export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingReport }) => {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
-  const [projectTitle, setProjectTitle] = useState('Attendance Project');
-  const [moduleName, setModuleName] = useState('Employee Management');
+  const [projectTitle, setProjectTitle] = useState('');
+  const [moduleName, setModuleName] = useState('');
   const [workStatus, setWorkStatus] = useState('IN_PROGRESS'); // IN_PROGRESS | PENDING | COMPLETED
   const [tasksCompleted, setTasksCompleted] = useState('');
   const [pendingTasks, setPendingTasks] = useState('');
@@ -36,8 +36,8 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
     if (isOpen) {
       if (existingReport) {
         setTitle(existingReport.title || '');
-        setProjectTitle(existingReport.projectTitle || 'Attendance Project');
-        setModuleName(existingReport.moduleName || 'Employee Management');
+        setProjectTitle(existingReport.projectTitle || '');
+        setModuleName(existingReport.moduleName || '');
         setWorkStatus(existingReport.workStatus || 'IN_PROGRESS');
         setTasksCompleted(existingReport.tasksCompleted || '');
         setPendingTasks(existingReport.pendingTasks || '');
@@ -45,8 +45,8 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
         setHoursWorked(existingReport.hoursWorked || 8);
       } else {
         setTitle('');
-        setProjectTitle('Attendance Project');
-        setModuleName('Employee Management');
+        setProjectTitle('');
+        setModuleName('');
         setWorkStatus('IN_PROGRESS');
         setTasksCompleted('');
         setPendingTasks('');
@@ -68,8 +68,8 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
 
     const payload = {
       title: title.trim(),
-      projectTitle: projectTitle.trim() || 'Attendance Project',
-      moduleName: moduleName.trim() || 'General',
+      projectTitle: projectTitle.trim() || '',
+      moduleName: moduleName.trim() || '',
       workStatus,
       tasksCompleted: tasksCompleted.trim(),
       pendingTasks: pendingTasks.trim(),
