@@ -57,11 +57,16 @@ export const EmployeeDetailsModal = ({
     }
   }, [employee, isOpen]);
 
-  // Load managers list when editing starts
+  // Load all potential managers (MANAGER role) when modal opens
   useEffect(() => {
     if (isOpen) {
-      api.get('/employees?role=MANAGER&limit=100&status=ACTIVE')
-        .then((res) => setManagers(res.data?.data?.employees || []))
+      api.get('/employees?limit=200&status=ACTIVE')
+        .then((res) => {
+          const all = res.data?.data?.employees || [];
+          // Show anyone who can be a reporting manager: MANAGER, HR, SUPER_ADMIN, CEO
+          const mgrs = all.filter((e) => ['MANAGER', 'HR', 'SUPER_ADMIN', 'CEO'].includes(e.role));
+          setManagers(mgrs);
+        })
         .catch(() => setManagers([]));
     }
   }, [isOpen]);
