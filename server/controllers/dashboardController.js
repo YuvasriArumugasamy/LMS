@@ -90,13 +90,16 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
     const teamMembers = await User.find({ reportingManager: userId, isDeleted: false }).select('_id');
     const teamIds = teamMembers.map((m) => m._id);
 
+    // Edge case: if no team members, return empty stats
+    const teamQuery = teamIds.length > 0 ? { user: { $in: teamIds } } : { user: { $in: [userId] } };
+
     const [teamCount, pendingRequests, approvedRequests, teamOnLeaveToday, monthlyTrend] = await Promise.all([
       Promise.resolve(teamIds.length),
-      LeaveRequest.countDocuments({ user: { $in: teamIds }, status: 'PENDING', isDeleted: false }),
-      LeaveRequest.countDocuments({ user: { $in: teamIds }, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, isDeleted: false }),
-      LeaveRequest.find({ user: { $in: teamIds }, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
+      LeaveRequest.countDocuments({ ...teamQuery, status: 'PENDING', isDeleted: false }),
+      LeaveRequest.countDocuments({ ...teamQuery, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, isDeleted: false }),
+      LeaveRequest.find({ ...teamQuery, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
         .populate('user', 'firstName lastName profileImage designation'),
-      buildMonthlyTrend({ user: { $in: teamIds } })
+      teamIds.length > 0 ? buildMonthlyTrend({ user: { $in: teamIds } }) : buildMonthlyTrend({ user: userId })
     ]);
 
     res.status(200).json({

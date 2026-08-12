@@ -346,11 +346,15 @@ export const Employees = () => {
                       </div>
                     </div>
 
-                    {/* Status Badge with Green Dot */}
+                    {/* Status Badge with Green/Red Dot based on actual status */}
                     <div className="shrink-0">
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300 font-extrabold text-[11px] inline-flex items-center gap-1.5 shadow-2xs border border-emerald-100 dark:border-emerald-900/30">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Active
+                      <span className={`px-2.5 py-1 rounded-full font-extrabold text-[11px] inline-flex items-center gap-1.5 shadow-2xs border ${
+                        emp.status === 'ACTIVE'
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-100 dark:border-emerald-900/30'
+                          : 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-100 dark:border-rose-900/30'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${emp.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
+                        {emp.status === 'ACTIVE' ? 'Active' : emp.status === 'INACTIVE' ? 'Inactive' : 'Suspended'}
                       </span>
                     </div>
                   </div>
@@ -429,9 +433,13 @@ export const Employees = () => {
 
                     {/* Status Badge right-aligned on mobile only */}
                     <div className="md:hidden shrink-0">
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300 font-extrabold text-[11px] inline-flex items-center gap-1.5 shadow-2xs border border-emerald-100 dark:border-emerald-900/30">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Active
+                      <span className={`px-2.5 py-1 rounded-full font-extrabold text-[11px] inline-flex items-center gap-1.5 shadow-2xs border ${
+                        emp.status === 'ACTIVE'
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-100 dark:border-emerald-900/30'
+                          : 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-100 dark:border-rose-900/30'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${emp.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
+                        {emp.status === 'ACTIVE' ? 'Active' : emp.status === 'INACTIVE' ? 'Inactive' : 'Suspended'}
                       </span>
                     </div>
                   </div>
@@ -450,9 +458,13 @@ export const Employees = () => {
                   {/* Status Badge & Action Button Column */}
                   <div className="flex items-center justify-between md:justify-end gap-4 md:col-span-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
                     <div className="hidden md:block">
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300 font-extrabold text-[11px] inline-flex items-center gap-1.5 shadow-2xs border border-emerald-100 dark:border-emerald-900/30">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Active
+                      <span className={`px-2.5 py-1 rounded-full font-extrabold text-[11px] inline-flex items-center gap-1.5 shadow-2xs border ${
+                        emp.status === 'ACTIVE'
+                          ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-100 dark:border-emerald-900/30'
+                          : 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-100 dark:border-rose-900/30'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${emp.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
+                        {emp.status === 'ACTIVE' ? 'Active' : emp.status === 'INACTIVE' ? 'Inactive' : 'Suspended'}
                       </span>
                     </div>
 

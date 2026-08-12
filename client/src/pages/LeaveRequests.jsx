@@ -134,6 +134,15 @@ export const LeaveRequests = () => {
         </button>
 
         <button
+          onClick={() => setStatusFilter('TEAM_LEAD_APPROVED')}
+          className={`px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all text-center ${
+            statusFilter === 'TEAM_LEAD_APPROVED' ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          TL Approved
+        </button>
+
+        <button
           onClick={() => setStatusFilter('ESCALATED_TO_HR')}
           className={`px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all text-center ${
             statusFilter === 'ESCALATED_TO_HR' ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
