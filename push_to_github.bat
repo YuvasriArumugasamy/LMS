@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "fix(ceo): force update CEO name to Alban Santhosh A on API fetch"
+git commit -m "style(ui): redesign floating quick actions menu with vertical alignment and text labels"
 git push -u origin main
 echo Completed Git Push!
 pause
