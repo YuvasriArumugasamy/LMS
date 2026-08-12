@@ -28,6 +28,18 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
   const role = user?.role || 'EMPLOYEE';
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Fix 12: Proper role display labels
+  const getRoleLabel = (r) => {
+    const labels = {
+      CEO: 'CEO',
+      ADMIN: 'Admin',
+      HR: 'HR',
+      TEAM_LEAD: 'Team Lead',
+      EMPLOYEE: 'Employee'
+    };
+    return labels[r] || r?.replace('_', ' ') || 'Employee';
+  };
+
   useEffect(() => {
     let isMounted = true;
     const fetchUnread = async () => {
@@ -45,7 +57,7 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
       }
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 15000);
+    const interval = setInterval(fetchUnread, 30000);
     return () => {
       isMounted = false;
       clearInterval(interval);
@@ -215,7 +227,7 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="inline-block px-1.5 py-0.5 text-[9px] font-black rounded-md bg-blue-600/10 text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                  {user?.designation?.name || (role === 'ADMIN' ? 'Administrator' : role === 'EMPLOYEE' ? 'Developer' : role?.replace('_', ' '))}
+                  {user?.designation?.name || getRoleLabel(role)}
                 </span>
               </div>
             </div>

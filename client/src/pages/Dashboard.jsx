@@ -358,7 +358,7 @@ export const Dashboard = () => {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-wrap">
                 <div className="flex items-center justify-center sm:justify-start gap-2">
                   <span className="px-3 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
-                    {user?.role?.replace('_', ' ')}
+                    {user?.role === 'TEAM_LEAD' ? 'Team Lead' : user?.role === 'ADMIN' ? 'Admin' : user?.role?.replace('_', ' ')}
                   </span>
                 </div>
 
