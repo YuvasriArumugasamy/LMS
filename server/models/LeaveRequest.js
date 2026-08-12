@@ -55,19 +55,6 @@ const leaveRequestSchema = new mongoose.Schema(
     ],
     status: {
       type: String,
-      enum: [
-        'PENDING',
-        'TEAM_LEAD_APPROVED',
-        'TEAM_LEAD_REJECTED',
-        'ESCALATED_TO_HR',
-        'HR_APPROVED',
-        'HR_REJECTED',
-        'ADMIN_APPROVED',
-        'ADMIN_REJECTED',
-        'CEO_APPROVED',
-        'CEO_REJECTED',
-        'CANCELLED'
-      ],
       default: 'PENDING',
       index: true
     },
@@ -84,26 +71,10 @@ const leaveRequestSchema = new mongoose.Schema(
           ref: 'User'
         },
         reviewerRole: {
-          type: String,
-          enum: ['EMPLOYEE', 'TEAM_LEAD', 'MANAGER', 'HR', 'ADMIN', 'SUPER_ADMIN', 'CEO', 'SYSTEM']
+          type: String
         },
         action: {
-          type: String,
-          enum: [
-            'APPLIED',
-            'TEAM_LEAD_APPROVE',
-            'TEAM_LEAD_REJECT',
-            'MANAGER_APPROVE',
-            'MANAGER_REJECT',
-            'ESCALATED',
-            'HR_APPROVE',
-            'HR_REJECT',
-            'ADMIN_APPROVE',
-            'ADMIN_REJECT',
-            'CEO_APPROVE',
-            'CEO_REJECT',
-            'CANCELLED'
-          ]
+          type: String
         },
         comments: String,
         timestamp: {
