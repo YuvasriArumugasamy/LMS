@@ -39,7 +39,7 @@ const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
   }
   // Compare submitted face against registered face descriptor
   const distance = calculateEuclideanDistance(user.faceDescriptor, submittedDescriptor);
-  if (distance > 0.55) {
+  if (distance > 0.60) {
     return { valid: false, message: 'Face verification failed! Face does not match the registered profile. Please use your own registered face.' };
   }
   return { valid: true, distance };

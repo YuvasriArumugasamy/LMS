@@ -18,6 +18,7 @@ const loadFaceModels = async () => {
   const MODEL_URL = '/models';
   await Promise.all([
     faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+    faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL).catch((err) => console.warn('SSD Mobilenet model load notice:', err)),
     faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
     faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
   ]);
@@ -101,18 +102,29 @@ export const FaceCameraModal = ({
     detectionIntervalRef.current = setInterval(async () => {
       if (!videoRef.current || videoRef.current.readyState < 2) return;
       try {
-        const detection = await faceapi.detectSingleFace(
+        // Fast detection with low threshold for responsive real-time indicator
+        let detection = await faceapi.detectSingleFace(
           videoRef.current,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.2 })
         );
-        setFaceDetected(!!detection);
-        if (detection) {
-          setStatusMsg('Face detected — click Capture');
+        
+        // Fallback to SSD Mobilenet if Tiny Detector did not find a face
+        if (!detection && faceapi.nets.ssdMobilenetv1.isLoaded) {
+          detection = await faceapi.detectSingleFace(
+            videoRef.current,
+            new faceapi.SsdMobilenetv1Options({ minConfidence: 0.25 })
+          );
+        }
+
+        const hasFace = !!detection;
+        setFaceDetected(hasFace);
+        if (hasFace) {
+          setStatusMsg('Face detected ✓ — click Capture');
         } else {
           setStatusMsg('Align your face inside the frame');
         }
       } catch (_) {}
-    }, 400);
+    }, 350);
   };
 
   const cleanup = () => {
@@ -128,7 +140,7 @@ export const FaceCameraModal = ({
 
   const handleCaptureFace = async () => {
     if (!videoRef.current || !canvasRef.current) return;
-    if (status !== 'scanning' && status !== 'face_detected') return;
+    if (status === 'processing') return;
 
     setStatus('processing');
     setStatusMsg('Extracting face descriptor...');
@@ -140,22 +152,40 @@ export const FaceCameraModal = ({
         detectionIntervalRef.current = null;
       }
 
-      // Draw current frame
+      // Draw current frame to hidden canvas
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth || 640;
       canvas.height = video.videoHeight || 480;
-      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Run full detection: detect face + landmarks + 128-d descriptor
-      const detection = await faceapi
-        .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+      // Multi-pass face detection for maximum detection accuracy & robustness
+      // Pass 1: TinyFaceDetector (inputSize 416, threshold 0.2)
+      let detection = await faceapi
+        .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.2 }))
         .withFaceLandmarks()
         .withFaceDescriptor();
 
+      // Pass 2: SSD Mobilenet v1 fallback
+      if (!detection && faceapi.nets.ssdMobilenetv1.isLoaded) {
+        detection = await faceapi
+          .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.2 }))
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+      }
+
+      // Pass 3: Ultra-sensitive TinyFaceDetector fallback (threshold 0.15)
+      if (!detection) {
+        detection = await faceapi
+          .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.15 }))
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+      }
+
       if (!detection) {
         setStatus('scanning');
-        setStatusMsg('No face detected. Please try again.');
+        setStatusMsg('No face detected clearly. Please align your face and try again.');
         setFaceDetected(false);
         startFaceDetectionLoop();
         return;
@@ -166,7 +196,7 @@ export const FaceCameraModal = ({
       setComputedDescriptor(descriptorArray);
       setCapturedPreview(canvas.toDataURL('image/jpeg', 0.85));
       setStatus('captured');
-      setStatusMsg('Face captured successfully');
+      setStatusMsg('Face captured successfully ✓');
     } catch (err) {
       console.error('Face capture error:', err);
       setStatus('scanning');
@@ -335,11 +365,15 @@ export const FaceCameraModal = ({
               <button
                 type="button"
                 onClick={handleCaptureFace}
-                disabled={isLoading || !!cameraError || !faceDetected}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-lg shadow-blue-500/25 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                disabled={isLoading || !!cameraError}
+                className={`px-6 py-2.5 rounded-xl text-white font-extrabold text-xs shadow-lg flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 ${
+                  faceDetected
+                    ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 shadow-emerald-500/25'
+                    : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 shadow-blue-500/25'
+                }`}
               >
                 <Camera className="w-4 h-4 stroke-[2.5]" />
-                {isLoading ? 'Initializing...' : faceDetected ? 'Capture Face' : 'Waiting for Face...'}
+                {isLoading ? 'Initializing...' : faceDetected ? 'Capture Face ✓' : 'Capture Face'}
               </button>
             </>
           )}
@@ -348,3 +382,4 @@ export const FaceCameraModal = ({
     </Modal>
   );
 };
+
