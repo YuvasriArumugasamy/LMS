@@ -156,27 +156,24 @@ export const Attendance = () => {
       }
     }
 
-    if (u.role === 'TEAM_LEAD') return 'Team Lead (TL)';
-    if (u.role === 'HR') return 'HR Manager';
-    if (u.role === 'ADMIN') return 'System Admin';
+    if (u.role === 'TEAM_LEAD') return 'Team Lead';
+    if (u.role === 'HR') return 'HR';
+    if (u.role === 'ADMIN') return 'Admin';
 
     return 'Employee Member';
-  };
-
-  const getEmpId = (u) => {
-    if (u && typeof u === 'object' && u.employeeId) return u.employeeId;
-    return 'EMP-1001';
   };
 
   const getEmpDept = (u) => {
     if (u && typeof u === 'object') {
       if (u.department?.name) return u.department.name;
       if (typeof u.department === 'string' && u.department) return u.department;
-      if (u.role === 'ADMIN') return 'Executive Board';
-      if (u.role === 'HR') return 'Human Resources';
-      if (u.role === 'TEAM_LEAD') return 'Operations & Tech';
     }
-    return 'Engineering Department';
+    return '—';
+  };
+
+  const getEmpId = (u) => {
+    if (u && typeof u === 'object' && u.employeeId) return u.employeeId;
+    return '—';
   };
 
   const formatWorkDuration = (log) => {

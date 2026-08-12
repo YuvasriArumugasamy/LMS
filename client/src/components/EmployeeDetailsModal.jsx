@@ -430,9 +430,9 @@ export const EmployeeDetailsModal = ({
                   className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 >
                   <option value="EMPLOYEE">Employee</option>
-                  <option value="TEAM_LEAD">Manager</option>
-                  <option value="HR">HR Manager</option>
-                  <option value="ADMIN">Super Admin</option>
+                  <option value="TEAM_LEAD">Team Lead</option>
+                  <option value="HR">HR</option>
+                  <option value="ADMIN">Admin</option>
                 </select>
               </div>
 

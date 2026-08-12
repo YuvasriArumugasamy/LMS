@@ -174,7 +174,9 @@ export const AuditLogs = () => {
                     <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors text-xs sm:text-sm md:text-base truncate">
                       {log.userName || 'System Engine'}
                     </h3>
-                    <p className="text-[10px] text-slate-400 font-mono font-semibold uppercase">{log.userRole || 'SYSTEM'}</p>
+                    <p className="text-[10px] text-slate-400 font-mono font-semibold uppercase">
+                      {log.userRole === 'TEAM_LEAD' ? 'Team Lead' : log.userRole === 'ADMIN' ? 'Admin' : log.userRole || 'SYSTEM'}
+                    </p>
                   </div>
                 </div>
                 <div className="md:hidden shrink-0">

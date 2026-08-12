@@ -50,7 +50,7 @@ export const Settings = () => {
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">System & Company Settings</h1>
-        <p className="text-xs sm:text-sm text-slate-500 font-medium">Configure corporate policies, emergency escalation timers, and SMTP email rules</p>
+        <p className="text-xs sm:text-sm text-slate-500 font-medium">Configure corporate policies and emergency escalation timers</p>
       </div>
 
       {saved && (
