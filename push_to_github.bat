@@ -10,7 +10,7 @@ git rm -r --cached client/node_modules 2>nul
 git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 git add .
-git commit -m "style(ui): restore original compact radial arc speed dial design"
+git commit -m "fix(ui): fix MobileBottomNav syntax error and restore compact radial arc speed dial"
 git push -u origin main
 echo Completed Git Push!
 pause
