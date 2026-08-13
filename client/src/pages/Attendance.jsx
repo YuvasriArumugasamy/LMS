@@ -113,6 +113,8 @@ export const Attendance = () => {
   const [modalPage, setModalPage] = useState(1);
   const [selectedDetailLog, setSelectedDetailLog] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportMonth, setReportMonth] = useState(new Date().getMonth()); // 0=Jan
+  const [reportYear, setReportYear] = useState(new Date().getFullYear());
 
   const itemsPerPage = 7;
   const modalTopRef = useRef(null);
@@ -416,20 +418,43 @@ export const Attendance = () => {
   };
 
   // ===== EXCEL REPORT FUNCTIONS =====
+  // Get month-filtered stats for a single employee group
+  const getMonthFilteredStats = (emp) => {
+    const filtered = (emp.logs || []).filter(log => {
+      const d = new Date(log.clockIn || log.date);
+      return d.getMonth() === reportMonth && d.getFullYear() === reportYear;
+    });
+    const stats = { totalDays: filtered.length, presentCount: 0, wfhCount: 0, lateCount: 0, halfDayCount: 0, absentCount: 0 };
+    filtered.forEach(log => {
+      if (log.workLocation === 'WFH') stats.wfhCount++;
+      if (log.status === 'LATE') { stats.lateCount++; stats.presentCount++; }
+      else if (log.status === 'HALF_DAY') { stats.halfDayCount++; stats.presentCount++; }
+      else if (log.status === 'ABSENT') { stats.absentCount++; }
+      else { stats.presentCount++; }
+    });
+    return stats;
+  };
+
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
   const handleDownloadExcel = () => {
-    const headers = ['#', 'Employee Name', 'Employee ID', 'Department', 'Total Days', 'Present Days', 'WFH Days', 'Late Check-ins', 'Half Days', 'Absent Days'];
-    const rows = filteredEmployeeGroupList.map((emp, idx) => [
-      idx + 1,
-      getEmpDisplayName(emp.user),
-      getEmpId(emp.user),
-      getEmpDept(emp.user),
-      emp.totalDays,
-      emp.presentCount,
-      emp.wfhCount,
-      emp.lateCount,
-      emp.halfDayCount,
-      emp.absentCount
-    ]);
+    const headers = ['#', 'Employee Name', 'Employee ID', 'Department', 'Month', 'Total Days', 'Present Days', 'WFH Days', 'Late Check-ins', 'Half Days', 'Absent Days'];
+    const rows = filteredEmployeeGroupList.map((emp, idx) => {
+      const s = getMonthFilteredStats(emp);
+      return [
+        idx + 1,
+        getEmpDisplayName(emp.user),
+        getEmpId(emp.user),
+        getEmpDept(emp.user),
+        `${MONTH_NAMES[reportMonth]} ${reportYear}`,
+        s.totalDays,
+        s.presentCount,
+        s.wfhCount,
+        s.lateCount,
+        s.halfDayCount,
+        s.absentCount
+      ];
+    });
 
     // Build CSV content with BOM for Excel to read UTF-8 properly
     const bom = '\uFEFF';
@@ -443,7 +468,7 @@ export const Attendance = () => {
     link.href = url;
     const today = new Date().toISOString().split('T')[0];
     const filterLabel = statusFilter ? `_${statusFilter}` : '_All';
-    link.download = `Attendance_Report${filterLabel}_${today}.csv`;
+    link.download = `Attendance_Report_${MONTH_NAMES[reportMonth]}_${reportYear}${filterLabel}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1457,12 +1482,32 @@ export const Attendance = () => {
                   </h2>
                   <p className="text-[11px] text-slate-400 font-medium mt-0.5">
                     {filteredEmployeeGroupList.length} employee{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
-                    {statusFilter ? ` · Filter: ${statusFilter}` : ' · All Statuses'}
-                    {' '}· Generated on {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {' '}· {MONTH_NAMES[reportMonth]} {reportYear}
+                    {statusFilter ? ` · ${statusFilter}` : ' · All Statuses'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap justify-end">
+                {/* Month Filter */}
+                <select
+                  value={reportMonth}
+                  onChange={e => setReportMonth(Number(e.target.value))}
+                  className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
+                >
+                  {MONTH_NAMES.map((m, i) => (
+                    <option key={i} value={i}>{m}</option>
+                  ))}
+                </select>
+                {/* Year Filter */}
+                <select
+                  value={reportYear}
+                  onChange={e => setReportYear(Number(e.target.value))}
+                  className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
+                >
+                  {[reportYear - 1, reportYear, reportYear + 1].map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
                 <button onClick={handleDownloadExcel} className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-md shadow-emerald-500/25 hover:scale-105">
                   <Download className="w-3.5 h-3.5" /> Download Excel
                 </button>
@@ -1471,20 +1516,23 @@ export const Attendance = () => {
                 </button>
               </div>
             </div>
-            {/* Summary Stats Bar */}
+            {/* Summary Stats Bar - Month Filtered */}
             <div className="flex items-center gap-4 px-5 py-3 bg-slate-50/80 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800 shrink-0 overflow-x-auto">
-              {[
-                { label: 'Employees', value: filteredEmployeeGroupList.length, color: 'text-indigo-600 dark:text-indigo-400' },
-                { label: 'Total Present', value: filteredEmployeeGroupList.reduce((s, e) => s + e.presentCount, 0), color: 'text-emerald-600 dark:text-emerald-400' },
-                { label: 'Total WFH', value: filteredEmployeeGroupList.reduce((s, e) => s + e.wfhCount, 0), color: 'text-purple-600 dark:text-purple-400' },
-                { label: 'Total Late', value: filteredEmployeeGroupList.reduce((s, e) => s + e.lateCount, 0), color: 'text-amber-600 dark:text-amber-400' },
-                { label: 'Total Absent', value: filteredEmployeeGroupList.reduce((s, e) => s + e.absentCount, 0), color: 'text-rose-600 dark:text-rose-400' },
-              ].map((stat, i) => (
-                <div key={i} className="flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap">{stat.label}</span>
-                  <span className={`text-base font-black ${stat.color}`}>{stat.value}</span>
-                </div>
-              ))}
+              {(() => {
+                const allStats = filteredEmployeeGroupList.map(e => getMonthFilteredStats(e));
+                return [
+                  { label: 'Employees', value: filteredEmployeeGroupList.length, color: 'text-indigo-600 dark:text-indigo-400' },
+                  { label: 'Total Present', value: allStats.reduce((s, e) => s + e.presentCount, 0), color: 'text-emerald-600 dark:text-emerald-400' },
+                  { label: 'Total WFH', value: allStats.reduce((s, e) => s + e.wfhCount, 0), color: 'text-purple-600 dark:text-purple-400' },
+                  { label: 'Total Late', value: allStats.reduce((s, e) => s + e.lateCount, 0), color: 'text-amber-600 dark:text-amber-400' },
+                  { label: 'Total Absent', value: allStats.reduce((s, e) => s + e.absentCount, 0), color: 'text-rose-600 dark:text-rose-400' },
+                ].map((stat, i) => (
+                  <div key={i} className="flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap">{stat.label}</span>
+                    <span className={`text-base font-black ${stat.color}`}>{stat.value}</span>
+                  </div>
+                ));
+              })()}
             </div>
             {/* Excel-like Table */}
             <div className="overflow-auto flex-1">
@@ -1500,20 +1548,23 @@ export const Attendance = () => {
                   {filteredEmployeeGroupList.length === 0 ? (
                     <tr><td colSpan={10} className="py-16 text-center text-slate-400 font-semibold text-sm">No attendance data found.</td></tr>
                   ) : (
-                    filteredEmployeeGroupList.map((emp, idx) => (
+                    filteredEmployeeGroupList.map((emp, idx) => {
+                      const s = getMonthFilteredStats(emp);
+                      return (
                       <tr key={emp.empId} className={`border-b border-slate-100 dark:border-slate-800 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/20 transition-colors ${idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-900/60'}`}>
                         <td className="px-3 py-2.5 font-bold text-slate-400 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">{idx + 1}</td>
                         <td className="px-3 py-2.5 font-extrabold text-slate-900 dark:text-white border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">{getEmpDisplayName(emp.user)}</td>
                         <td className="px-3 py-2.5 font-bold text-indigo-600 dark:text-indigo-400 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap font-mono">{getEmpId(emp.user)}</td>
                         <td className="px-3 py-2.5 font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">{getEmpDept(emp.user)}</td>
-                        <td className="px-3 py-2.5 font-black text-slate-900 dark:text-white border-r border-slate-100 dark:border-slate-800 text-center whitespace-nowrap">{emp.totalDays}</td>
-                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-black">{emp.presentCount}</span></td>
-                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 font-black">{emp.wfhCount}</span></td>
-                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className={`px-2 py-0.5 rounded-md font-black ${emp.lateCount > 0 ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'text-slate-400'}`}>{emp.lateCount}</span></td>
-                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className={`px-2 py-0.5 rounded-md font-black ${emp.halfDayCount > 0 ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400' : 'text-slate-400'}`}>{emp.halfDayCount}</span></td>
-                        <td className="px-3 py-2.5 font-black text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded-md font-black ${emp.absentCount > 0 ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400' : 'text-slate-400'}`}>{emp.absentCount}</span></td>
+                        <td className="px-3 py-2.5 font-black text-slate-900 dark:text-white border-r border-slate-100 dark:border-slate-800 text-center whitespace-nowrap">{s.totalDays}</td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-black">{s.presentCount}</span></td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 font-black">{s.wfhCount}</span></td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className={`px-2 py-0.5 rounded-md font-black ${s.lateCount > 0 ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'text-slate-400'}`}>{s.lateCount}</span></td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className={`px-2 py-0.5 rounded-md font-black ${s.halfDayCount > 0 ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400' : 'text-slate-400'}`}>{s.halfDayCount}</span></td>
+                        <td className="px-3 py-2.5 font-black text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded-md font-black ${s.absentCount > 0 ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400' : 'text-slate-400'}`}>{s.absentCount}</span></td>
                       </tr>
-                    ))
+                      );
+                    })
                   )}
                 </tbody>
               </table>
