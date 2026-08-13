@@ -256,8 +256,11 @@ export const getAttendanceLogs = asyncHandler(async (req, res, next) => {
   const currentYear = Number(year) || new Date().getFullYear();
   const currentMonth = Number(month) || new Date().getMonth() + 1;
 
-  const startDate = new Date(currentYear, currentMonth - 1, 1);
-  const endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
+  // Build IST-aware month start and end dates
+  const monthStr = String(currentMonth).padStart(2, '0');
+  const lastDay = new Date(currentYear, currentMonth, 0).getDate();
+  const startDate = new Date(`${currentYear}-${monthStr}-01T00:00:00.000+05:30`);
+  const endDate = new Date(`${currentYear}-${monthStr}-${String(lastDay).padStart(2, '0')}T23:59:59.999+05:30`);
 
   let query = {
     date: { $gte: startDate, $lte: endDate }

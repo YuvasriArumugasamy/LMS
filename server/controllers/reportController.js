@@ -18,8 +18,17 @@ export const getLeaveReports = asyncHandler(async (req, res, next) => {
   }
   if (leaveType) matchQuery.leaveType = leaveType;
 
-  const startDate = month ? new Date(year, month - 1, 1) : new Date(year, 0, 1);
-  const endDate = month ? new Date(year, month, 0, 23, 59, 59) : new Date(year, 11, 31, 23, 59, 59);
+  // IST-aware date range for accurate Indian timezone filtering
+  let startDate, endDate;
+  if (month) {
+    const monthStr = String(month).padStart(2, '0');
+    const lastDay = new Date(year, month, 0).getDate();
+    startDate = new Date(`${year}-${monthStr}-01T00:00:00.000+05:30`);
+    endDate = new Date(`${year}-${monthStr}-${String(lastDay).padStart(2, '0')}T23:59:59.999+05:30`);
+  } else {
+    startDate = new Date(`${year}-01-01T00:00:00.000+05:30`);
+    endDate = new Date(`${year}-12-31T23:59:59.999+05:30`);
+  }
 
   matchQuery.fromDate = { $gte: startDate, $lte: endDate };
 
