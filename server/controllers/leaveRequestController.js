@@ -1,4 +1,4 @@
-﻿import { LeaveRequest } from '../models/LeaveRequest.js';
+import { LeaveRequest } from '../models/LeaveRequest.js';
 import { LeaveBalance } from '../models/LeaveBalance.js';
 import { LeaveType } from '../models/LeaveType.js';
 import { User } from '../models/User.js';
@@ -337,19 +337,7 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
         reviewer: req.user._id,
         reviewerRole: reviewerRole,
         action: 'ADMIN_APPROVE',
-        comments: comments || 'Approved by Admin. Pending CEO final confirmation.',
-        timestamp: now
-      });
-    } else if (leave.status === 'ADMIN_APPROVED') {
-      if (reviewerRole !== 'CEO') {
-        return next(new AppError('Employee leave request requires CEO final approval.', 403));
-      }
-      leave.status = 'CEO_APPROVED';
-      leave.approvalFlow.push({
-        reviewer: req.user._id,
-        reviewerRole: 'CEO',
-        action: 'CEO_APPROVE',
-        comments: comments || 'Final executive approval granted by CEO.',
+        comments: comments || 'Approved by Admin.',
         timestamp: now
       });
     }
@@ -457,8 +445,10 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
     });
   }
 
-  // Deduct from Pending and add to Used ONLY when leave reaches final CEO_APPROVED status
-  if (leave.status === 'CEO_APPROVED') {
+  // Deduct from Pending and add to Used ONLY when leave reaches final approved status
+  const isFinalApproval = (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || (applicantRole !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
+
+  if (isFinalApproval) {
     const currentYear = new Date(leave.fromDate).getFullYear();
     const balance = await LeaveBalance.findOne({ user: leave.user._id, year: currentYear });
     if (balance) {
@@ -474,7 +464,7 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
   await leave.save();
 
   // Notify Employee / Applicant
-  const approveTitle = leave.status === 'CEO_APPROVED' ? 'Leave Request Final Approved by CEO ✅' : `Leave Request Status Updated: ${leave.status.replace('_', ' ')}`;
+  const approveTitle = isFinalApproval ? `Leave Request Final Approved ✅` : `Leave Request Status Updated: ${leave.status.replace('_', ' ')}`;
   const approveMsg = `Your leave request for ${leave.daysCount} day(s) has been updated to ${leave.status.replace('_', ' ')}.`;
   const applicantId = leave.user?._id || leave.user;
   if (applicantId) {
@@ -489,7 +479,11 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
   }
 
   // Level 1 -> Level 2 Notification Dispatch: Notify CEO if Level 1 approval was done and CEO final approval is pending
-  if (leave.status === 'ADMIN_APPROVED' || leave.status === 'HR_APPROVED') {
+  const requiresCeoApproval = (applicantRole === 'TEAM_LEAD' && leave.status === 'ADMIN_APPROVED') || 
+                              (applicantRole === 'HR' && leave.status === 'ADMIN_APPROVED') || 
+                              (applicantRole === 'ADMIN' && leave.status === 'HR_APPROVED');
+
+  if (requiresCeoApproval) {
     try {
       const ceoUsers = await User.find({ role: 'CEO', status: 'ACTIVE' });
       const ceoTitle = `🚨 CEO Level 2 Final Approval Required (${applicantRole} Leave)`;
@@ -520,7 +514,7 @@ export const rejectLeave = asyncHandler(async (req, res, next) => {
   const { comments } = req.body;
   if (!comments) return next(new AppError('Rejection reason/comments are required.', 400));
 
-  const leave = await LeaveRequest.findById(req.params.id);
+  const leave = await LeaveRequest.findById(req.params.id).populate('user', 'role');
   if (!leave || leave.isDeleted) return next(new AppError('Leave request not found.', 404));
 
   const reviewerRole = req.user.role;
@@ -558,11 +552,14 @@ export const rejectLeave = asyncHandler(async (req, res, next) => {
 
   // Restore Leave Balance based on previous status
   const currentYear = new Date(leave.fromDate).getFullYear();
-  const balance = await LeaveBalance.findOne({ user: leave.user, year: currentYear });
+  const balance = await LeaveBalance.findOne({ user: leave.user._id || leave.user, year: currentYear });
   if (balance) {
     const alloc = balance.allocations.find((a) => a.leaveType.toString() === leave.leaveType.toString());
     if (alloc) {
-      if (previousStatus === 'CEO_APPROVED') {
+      const applicantRole = leave.user.role || 'EMPLOYEE';
+      const wasFinalApproved = previousStatus === 'CEO_APPROVED' || (applicantRole === 'EMPLOYEE' && previousStatus === 'ADMIN_APPROVED');
+
+      if (wasFinalApproved) {
         alloc.used = Math.max(0, alloc.used - leave.daysCount);
         alloc.remaining += leave.daysCount;
       } else {
@@ -576,14 +573,15 @@ export const rejectLeave = asyncHandler(async (req, res, next) => {
   // Notify Employee
   const rejectTitle = `Leave Request Rejected by ${reviewerRole} ❌`;
   const rejectMsg = `Your leave request has been rejected. Reason: ${comments}`;
+  const recipientId = leave.user._id || leave.user;
   await Notification.safeCreate({
-    recipient: leave.user,
+    recipient: recipientId,
     title: rejectTitle,
     message: rejectMsg,
     type: 'LEAVE_REJECTED',
     targetUrl: '/leaves'
   });
-  sendPushNotification(leave.user, rejectTitle, rejectMsg, '/leaves');
+  sendPushNotification(recipientId, rejectTitle, rejectMsg, '/leaves');
 
   res.status(200).json({ status: 'success', data: { leave } });
 });
@@ -597,8 +595,10 @@ export const cancelLeave = asyncHandler(async (req, res, next) => {
     return next(new AppError('You can only cancel your own leave requests.', 403));
   }
 
-  // Fix 3: Prevent cancellation of final approved (CEO_APPROVED) leaves
-  if (leave.status === 'CEO_APPROVED') {
+  // Fix 3: Prevent cancellation of final approved leaves
+  const isFinalApproved = (req.user.role === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || (req.user.role !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
+
+  if (isFinalApproved) {
     return next(new AppError('Final approved leaves cannot be cancelled. Please contact HR.', 400));
   }
 
@@ -620,7 +620,9 @@ export const cancelLeave = asyncHandler(async (req, res, next) => {
   if (balance) {
     const alloc = balance.allocations.find((a) => a.leaveType.toString() === leave.leaveType.toString());
     if (alloc) {
-      if (previousStatus === 'CEO_APPROVED') {
+      const wasFinalApproved = previousStatus === 'CEO_APPROVED' || (req.user.role === 'EMPLOYEE' && previousStatus === 'ADMIN_APPROVED');
+
+      if (wasFinalApproved) {
         // Fully approved — restore from used
         alloc.used = Math.max(0, alloc.used - leave.daysCount);
         alloc.remaining += leave.daysCount;
