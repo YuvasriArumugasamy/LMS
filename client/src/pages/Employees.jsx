@@ -106,7 +106,7 @@ export const Employees = () => {
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('search') || '');
   const [selectedDept, setSelectedDept] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
@@ -121,6 +121,10 @@ export const Employees = () => {
   useEffect(() => {
     const actionParam = searchParams.get('action');
     const deptParam = searchParams.get('department');
+    const searchParam = searchParams.get('search');
+    if (searchParam) {
+      setSearch(searchParam);
+    }
     if (deptParam) {
       setSelectedDept(deptParam);
       setFormData((prev) => ({ ...prev, department: deptParam }));
