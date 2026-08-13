@@ -58,7 +58,8 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
     }
     if (leave.status === 'ADMIN_APPROVED') {
       const idx = approvalChain.findIndex((s) => s.role === 'CEO');
-      return idx !== -1 ? idx : approvalChain.length - 1;
+      // If no CEO step (EMPLOYEE flow), ADMIN_APPROVED = final (beyond chain)
+      return idx !== -1 ? idx : approvalChain.length;
     }
     return approvalChain.length;
   };

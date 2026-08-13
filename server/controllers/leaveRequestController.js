@@ -307,7 +307,7 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
 
   // Sequential Approval Flow Implementation based on Applicant Role
   if (applicantRole === 'EMPLOYEE') {
-    // Sequential Flow: TL (TEAM_LEAD) -> HR -> Admin (ADMIN) -> CEO
+    // Sequential Flow: TL -> HR -> Admin (ADMIN) — Final for Employee, no CEO
     if (leave.status === 'PENDING' || leave.status === 'ESCALATED_TO_HR') {
       if (!['TEAM_LEAD', 'CEO'].includes(reviewerRole)) {
         return next(new AppError('Employee leave request requires TL (Manager) approval first.', 403));
