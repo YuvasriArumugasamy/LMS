@@ -1511,7 +1511,7 @@ export const Attendance = () => {
                 <button onClick={handleDownloadExcel} className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-md shadow-emerald-500/25 hover:scale-105">
                   <Download className="w-3.5 h-3.5" /> Download Excel
                 </button>
-                <button onClick={() => setIsReportModalOpen(false)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition-all cursor-pointer">
+                <button onClick={() => setIsReportModalOpen(false)} className="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-all cursor-pointer shadow-md shadow-red-500/25 hover:scale-105">
                   <X className="w-4 h-4" />
                 </button>
               </div>
