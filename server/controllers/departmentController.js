@@ -9,12 +9,18 @@ export const getDepartments = asyncHandler(async (req, res, next) => {
     .sort({ name: 1 })
     .lean();
 
-  const departments = await Promise.all(
-    rawDepartments.map(async (dept) => {
-      const count = await User.countDocuments({ department: dept._id, isDeleted: false });
-      return { ...dept, employeeCount: count };
-    })
-  );
+  // Fix N+1: single aggregation instead of per-department countDocuments
+  const counts = await User.aggregate([
+    { $match: { isDeleted: false } },
+    { $group: { _id: '$department', count: { $sum: 1 } } }
+  ]);
+  const countMap = {};
+  counts.forEach((c) => { if (c._id) countMap[c._id.toString()] = c.count; });
+
+  const departments = rawDepartments.map((dept) => ({
+    ...dept,
+    employeeCount: countMap[dept._id.toString()] || 0
+  }));
 
   res.status(200).json({
     status: 'success',

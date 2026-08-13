@@ -174,7 +174,7 @@ export const EmployeeDetailsModal = ({
                   {employee.firstName} {employee.lastName}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-primary/10 text-primary border border-primary/20 truncate">
-                  {employee.role?.replace('_', ' ')}
+                  {employee.role === 'TEAM_LEAD' ? 'Team Lead' : employee.role === 'ADMIN' ? 'Admin' : employee.role?.replace('_', ' ')}
                 </span>
               </div>
               <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1.5 truncate max-w-[18rem]">

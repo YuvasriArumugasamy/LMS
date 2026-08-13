@@ -3,7 +3,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/Modal';
 import { DesignationDetailsModal } from '../components/DesignationDetailsModal';
-import { Award, Plus, Trash2, ChevronRight, Building2, Briefcase, Settings, Users } from 'lucide-react';
+import { Award, Plus, Trash2, ChevronRight, Building2, Briefcase, Settings, Users, AlertTriangle } from 'lucide-react';
 
 const ROW_THEMES = [
   {
@@ -60,7 +60,9 @@ export const Designations = () => {
   const [selectedDesignation, setSelectedDesignation] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', code: '', department: '', grade: 'L2' });
+  const [designationToDelete, setDesignationToDelete] = useState(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -98,12 +100,23 @@ export const Designations = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
+    setDesignationToDelete(id);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!designationToDelete) return;
+    setDeleteLoading(true);
     try {
-      await api.delete(`/designations/${id}`);
+      await api.delete(`/designations/${designationToDelete}`);
+      setIsDeleteConfirmOpen(false);
+      setDesignationToDelete(null);
       fetchData();
     } catch (err) {
       alert('Failed to delete designation.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -306,6 +319,38 @@ export const Designations = () => {
               </button>
             </div>
           </form>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={isDeleteConfirmOpen} onClose={() => !deleteLoading && setIsDeleteConfirmOpen(false)} maxWidth="max-w-sm">
+        <div className="space-y-4 text-center">
+          <div className="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-950/40 flex items-center justify-center mx-auto">
+            <AlertTriangle className="w-7 h-7 text-rose-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">Delete Designation?</h3>
+            <p className="text-sm text-slate-500 mt-1">This action cannot be undone.</p>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              disabled={deleteLoading}
+              onClick={() => setIsDeleteConfirmOpen(false)}
+              className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all hover:bg-slate-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={deleteLoading}
+              onClick={handleConfirmDelete}
+              className="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              {deleteLoading ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
         </div>
       </Modal>
     </div>
