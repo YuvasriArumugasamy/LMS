@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
@@ -32,7 +32,10 @@ import {
   Search,
   LogIn,
   LogOut,
-  X
+  X,
+  Download,
+  FileSpreadsheet,
+  BarChart3
 } from 'lucide-react';
 
 const CARD_THEMES = [
@@ -108,6 +111,7 @@ export const Attendance = () => {
   const [modalEndDate, setModalEndDate] = useState('');
   const [modalPage, setModalPage] = useState(1);
   const [selectedDetailLog, setSelectedDetailLog] = useState(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const itemsPerPage = 7;
   const modalTopRef = useRef(null);
@@ -408,6 +412,41 @@ export const Attendance = () => {
       currDate.setDate(currDate.getDate() - 1);
     }
     return fullHistory.sort((a, b) => new Date(a.clockIn || a.date) - new Date(b.clockIn || b.date));
+  };
+
+  // ===== EXCEL REPORT FUNCTIONS =====
+  const handleDownloadExcel = () => {
+    const headers = ['#', 'Employee Name', 'Employee ID', 'Department', 'Total Days', 'Present Days', 'WFH Days', 'Late Check-ins', 'Half Days', 'Absent Days'];
+    const rows = filteredEmployeeGroupList.map((emp, idx) => [
+      idx + 1,
+      getEmpDisplayName(emp.user),
+      getEmpId(emp.user),
+      getEmpDept(emp.user),
+      emp.totalDays,
+      emp.presentCount,
+      emp.wfhCount,
+      emp.lateCount,
+      emp.halfDayCount,
+      emp.absentCount
+    ]);
+
+    // Build CSV content with BOM for Excel to read UTF-8 properly
+    const bom = '\uFEFF';
+    const csvContent = bom + [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const today = new Date().toISOString().split('T')[0];
+    const filterLabel = statusFilter ? `_${statusFilter}` : '_All';
+    link.download = `Attendance_Report${filterLabel}_${today}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleOpenHistoryModal = (empGroup) => {
@@ -761,8 +800,28 @@ export const Attendance = () => {
           </div>
         </div>
 
-        <div className="text-xs font-extrabold text-slate-400 shrink-0 self-start sm:self-auto pt-0.5 sm:pt-0">
-          Showing {filteredEmployeeGroupList.length} Employee Card{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="text-xs font-extrabold text-slate-400 shrink-0 self-start sm:self-auto pt-0.5 sm:pt-0 mr-2">
+            Showing {filteredEmployeeGroupList.length} Employee Card{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
+          </div>
+          {user?.role !== 'EMPLOYEE' && (
+            <>
+              <button
+                onClick={() => setIsReportModalOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                View Report
+              </button>
+              <button
+                onClick={handleDownloadExcel}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -1380,6 +1439,150 @@ export const Attendance = () => {
         onCaptureSuccess={handleFaceVerificationSuccess}
         isSubmitting={actionLoading}
       />
+
+      {/* ===== ATTENDANCE REPORT MODAL (Excel-like View) ===== */}
+      {isReportModalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-900/70 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-5xl flex flex-col max-h-[92vh] overflow-hidden">
+
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-indigo-50/80 via-blue-50/40 to-white dark:from-slate-800/80 dark:to-slate-900 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                    Attendance Report
+                  </h2>
+                  <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                    {filteredEmployeeGroupList.length} employee{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
+                    {statusFilter ? ` · Filter: ${statusFilter}` : ' · All Statuses'}
+                    {' '}· Generated on {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDownloadExcel}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-md shadow-emerald-500/25 hover:scale-105"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Download Excel
+                </button>
+                <button
+                  onClick={() => setIsReportModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Summary Stats Bar */}
+            <div className="flex items-center gap-4 px-5 py-3 bg-slate-50/80 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800 shrink-0 overflow-x-auto">
+              {[
+                { label: 'Employees', value: filteredEmployeeGroupList.length, color: 'text-indigo-600 dark:text-indigo-400' },
+                { label: 'Total Present', value: filteredEmployeeGroupList.reduce((s, e) => s + e.presentCount, 0), color: 'text-emerald-600 dark:text-emerald-400' },
+                { label: 'Total WFH', value: filteredEmployeeGroupList.reduce((s, e) => s + e.wfhCount, 0), color: 'text-purple-600 dark:text-purple-400' },
+                { label: 'Total Late', value: filteredEmployeeGroupList.reduce((s, e) => s + e.lateCount, 0), color: 'text-amber-600 dark:text-amber-400' },
+                { label: 'Total Absent', value: filteredEmployeeGroupList.reduce((s, e) => s + e.absentCount, 0), color: 'text-rose-600 dark:text-rose-400' },
+              ].map((stat, i) => (
+                <div key={i} className="flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap">{stat.label}</span>
+                  <span className={`text-base font-black ${stat.color}`}>{stat.value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Excel-like Table */}
+            <div className="overflow-auto flex-1">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 dark:bg-slate-800 sticky top-0 z-10">
+                    {['#', 'Employee Name', 'Employee ID', 'Department', 'Total Days', 'Present', 'WFH Days', 'Late', 'Half Day', 'Absent'].map((col, i) => (
+                      <th
+                        key={i}
+                        className="px-3 py-2.5 text-left font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-wider whitespace-nowrap border-b-2 border-slate-200 dark:border-slate-700 border-r border-slate-200 dark:border-slate-700"
+                      >
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredEmployeeGroupList.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="py-16 text-center text-slate-400 font-semibold text-sm">
+                        No attendance data found for selected filter.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredEmployeeGroupList.map((emp, idx) => (
+                      <tr
+                        key={emp.empId}
+                        className={`border-b border-slate-100 dark:border-slate-800 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/20 transition-colors ${idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-900/60'}`}
+                      >
+                        <td className="px-3 py-2.5 font-bold text-slate-400 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">{idx + 1}</td>
+                        <td className="px-3 py-2.5 font-extrabold text-slate-900 dark:text-white border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
+                          {getEmpDisplayName(emp.user)}
+                        </td>
+                        <td className="px-3 py-2.5 font-bold text-indigo-600 dark:text-indigo-400 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap font-mono">
+                          {getEmpId(emp.user)}
+                        </td>
+                        <td className="px-3 py-2.5 font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
+                          {getEmpDept(emp.user)}
+                        </td>
+                        <td className="px-3 py-2.5 font-black text-slate-900 dark:text-white border-r border-slate-100 dark:border-slate-800 text-center whitespace-nowrap">
+                          {emp.totalDays}
+                        </td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-black">
+                            {emp.presentCount}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
+                          <span className="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 font-black">
+                            {emp.wfhCount}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded-md font-black ${emp.lateCount > 0 ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'text-slate-400'}`}>
+                            {emp.lateCount}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded-md font-black ${emp.halfDayCount > 0 ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400' : 'text-slate-400'}`}>
+                            {emp.halfDayCount}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 font-black text-center whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded-md font-black ${emp.absentCount > 0 ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400' : 'text-slate-400'}`}>
+                            {emp.absentCount}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-between shrink-0">
+              <p className="text-[11px] text-slate-400 font-semibold">
+                Life Changers Ind LMS · Attendance Report · {new Date().toLocaleString()}
+              </p>
+              <button
+                onClick={() => setIsReportModalOpen(false)}
+                className="px-5 py-2 rounded-full bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
