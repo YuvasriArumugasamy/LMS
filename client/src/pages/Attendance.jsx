@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
@@ -1440,11 +1441,10 @@ export const Attendance = () => {
         isSubmitting={actionLoading}
       />
 
-      {/* ===== ATTENDANCE REPORT MODAL (Excel-like View) ===== */}
-      {isReportModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-900/70 backdrop-blur-sm">
+      {/* ===== ATTENDANCE REPORT MODAL via Portal ===== */}
+      {isReportModalOpen && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-slate-900/70 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-5xl flex flex-col max-h-[92vh] overflow-hidden">
-
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-indigo-50/80 via-blue-50/40 to-white dark:from-slate-800/80 dark:to-slate-900 shrink-0">
               <div className="flex items-center gap-3">
@@ -1463,22 +1463,14 @@ export const Attendance = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleDownloadExcel}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-md shadow-emerald-500/25 hover:scale-105"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Download Excel
+                <button onClick={handleDownloadExcel} className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-md shadow-emerald-500/25 hover:scale-105">
+                  <Download className="w-3.5 h-3.5" /> Download Excel
                 </button>
-                <button
-                  onClick={() => setIsReportModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition-all cursor-pointer"
-                >
+                <button onClick={() => setIsReportModalOpen(false)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition-all cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
-
             {/* Summary Stats Bar */}
             <div className="flex items-center gap-4 px-5 py-3 bg-slate-50/80 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800 shrink-0 overflow-x-auto">
               {[
@@ -1494,95 +1486,48 @@ export const Attendance = () => {
                 </div>
               ))}
             </div>
-
             {/* Excel-like Table */}
             <div className="overflow-auto flex-1">
               <table className="w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-100 dark:bg-slate-800 sticky top-0 z-10">
                     {['#', 'Employee Name', 'Employee ID', 'Department', 'Total Days', 'Present', 'WFH Days', 'Late', 'Half Day', 'Absent'].map((col, i) => (
-                      <th
-                        key={i}
-                        className="px-3 py-2.5 text-left font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-wider whitespace-nowrap border-b-2 border-slate-200 dark:border-slate-700 border-r border-slate-200 dark:border-slate-700"
-                      >
-                        {col}
-                      </th>
+                      <th key={i} className="px-3 py-2.5 text-left font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-wider whitespace-nowrap border-b-2 border-slate-200 dark:border-slate-700 border-r border-slate-200 dark:border-slate-700">{col}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredEmployeeGroupList.length === 0 ? (
-                    <tr>
-                      <td colSpan={10} className="py-16 text-center text-slate-400 font-semibold text-sm">
-                        No attendance data found for selected filter.
-                      </td>
-                    </tr>
+                    <tr><td colSpan={10} className="py-16 text-center text-slate-400 font-semibold text-sm">No attendance data found.</td></tr>
                   ) : (
                     filteredEmployeeGroupList.map((emp, idx) => (
-                      <tr
-                        key={emp.empId}
-                        className={`border-b border-slate-100 dark:border-slate-800 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/20 transition-colors ${idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-900/60'}`}
-                      >
+                      <tr key={emp.empId} className={`border-b border-slate-100 dark:border-slate-800 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/20 transition-colors ${idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-900/60'}`}>
                         <td className="px-3 py-2.5 font-bold text-slate-400 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">{idx + 1}</td>
-                        <td className="px-3 py-2.5 font-extrabold text-slate-900 dark:text-white border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
-                          {getEmpDisplayName(emp.user)}
-                        </td>
-                        <td className="px-3 py-2.5 font-bold text-indigo-600 dark:text-indigo-400 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap font-mono">
-                          {getEmpId(emp.user)}
-                        </td>
-                        <td className="px-3 py-2.5 font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
-                          {getEmpDept(emp.user)}
-                        </td>
-                        <td className="px-3 py-2.5 font-black text-slate-900 dark:text-white border-r border-slate-100 dark:border-slate-800 text-center whitespace-nowrap">
-                          {emp.totalDays}
-                        </td>
-                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
-                          <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-black">
-                            {emp.presentCount}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
-                          <span className="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 font-black">
-                            {emp.wfhCount}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-md font-black ${emp.lateCount > 0 ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'text-slate-400'}`}>
-                            {emp.lateCount}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-md font-black ${emp.halfDayCount > 0 ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400' : 'text-slate-400'}`}>
-                            {emp.halfDayCount}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2.5 font-black text-center whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-md font-black ${emp.absentCount > 0 ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400' : 'text-slate-400'}`}>
-                            {emp.absentCount}
-                          </span>
-                        </td>
+                        <td className="px-3 py-2.5 font-extrabold text-slate-900 dark:text-white border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">{getEmpDisplayName(emp.user)}</td>
+                        <td className="px-3 py-2.5 font-bold text-indigo-600 dark:text-indigo-400 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap font-mono">{getEmpId(emp.user)}</td>
+                        <td className="px-3 py-2.5 font-semibold text-slate-600 dark:text-slate-300 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">{getEmpDept(emp.user)}</td>
+                        <td className="px-3 py-2.5 font-black text-slate-900 dark:text-white border-r border-slate-100 dark:border-slate-800 text-center whitespace-nowrap">{emp.totalDays}</td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-black">{emp.presentCount}</span></td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 font-black">{emp.wfhCount}</span></td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className={`px-2 py-0.5 rounded-md font-black ${emp.lateCount > 0 ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'text-slate-400'}`}>{emp.lateCount}</span></td>
+                        <td className="px-3 py-2.5 font-black text-center border-r border-slate-100 dark:border-slate-800 whitespace-nowrap"><span className={`px-2 py-0.5 rounded-md font-black ${emp.halfDayCount > 0 ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400' : 'text-slate-400'}`}>{emp.halfDayCount}</span></td>
+                        <td className="px-3 py-2.5 font-black text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded-md font-black ${emp.absentCount > 0 ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400' : 'text-slate-400'}`}>{emp.absentCount}</span></td>
                       </tr>
                     ))
                   )}
                 </tbody>
               </table>
             </div>
-
             {/* Footer */}
             <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-between shrink-0">
-              <p className="text-[11px] text-slate-400 font-semibold">
-                Life Changers Ind LMS · Attendance Report · {new Date().toLocaleString()}
-              </p>
-              <button
-                onClick={() => setIsReportModalOpen(false)}
-                className="px-5 py-2 rounded-full bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer"
-              >
-                Close
-              </button>
+              <p className="text-[11px] text-slate-400 font-semibold">Life Changers Ind LMS · Attendance Report · {new Date().toLocaleString()}</p>
+              <button onClick={() => setIsReportModalOpen(false)} className="px-5 py-2 rounded-full bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer">Close</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
 };
+
