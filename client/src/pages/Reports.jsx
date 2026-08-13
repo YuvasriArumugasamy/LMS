@@ -38,6 +38,8 @@ export const Reports = () => {
     try {
       const params = { year };
       if (status) params.status = status;
+      // If a specific date is selected, pass it as fromDate filter
+      if (selectedCustomDate) params.date = selectedCustomDate;
       const res = await api.get('/reports', { params });
       setReports(res.data.data.reports || []);
     } catch (err) {
@@ -49,7 +51,7 @@ export const Reports = () => {
 
   useEffect(() => {
     fetchReports();
-  }, [year, status]);
+  }, [year, status, selectedCustomDate]);
 
   const handleOpenDetails = (r) => {
     setSelectedReport(r);

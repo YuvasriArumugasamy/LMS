@@ -4,7 +4,7 @@ import { Department } from '../models/Department.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const getLeaveReports = asyncHandler(async (req, res, next) => {
-  const { year = new Date().getFullYear(), month, department, leaveType, status } = req.query;
+  const { year = new Date().getFullYear(), month, department, leaveType, status, date } = req.query;
 
   const matchQuery = { isDeleted: false };
   if (status) {
@@ -18,9 +18,12 @@ export const getLeaveReports = asyncHandler(async (req, res, next) => {
   }
   if (leaveType) matchQuery.leaveType = leaveType;
 
-  // IST-aware date range for accurate Indian timezone filtering
+  // Specific date filter (IST-aware) takes priority over year/month
   let startDate, endDate;
-  if (month) {
+  if (date) {
+    startDate = new Date(`${date}T00:00:00.000+05:30`);
+    endDate = new Date(`${date}T23:59:59.999+05:30`);
+  } else if (month) {
     const monthStr = String(month).padStart(2, '0');
     const lastDay = new Date(year, month, 0).getDate();
     startDate = new Date(`${year}-${monthStr}-01T00:00:00.000+05:30`);
