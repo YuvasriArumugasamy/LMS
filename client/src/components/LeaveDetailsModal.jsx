@@ -271,7 +271,28 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
                   <div className="absolute -left-[19px] top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-white dark:ring-slate-900" />
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <p className="text-xs font-bold text-slate-900 dark:text-white">
-                      {step.action?.replace('_', ' ')} by <span className="text-primary uppercase">{step.reviewerRole}</span>
+                      {(() => {
+                        const actionLabels = {
+                          'APPLIED': 'Applied',
+                          'TEAM_LEAD_APPROVE': 'Approved by TL',
+                          'TEAM_LEAD_REJECT': 'Rejected by TL',
+                          'HR_APPROVE': 'Approved by HR',
+                          'HR_REJECT': 'Rejected by HR',
+                          'ADMIN_APPROVE': 'Approved by Admin',
+                          'ADMIN_REJECT': 'Rejected by Admin',
+                          'CEO_APPROVE': 'Final Approved by CEO',
+                          'CEO_REJECT': 'Rejected by CEO',
+                          'ESCALATED': 'Escalated to HR',
+                          'CANCELLED': 'Cancelled'
+                        };
+                        const roleLabels = {
+                          'TEAM_LEAD': 'Team Lead', 'ADMIN': 'Admin',
+                          'HR': 'HR', 'CEO': 'CEO', 'EMPLOYEE': 'Employee', 'SYSTEM': 'System'
+                        };
+                        const actionText = actionLabels[step.action] || step.action?.replace(/_/g, ' ');
+                        const roleText = roleLabels[step.reviewerRole] || step.reviewerRole;
+                        return <>{actionText} — <span className="text-primary">{roleText}</span></>;
+                      })()}
                     </p>
                     <span className="text-[10px] text-slate-400 font-mono shrink-0">
                       {new Date(step.timestamp).toLocaleString()}

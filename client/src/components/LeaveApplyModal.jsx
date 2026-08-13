@@ -157,6 +157,7 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
             <input
               type="date"
               value={toDate}
+              min={fromDate || new Date().toISOString().split('T')[0]}
               onChange={(e) => setToDate(e.target.value)}
               className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary transition-all"
               required
