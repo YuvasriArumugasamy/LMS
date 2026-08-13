@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Modal } from './Modal';
 import { UserAvatar } from './UserAvatar';
 import {
@@ -36,21 +36,29 @@ const formatDepartmentName = (dept, fallback = 'Engineering') => {
 export const DailyReportDetailsModal = ({
   isOpen,
   onClose,
-  report,
+  report: initialReport,
   currentUser,
   onUpdateSuccess,
   onEditReport
 }) => {
-  const [feedback, setFeedback] = useState(report?.feedback || '');
-  const [reviewStatus, setReviewStatus] = useState(report?.status || 'REVIEWED');
+  const [currentReport, setCurrentReport] = React.useState(initialReport);
+  const [feedback, setFeedback] = useState(initialReport?.feedback || '');
+  const [reviewStatus, setReviewStatus] = useState(initialReport?.status || 'REVIEWED');
   const [submitting, setSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isLoadingDate, setIsLoadingDate] = useState(false);
 
-  if (!report) return null;
+  React.useEffect(() => {
+    setCurrentReport(initialReport);
+    setFeedback(initialReport?.feedback || '');
+    setReviewStatus(initialReport?.status || 'REVIEWED');
+  }, [initialReport]);
+
+  if (!currentReport) return null;
 
   const isReviewer = ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD'].includes(currentUser?.role);
-  const reportUserId = report.user?._id ? report.user._id.toString() : report.user ? report.user.toString() : '';
+  const reportUserId = currentReport.user?._id ? currentReport.user._id.toString() : currentReport.user ? currentReport.user.toString() : '';
   const currentUserId = currentUser?._id ? currentUser._id.toString() : '';
   const isOwner = reportUserId && currentUserId && reportUserId === currentUserId;
   const canModify = isOwner;
@@ -59,7 +67,7 @@ export const DailyReportDetailsModal = ({
     e.preventDefault();
     try {
       setSubmitting(true);
-      await api.patch(`/daily-reports/${report._id}`, {
+      await api.patch(`/daily-reports/${currentReport._id}`, {
         feedback: feedback.trim(),
         status: reviewStatus
       });
@@ -75,7 +83,7 @@ export const DailyReportDetailsModal = ({
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      await api.delete(`/daily-reports/${report._id}`);
+      await api.delete(`/daily-reports/${currentReport._id}`);
       setShowDeleteConfirm(false);
       onUpdateSuccess();
       onClose();
@@ -86,9 +94,38 @@ export const DailyReportDetailsModal = ({
     }
   };
 
+  const handleDateChange = async (e) => {
+    const selectedDate = e.target.value;
+    if (!selectedDate) return;
+    
+    try {
+      setIsLoadingDate(true);
+      // Fetch user's report history
+      const res = await api.get(`/daily-reports/history/${currentReport.user._id || currentReport.user}`);
+      const historyReports = res.data?.data?.reports || [];
+      
+      // Find report for the selected date
+      const foundReport = historyReports.find(r => 
+        new Date(r.date).toISOString().split('T')[0] === selectedDate
+      );
+      
+      if (foundReport) {
+        setCurrentReport(foundReport);
+        setFeedback(foundReport.feedback || '');
+        setReviewStatus(foundReport.status || 'REVIEWED');
+      } else {
+        alert('No report found for ' + selectedDate);
+      }
+    } catch (err) {
+      alert('Failed to fetch report history');
+    } finally {
+      setIsLoadingDate(false);
+    }
+  };
+
   const handleDownloadReport = () => {
-    const empName = `${report.user?.firstName || 'Employee'} ${report.user?.lastName || ''}`.trim();
-    const dateStr = new Date(report.date).toLocaleDateString('en-US', {
+    const empName = `${currentReport.user?.firstName || 'Employee'} ${currentReport.user?.lastName || ''}`.trim();
+    const dateStr = new Date(currentReport.date).toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
@@ -102,31 +139,31 @@ export const DailyReportDetailsModal = ({
 EMPLOYEE INFORMATION:
 ------------------------------------------------------------------------
 Name:        ${empName}
-Employee ID: ${report.user?.employeeId || 'N/A'}
-Department:  ${report.user?.department?.name || 'N/A'}
+Employee ID: ${currentReport.user?.employeeId || 'N/A'}
+Department:  ${currentReport.user?.department?.name || 'N/A'}
 Report Date: ${dateStr}
-Status:      ${report.status || 'SUBMITTED'}
+Status:      ${currentReport.status || 'SUBMITTED'}
 
 REPORT SUMMARY:
 ------------------------------------------------------------------------
-Title / Focus:   ${report.title}
-Hours Logged:    ${report.hoursWorked || 8} Hours
+Title / Focus:   ${currentReport.title}
+Hours Logged:    ${currentReport.hoursWorked || 8} Hours
 
 TASKS COMPLETED TODAY:
 ------------------------------------------------------------------------
-${report.tasksCompleted}
+${currentReport.tasksCompleted}
 
 PENDING / CARRIED OVER TASKS:
 ------------------------------------------------------------------------
-${report.pendingTasks || 'None specified'}
+${currentReport.pendingTasks || 'None specified'}
 
 BLOCKERS / CHALLENGES:
 ------------------------------------------------------------------------
-${report.blockers || 'None reported'}
+${currentReport.blockers || 'None reported'}
 
 REVIEWER FEEDBACK:
 ------------------------------------------------------------------------
-${report.feedback ? `"${report.feedback}"` : 'No reviewer feedback yet.'}
+${currentReport.feedback ? `"${currentReport.feedback}"` : 'No reviewer feedback yet.'}
 
 ========================================================================
 Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
@@ -138,7 +175,7 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
     const link = document.createElement('a');
     link.href = url;
     const safeEmpName = empName.replace(/[^a-zA-Z0-9]/g, '_');
-    const safeDate = new Date(report.date).toISOString().split('T')[0];
+    const safeDate = new Date(currentReport.date).toISOString().split('T')[0];
     link.download = `Daily_Report_${safeEmpName}_${safeDate}.txt`;
     document.body.appendChild(link);
     link.click();
@@ -168,43 +205,49 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
           </div>
 
           {/* User Profile Card Matching Image 1 */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-sky-50/50 to-indigo-50/60 dark:from-slate-800/90 dark:to-slate-800/40 border border-blue-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className={`p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-sky-50/50 to-indigo-50/60 dark:from-slate-800/90 dark:to-slate-800/40 border border-blue-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs ${isLoadingDate ? 'opacity-50 pointer-events-none' : ''}`}>
             <div className="flex items-center gap-3.5">
-              <UserAvatar user={report.user} size="w-12 h-12 text-sm shrink-0" />
+              <UserAvatar user={currentReport.user} size="w-12 h-12 text-sm shrink-0" />
               <div>
                 <h3 className="text-base font-black text-slate-900 dark:text-white">
-                  {report.user?.firstName || 'Employee'} {report.user?.lastName || ''}
+                  {currentReport.user?.firstName || 'Employee'} {currentReport.user?.lastName || ''}
                 </h3>
                 <p className="text-xs text-blue-600/90 dark:text-blue-400 font-extrabold mt-0.5">
-                  {formatEmpId(report.user?.employeeId)} • {formatDepartmentName(report.user?.department)}
+                  {formatEmpId(currentReport.user?.employeeId)} • {formatDepartmentName(currentReport.user?.department)}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <span className="px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-extrabold border border-slate-200/80 dark:border-slate-700 flex items-center gap-1.5 shadow-2xs">
-                <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
-                {new Date(report.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-              </span>
+              <div className="relative flex items-center">
+                <CalendarDays className="absolute left-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="date"
+                  value={new Date(currentReport.date).toISOString().split('T')[0]}
+                  onChange={handleDateChange}
+                  title="Filter Report by Date"
+                  className="pl-9 pr-3 py-1.5 rounded-full bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-extrabold border border-slate-200/80 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer"
+                />
+              </div>
 
               <span className={`px-3.5 py-1.5 rounded-full text-xs font-black uppercase flex items-center gap-1 shadow-2xs ${
-                report.status === 'APPROVED' ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
-                report.status === 'REVIEWED' ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-800' :
+                currentReport.status === 'APPROVED' ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
+                currentReport.status === 'REVIEWED' ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-800' :
                 'bg-emerald-100/90 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800'
               }`}>
                 <Check className="w-3.5 h-3.5 stroke-[3]" />
-                {report.status}
+                {currentReport.status}
               </span>
             </div>
           </div>
 
           {/* Action Toolbar (Icon Only Edit & Delete Buttons) */}
           {canModify && (
-            <div className="flex items-center justify-end gap-2 pt-0.5">
+            <div className={`flex items-center justify-end gap-2 pt-0.5 ${isLoadingDate ? 'opacity-50 pointer-events-none' : ''}`}>
               <button
                 onClick={() => {
                   onClose();
-                  if (onEditReport) onEditReport(report);
+                  if (onEditReport) onEditReport(currentReport);
                 }}
                 title="Edit Report"
                 className="w-8 h-8 rounded-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-300 flex items-center justify-center transition-all cursor-pointer border border-blue-200 dark:border-blue-800 shadow-2xs hover:scale-105"
@@ -227,22 +270,22 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-black border border-indigo-200 dark:border-indigo-800">
-                  📁 Project: {report.projectTitle || 'Attendance Project'}
+                  📁 Project: {currentReport.projectTitle || 'Attendance Project'}
                 </span>
                 <span className="px-3 py-1 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-xs font-black border border-purple-200 dark:border-purple-800">
-                  🧩 Module: {report.moduleName || 'Employee Management'}
+                  🧩 Module: {currentReport.moduleName || 'Employee Management'}
                 </span>
               </div>
 
               {/* Work Progress Status Badge */}
               <span className={`px-3.5 py-1 rounded-full text-xs font-black flex items-center gap-1.5 shadow-2xs ${
-                report.workStatus === 'PENDING'
+                currentReport.workStatus === 'PENDING'
                   ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 animate-pulse'
-                  : report.workStatus === 'COMPLETED'
+                  : currentReport.workStatus === 'COMPLETED'
                   ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
                   : 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700'
               }`}>
-                {report.workStatus === 'PENDING' ? '🟡 Task Status: Pending (Interrupted / Paused)' : report.workStatus === 'COMPLETED' ? '🟢 Task Status: Completed' : '🔵 Task Status: On Progress'}
+                {currentReport.workStatus === 'PENDING' ? '🟡 Task Status: Pending (Interrupted / Paused)' : currentReport.workStatus === 'COMPLETED' ? '🟢 Task Status: Completed' : '🔵 Task Status: On Progress'}
               </span>
             </div>
 
@@ -256,7 +299,7 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
                     Report Focus / Title
                   </span>
                   <p className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate mt-0.5">
-                    {report.title}
+                    {currentReport.title}
                   </p>
                 </div>
               </div>
@@ -267,7 +310,7 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-black text-blue-600 dark:text-blue-400 block">
-                    {report.hoursWorked || 8} Hours
+                    {currentReport.hoursWorked || 8} Hours
                   </span>
                   <span className="text-[9px] font-medium text-slate-400 block">
                     Total spent
@@ -289,7 +332,7 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
             </div>
 
             <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line relative z-10 pl-11">
-              {report.tasksCompleted}
+              {currentReport.tasksCompleted}
             </p>
 
             {/* Background Watermark Icon */}
@@ -310,7 +353,7 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
               </div>
 
               <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line relative z-10 pl-10 pr-10">
-                {report.pendingTasks || 'None specified'}
+                {currentReport.pendingTasks || 'None specified'}
               </p>
 
               {/* Watermark */}
@@ -329,7 +372,7 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
               </div>
 
               <p className="text-xs font-semibold text-amber-900 dark:text-amber-200 leading-relaxed whitespace-pre-line relative z-10 pl-10 pr-10">
-                {report.blockers || 'None reported'}
+                {currentReport.blockers || 'None reported'}
               </p>
 
               {/* Watermark */}
@@ -338,20 +381,20 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
           </div>
 
           {/* Feedback Section */}
-          {report.feedback && (
+          {currentReport.feedback && (
             <div className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-900/60 space-y-1">
               <div className="flex items-center justify-between text-indigo-700 dark:text-indigo-300 text-xs font-black">
                 <span className="flex items-center gap-1.5">
                   <MessageSquare className="w-3.5 h-3.5" /> Reviewer Feedback
                 </span>
-                {report.reviewedBy && (
+                {currentReport.reviewedBy && (
                   <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 bg-indigo-100/70 dark:bg-indigo-900/50 px-2.5 py-0.5 rounded-full">
-                    By {report.reviewedBy.firstName || 'User'} {report.reviewedBy.lastName || ''} ({report.reviewedBy.role === 'CEO' ? 'CEO Executive' : report.reviewedBy.role === 'TEAM_LEAD' ? 'TEAM_LEAD' : report.reviewedBy.role === 'HR' ? 'HR Manager' : 'Admin'})
+                    By {currentReport.reviewedBy.firstName || 'User'} {currentReport.reviewedBy.lastName || ''} ({currentReport.reviewedBy.role === 'CEO' ? 'CEO Executive' : currentReport.reviewedBy.role === 'TEAM_LEAD' ? 'TEAM_LEAD' : currentReport.reviewedBy.role === 'HR' ? 'HR Manager' : 'Admin'})
                   </span>
                 )}
               </div>
               <p className="text-xs text-slate-700 dark:text-slate-300 font-medium italic mt-1">
-                "{report.feedback}"
+                "{currentReport.feedback}"
               </p>
             </div>
           )}
@@ -452,7 +495,7 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
                 Delete Work Report?
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                Are you sure you want to delete <span className="font-bold text-slate-700 dark:text-slate-200">"{report.title}"</span>?
+                Are you sure you want to delete <span className="font-bold text-slate-700 dark:text-slate-200">"{currentReport.title}"</span>?
               </p>
             </div>
 
