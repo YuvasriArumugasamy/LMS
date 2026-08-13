@@ -118,17 +118,16 @@ export const getDailyReports = asyncHandler(async (req, res, next) => {
   let reportDateQuery = {};
 
   if (date) {
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
+    // Parse the date string as IST to avoid UTC offset issues
+    // e.g. "2026-08-12" should be 2026-08-12 00:00:00 IST to 2026-08-12 23:59:59 IST
+    const start = new Date(`${date}T00:00:00.000+05:30`);
+    const end = new Date(`${date}T23:59:59.999+05:30`);
     reportDateQuery.date = { $gte: start, $lte: end };
   } else {
-    const today = new Date();
-    const start = new Date(today);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(today);
-    end.setHours(23, 59, 59, 999);
+    // Default: today in IST
+    const istDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+    const start = new Date(`${istDateStr}T00:00:00.000+05:30`);
+    const end = new Date(`${istDateStr}T23:59:59.999+05:30`);
     reportDateQuery.date = { $gte: start, $lte: end };
   }
 
