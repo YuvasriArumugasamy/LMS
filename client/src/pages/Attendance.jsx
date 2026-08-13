@@ -1570,9 +1570,8 @@ export const Attendance = () => {
               </table>
             </div>
             {/* Footer */}
-            <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-between shrink-0">
+            <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 shrink-0">
               <p className="text-[11px] text-slate-400 font-semibold">Life Changers Ind LMS · Attendance Report · {new Date().toLocaleString()}</p>
-              <button onClick={() => setIsReportModalOpen(false)} className="px-5 py-2 rounded-full bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer">Close</button>
             </div>
           </div>
         </div>,
