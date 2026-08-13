@@ -1,7 +1,55 @@
 import { User } from '../models/User.js';
 
 /**
- * Send push notification to target user(s) via Firebase Cloud Messaging
+ * Initialize Firebase Admin SDK lazily (only when needed).
+ * Requires FIREBASE_SERVICE_ACCOUNT_JSON env var (stringified JSON of service account key)
+ * OR individual env vars: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
+ */
+let firebaseAdmin = null;
+
+const getFirebaseAdmin = async () => {
+  if (firebaseAdmin) return firebaseAdmin;
+
+  try {
+    const { default: admin } = await import('firebase-admin');
+
+    if (admin.apps.length > 0) {
+      firebaseAdmin = admin;
+      return firebaseAdmin;
+    }
+
+    let credential;
+
+    // Option 1: Full service account JSON provided as env var
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+      credential = admin.credential.cert(serviceAccount);
+    }
+    // Option 2: Individual env vars
+    else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+      credential = admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        // Vercel stores private key with literal \n — convert to real newlines
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+      });
+    } else {
+      console.warn('[Push Notification] Firebase credentials not configured. Push notifications disabled.');
+      return null;
+    }
+
+    admin.initializeApp({ credential });
+    firebaseAdmin = admin;
+    console.log('[Firebase Admin] Initialized successfully.');
+    return firebaseAdmin;
+  } catch (err) {
+    console.error('[Firebase Admin] Initialization failed:', err.message);
+    return null;
+  }
+};
+
+/**
+ * Send push notification to target user(s) via Firebase Admin SDK (HTTP v1 API)
  * @param {string|Array<string>} recipientIds - Single user ID or array of user IDs
  * @param {string} title - Push Notification Title
  * @param {string} message - Push Notification Body Content
@@ -24,43 +72,53 @@ export const sendPushNotification = async (recipientIds, title, message, targetU
       return;
     }
 
-    const serverKey = process.env.FIREBASE_SERVER_KEY || process.env.FIREBASE_VAPID_KEY;
+    const admin = await getFirebaseAdmin();
+    if (!admin) return;
 
-    // Dispatch FCM push requests for registered tokens
-    const pushPromises = tokens.map(async (token) => {
-      try {
-        const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `key=${serverKey}`
-          },
-          body: JSON.stringify({
-            to: token,
-            notification: {
-              title: title,
-              body: message,
-              icon: '/favicon.ico',
-              click_action: targetUrl
-            },
-            data: {
-              title: title,
-              message: message,
-              targetUrl: targetUrl
-            }
-          })
-        });
+    const messaging = admin.messaging();
 
-        const result = await response.json().catch(() => null);
-        return result;
-      } catch (err) {
-        console.error(`[Push Notification Error] Failed to send to token ${token.substring(0, 10)}...`, err.message);
+    // Send to all tokens in parallel using the HTTP v1 API (sendEachForMulticast)
+    const multicastMessage = {
+      tokens,
+      notification: {
+        title,
+        body: message
+      },
+      webpush: {
+        notification: {
+          title,
+          body: message,
+          icon: '/favicon.ico',
+          click_action: targetUrl
+        },
+        fcmOptions: {
+          link: targetUrl
+        }
+      },
+      data: {
+        title,
+        message,
+        targetUrl
       }
-    });
+    };
 
-    await Promise.allSettled(pushPromises);
-    console.log(`[Push Notification] Dispatched "${title}" to ${tokens.length} device token(s).`);
+    const response = await messaging.sendEachForMulticast(multicastMessage);
+
+    const successCount = response.successCount;
+    const failureCount = response.failureCount;
+
+    if (failureCount > 0) {
+      // Log failed tokens for cleanup (stale tokens)
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          const errorCode = resp.error?.code || 'unknown';
+          console.warn(`[Push Notification] Token ${tokens[idx]?.substring(0, 12)}... failed: ${errorCode}`);
+        }
+      });
+    }
+
+    console.log(`[Push Notification] "${title}" — sent: ${successCount}, failed: ${failureCount}, total tokens: ${tokens.length}`);
   } catch (error) {
-    console.error('[Push Notification Service Error]', error);
+    console.error('[Push Notification Service Error]', error.message);
   }
 };

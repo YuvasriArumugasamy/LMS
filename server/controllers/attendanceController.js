@@ -135,6 +135,7 @@ export const lunchOut = asyncHandler(async (req, res, next) => {
     return next(new AppError('You have already taken lunch out.', 400));
   }
 
+  const now = new Date();
   attendance.lunchOut = now;
   await attendance.save();
 
@@ -173,6 +174,7 @@ export const lunchIn = asyncHandler(async (req, res, next) => {
     return next(new AppError('You have already taken lunch in.', 400));
   }
 
+  const now = new Date();
   attendance.lunchIn = now;
   await attendance.save();
 

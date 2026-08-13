@@ -31,7 +31,11 @@ export const getLeaveRequests = asyncHandler(async (req, res, next) => {
     }
   }
 
-  if (user) query.user = user;
+  // Fix: Only allow user filter override for CEO/ADMIN/HR — prevent TEAM_LEAD scope bypass
+  if (user && ['CEO', 'ADMIN', 'HR'].includes(req.user.role)) {
+    query.user = user;
+    delete query.$or;
+  }
 
   // Fix 1: Apply search filter on user name/employeeId
   if (search) {
@@ -591,7 +595,7 @@ export const rejectLeave = asyncHandler(async (req, res, next) => {
 });
 
 export const cancelLeave = asyncHandler(async (req, res, next) => {
-  const leave = await LeaveRequest.findById(req.params.id);
+  const leave = await LeaveRequest.findById(req.params.id).populate('user', 'role');
   if (!leave || leave.isDeleted) return next(new AppError('Leave request not found.', 404));
 
   // Only the leave owner can cancel — managers/HR cannot cancel on behalf of employees
@@ -599,8 +603,9 @@ export const cancelLeave = asyncHandler(async (req, res, next) => {
     return next(new AppError('You can only cancel your own leave requests.', 403));
   }
 
-  // Fix 3: Prevent cancellation of final approved leaves
-  const isFinalApproved = (req.user.role === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || (req.user.role !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
+  // Fix 3: Prevent cancellation of final approved leaves — check applicant's own role, not reviewer role
+  const applicantRole = leave.user?.role || req.user.role;
+  const isFinalApproved = (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || (applicantRole !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
 
   if (isFinalApproved) {
     return next(new AppError('Final approved leaves cannot be cancelled. Please contact HR.', 400));

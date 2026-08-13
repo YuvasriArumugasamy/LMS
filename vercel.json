@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "cd client && npm install --include=dev && npm run build",
   "outputDirectory": "client/dist",
-  "installCommand": "npm install",
+  "installCommand": "npm install && cd server && npm install",
   "functions": {
     "api/index.js": {
       "maxDuration": 30,
@@ -15,7 +15,7 @@
       "destination": "/api/index.js"
     },
     {
-      "source": "/((?!api/|assets/|favicon.ico).*)",
+      "source": "/((?!api/|assets/|favicon\\.ico).*)",
       "destination": "/index.html"
     }
   ]

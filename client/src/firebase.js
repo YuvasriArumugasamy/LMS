@@ -3,41 +3,53 @@ import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDemoKeyForFirebaseMessaging',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'lms---application.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'lms---application',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'lms---application.appspot.com',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '236346623530',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:236346623530:web:NGNjNmM0MWItNDAwYS00ZTBjLTBjMTIwOWYtMjlxTlwOGQw'
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || 'BGOoVAyqlja4GGzrS4onFGnB_A5eXhhFNNo8twd9_2nr-Hu8C-7OnOJ1IeG1LWO6lu6CqaixzkCQumUSVi7Xp2Q';
+const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+
+// Only initialize Firebase if required config is present
+const isFirebaseConfigured = !!(firebaseConfig.apiKey && firebaseConfig.appId && VAPID_KEY);
 
 let app = null;
 let messaging = null;
 
-try {
-  app = initializeApp(firebaseConfig);
-} catch (err) {
-  console.warn('Firebase initialization warning:', err);
+if (isFirebaseConfigured) {
+  try {
+    app = initializeApp(firebaseConfig);
+  } catch (err) {
+    console.warn('[Firebase] Initialization warning:', err.message);
+  }
+} else {
+  console.info('[Firebase] Push notifications not configured — VITE_FIREBASE_API_KEY or VITE_FIREBASE_APP_ID missing.');
 }
 
 export const requestFcmToken = async () => {
   try {
+    // Return null silently if Firebase is not configured
+    if (!isFirebaseConfigured || !app) {
+      return null;
+    }
+
     const supported = await isSupported();
     if (!supported) {
-      console.warn('Firebase Cloud Messaging is not supported in this browser.');
+      console.warn('[Firebase] Cloud Messaging is not supported in this browser.');
       return null;
     }
 
     if (!('Notification' in window)) {
-      console.warn('Notifications API not supported in this browser.');
+      console.warn('[Firebase] Notifications API not supported in this browser.');
       return null;
     }
 
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      console.info('Notification permission denied by user.');
+      console.info('[Firebase] Notification permission denied by user.');
       return null;
     }
 
@@ -59,17 +71,18 @@ export const requestFcmToken = async () => {
     if (currentToken) {
       return currentToken;
     } else {
-      console.warn('No registration token available. Request permission to generate one.');
+      console.warn('[Firebase] No registration token available. Request permission to generate one.');
       return null;
     }
   } catch (err) {
-    console.error('Error retrieving FCM token:', err);
+    console.error('[Firebase] Error retrieving FCM token:', err.message);
     return null;
   }
 };
 
 export const onForegroundMessage = (callback) => {
   try {
+    if (!isFirebaseConfigured || !app) return () => {};
     if (!messaging && app) {
       messaging = getMessaging(app);
     }
@@ -79,7 +92,7 @@ export const onForegroundMessage = (callback) => {
       });
     }
   } catch (err) {
-    console.error('Error registering foreground messaging listener:', err);
+    console.error('[Firebase] Error registering foreground messaging listener:', err.message);
   }
   return () => {};
 };

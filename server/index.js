@@ -1,7 +1,5 @@
 import dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
-// LMS Server Entry Point - Updated CEO Exclude Filter
+// LMS Server Entry Point
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -33,41 +31,6 @@ const app = express();
 
 // Database Connection (Only run top-level connection on non-Vercel environments)
 if (process.env.VERCEL !== '1') {
-  try {
-    const dailyReportPath = path.resolve(process.cwd(), 'client/src/pages/DailyReports.jsx');
-    if (fs.existsSync(dailyReportPath)) {
-      const buf = fs.readFileSync(dailyReportPath);
-      let utf8Str = '';
-      if (buf[0] === 0xff && buf[1] === 0xfe) {
-        utf8Str = buf.toString('utf16le');
-      } else {
-        utf8Str = buf.toString('utf8');
-      }
-      utf8Str = utf8Str.replace(/[^\x00-\x7F]/g, '');
-      utf8Str = utf8Str.replace(/-ml-(?:\[[^\]]+\]|\S+)/g, 'ml-0');
-      utf8Str = utf8Str.replace(/-left-(?:\[[^\]]+\]|\S+)/g, 'left-0');
-      utf8Str = utf8Str.replace(/-translate-x-(?:\[[^\]]+\]|\S+)/g, 'translate-x-0');
-      utf8Str = utf8Str.replace(/marginLeft\s*:\s*['"]-[^'"]+['"]/g, "marginLeft: '0px'");
-      utf8Str = utf8Str.replace(/left\s*:\s*['"]-[^'"]+['"]/g, "left: '0px'");
-      utf8Str = utf8Str.replace(
-        /(<div[^>]*className=["'][^"']*relative[^"']*w-full[^"']*["'][^>]*>[\s\S]*?<input[^>]*placeholder=["']Search by employee name[^>]*>[\s\S]*?<\/div>)/g,
-        `{user?.role !== 'EMPLOYEE' && ( $1 )}`
-      );
-      utf8Str = utf8Str.replace(
-        /(<input[^>]*placeholder=["']Search by employee name[^>]*>)/g,
-        `{user?.role !== 'EMPLOYEE' ? $1 : null}`
-      );
-      utf8Str = utf8Str.replace(
-        /(<select[^>]*value={statusFilter}[^>]*>[\s\S]*?<\/select>)/g,
-        `{user?.role !== 'EMPLOYEE' && ( $1 )}`
-      );
-
-      fs.writeFileSync(dailyReportPath, utf8Str, 'utf8');
-      fs.writeFileSync(path.resolve(process.cwd(), 'client/src/pages/DailyReports_utf8.txt'), utf8Str, 'utf8');
-      console.log('[UTF-8 Fix] DailyReports.jsx converted to clean UTF-8 and sanitized negative margins.');
-    }
-  } catch (_) {}
-
   connectDB().then(() => {
     updateEarnedLeaveToPaidLeave();
     updateCeoName();
@@ -92,13 +55,33 @@ app.use(async (req, res, next) => {
 
 // Essential Middleware
 app.use(helmet());
+
+// CORS — allow configured frontend URL + Vercel preview deployments
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://localhost:5173',
+  'http://localhost:4173'
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      // Allow exact match or any Vercel preview subdomain
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/.*\.vercel\.app$/.test(origin);
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: Origin '${origin}' not allowed.`));
+      }
+    },
     credentials: true
   })
 );
-app.use(morgan('dev'));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

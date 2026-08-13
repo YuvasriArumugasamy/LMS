@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "node convert_utf8.mjs && cd client && npm install --include=dev && npm run build"
+    "build": "cd client && npm install --include=dev && npm run build"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -12,6 +12,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.3.1",
+    "firebase-admin": "^12.3.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.1",
