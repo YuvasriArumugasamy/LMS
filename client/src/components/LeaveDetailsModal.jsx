@@ -17,11 +17,11 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
   // Define approval chains based on applicant role
   const getApprovalChain = () => {
     if (applicantRole === 'EMPLOYEE') {
+      // Employee: TL -> HR -> Admin (Final — no CEO)
       return [
-        { role: 'TEAM_LEAD', label: '1. TL (Manager)', statusKey: 'TEAM_LEAD_APPROVED' },
+        { role: 'TEAM_LEAD', label: '1. TL Approval', statusKey: 'TEAM_LEAD_APPROVED' },
         { role: 'HR', label: '2. HR Approval', statusKey: 'HR_APPROVED' },
-        { role: 'ADMIN', label: '3. Admin Approval', statusKey: 'ADMIN_APPROVED' },
-        { role: 'CEO', label: '4. CEO Final', statusKey: 'CEO_APPROVED' }
+        { role: 'ADMIN', label: '3. Admin (Final)', statusKey: 'ADMIN_APPROVED' }
       ];
     } else if (applicantRole === 'TEAM_LEAD') {
       return [
@@ -68,14 +68,17 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
   const currentTurnLabel = approvalChain[currentStepIndex]?.label || 'CEO Approval';
 
   const isRejectedOrCancelled = ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status);
-  const isFinalApproved = leave.status === 'CEO_APPROVED';
+  // Final approved: EMPLOYEE → ADMIN_APPROVED, others → CEO_APPROVED
+  const isFinalApproved = (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || 
+                           (applicantRole !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
+
+  const canCancel = isOwner && !['CANCELLED', 'CEO_APPROVED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'].includes(leave.status) &&
+    !(applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED');
 
   // Check if current user is allowed to approve/reject right now in the sequence
   const isMyTurn = (currentUser?.role === currentTurnRole || currentUser?.role === 'CEO') && !isOwner && !isFinalApproved && !isRejectedOrCancelled;
   const showReviewSection = isManagerOrHR && (!isOwner || currentUser?.role === 'CEO');
   const isActionDisabled = actionLoading || !isMyTurn;
-
-  const canCancel = isOwner && !['CANCELLED', 'CEO_APPROVED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'].includes(leave.status);
 
   const handleApproveAction = async () => {
     setActionLoading(true);

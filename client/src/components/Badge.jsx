@@ -1,7 +1,6 @@
 ﻿import React from 'react';
 
-export const StatusBadge = ({ status, applicantRole }) => {
-  const styles = {
+export const StatusBadge = ({ status, applicantRole }) => {  const styles = {
     PENDING: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
     TEAM_LEAD_APPROVED: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
     TEAM_LEAD_REJECTED: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
@@ -38,7 +37,7 @@ export const StatusBadge = ({ status, applicantRole }) => {
     ESCALATED_TO_HR: 'Escalated to HR 🚨',
     HR_APPROVED: 'HR Approved',
     HR_REJECTED: 'HR Rejected ❌',
-    ADMIN_APPROVED: 'Admin Approved',
+    ADMIN_APPROVED: applicantRole === 'EMPLOYEE' ? 'Final Approved ✅' : 'Admin Approved',
     ADMIN_REJECTED: 'Admin Rejected ❌',
     CEO_APPROVED: 'Final Approved (CEO) ✅',
     CEO_REJECTED: 'CEO Rejected ❌',
@@ -51,7 +50,9 @@ export const StatusBadge = ({ status, applicantRole }) => {
     WEEK_OFF: '📅 Week Off'
   };
 
-  const currentStyle = styles[status] || 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+  const currentStyle = (status === 'ADMIN_APPROVED' && applicantRole === 'EMPLOYEE')
+    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+    : styles[status] || 'bg-slate-500/10 text-slate-500 border-slate-500/20';
   const label = labels[status] || status;
 
   return (

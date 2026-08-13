@@ -297,8 +297,12 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
   }
 
   // Prevent approval if leave request is already finalized or rejected
-  if (['CEO_APPROVED', 'TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status)) {
-    return next(new AppError(`This leave request is already finalized or rejected (${leave.status.replace('_', ' ')}).`, 400));
+  const isAlreadyFinalized = leave.status === 'CEO_APPROVED' || 
+    (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') ||
+    ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status);
+
+  if (isAlreadyFinalized) {
+    return next(new AppError(`This leave request is already finalized or rejected (${leave.status.replace(/_/g, ' ')}).`, 400));
   }
 
   // Sequential Approval Flow Implementation based on Applicant Role
