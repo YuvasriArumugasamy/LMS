@@ -311,7 +311,8 @@ export const Dashboard = () => {
           <span>{clockErrorMsg}</span>
         </div>
       )}
-      {/* Mobile Top Search Bar Widget */}
+      {/* Mobile Top Search Bar Widget — hidden for EMPLOYEE role */}
+      {user?.role !== 'EMPLOYEE' && (
       <div className="md:hidden w-full mb-1">
         <form
           onSubmit={(e) => {
@@ -332,6 +333,7 @@ export const Dashboard = () => {
           />
         </form>
       </div>
+      )}
 
       {/* ================= ROW 1: WELCOME BANNER + QUICK ACTIONS ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

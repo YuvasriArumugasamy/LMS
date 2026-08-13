@@ -65,17 +65,19 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
           <span className="bot"></span>
         </label>
 
-        {/* Global Search Bar */}
-        <form onSubmit={handleSearchSubmit} className="relative hidden md:block w-72 lg:w-96">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search employees, leaves, departments..."
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 focus:border-blue-500 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 rounded-enterprise outline-none transition-all shadow-2xs"
-          />
-        </form>
+        {/* Global Search Bar — hidden for EMPLOYEE role */}
+        {user?.role !== 'EMPLOYEE' && (
+          <form onSubmit={handleSearchSubmit} className="relative hidden md:block w-72 lg:w-96">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search employees, leaves, departments..."
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 focus:border-blue-500 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder-slate-400 rounded-enterprise outline-none transition-all shadow-2xs"
+            />
+          </form>
+        )}
       </div>
 
       <div className="flex items-center gap-3">
