@@ -220,14 +220,15 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
 
             <div className="flex items-center gap-2 shrink-0">
               <div className="relative flex items-center">
-                <CalendarDays className="absolute left-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <CalendarDays className="absolute left-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
                 <input
                   type="date"
                   value={new Date(currentReport.date).toISOString().split('T')[0]}
                   onChange={handleDateChange}
                   title="Filter Report by Date"
-                  className="pl-9 pr-3 py-1.5 rounded-full bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-extrabold border border-slate-200/80 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer"
+                  className="relative pl-9 pr-9 py-1.5 rounded-full bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-extrabold border border-slate-200/80 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-8 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:z-20"
                 />
+                <CalendarDays className="absolute right-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
               </div>
 
               <span className={`px-3.5 py-1.5 rounded-full text-xs font-black uppercase flex items-center gap-1 shadow-2xs ${
