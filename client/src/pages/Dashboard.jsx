@@ -279,12 +279,7 @@ export const Dashboard = () => {
         total: alloc.total,
         color: alloc.colorBadge || (alloc.leaveTypeCode === 'CL' ? '#2563EB' : alloc.leaveTypeCode === 'SL' ? '#EF4444' : (alloc.leaveTypeCode === 'PL' || alloc.leaveTypeCode === 'EL') ? '#22C55E' : '#F59E0B')
       }))
-    : [
-        { id: '1', name: 'Casual Leave', code: 'CL', remaining: 12, total: 18, color: '#2563EB' },
-        { id: '2', name: 'Sick Leave', code: 'SL', remaining: 10, total: 12, color: '#EF4444' },
-        { id: '3', name: 'Paid Leave', code: 'PL', remaining: 15, total: 30, color: '#22C55E' },
-        { id: '4', name: 'Emergency Leave', code: 'EML', remaining: 5, total: 10, color: '#F59E0B' }
-      ];
+    : [];
 
   const getUserDisplayName = () => {
     if (user?.role === 'CEO') return 'CEO';
@@ -587,7 +582,20 @@ export const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-              {entitlements.map((item) => (
+              {loading ? (
+                [1,2,3,4].map((i) => (
+                  <div key={i} className="bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 min-h-[155px] animate-pulse">
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-3" />
+                    <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-1/2 mb-2" />
+                    <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+                  </div>
+                ))
+              ) : entitlements.length === 0 ? (
+                <div className="col-span-4 text-center text-slate-400 text-sm font-semibold py-8">
+                  No leave balance found for {selectedBalanceYear}. Contact HR to allocate leave.
+                </div>
+              ) : (
+              entitlements.map((item) => (
                 <div
                   key={item.id}
                   className="bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 relative overflow-hidden shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between min-h-[155px]"
@@ -649,7 +657,8 @@ export const Dashboard = () => {
                     />
                   </div>
                 </div>
-              ))}
+              ))
+              )}
             </div>
           </div>
         )}
