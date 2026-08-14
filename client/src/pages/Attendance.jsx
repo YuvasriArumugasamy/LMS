@@ -1603,6 +1603,36 @@ export const Attendance = () => {
                 </span>
               </div>
 
+              {/* Lunch Out */}
+              <div className="flex items-center justify-between pb-2 sm:pb-2.5 border-b border-dashed border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-orange-50 dark:bg-orange-950/50 text-orange-500 dark:text-orange-400">
+                    <span className="text-sm">🍽️</span>
+                  </div>
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Lunch Out
+                  </span>
+                </div>
+                <span className={`text-xs font-black font-mono ${selectedDetailLog.lunchOut ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400'}`}>
+                  {selectedDetailLog.lunchOut ? formatClockTime(selectedDetailLog.lunchOut) : '—'}
+                </span>
+              </div>
+
+              {/* Lunch In */}
+              <div className="flex items-center justify-between pb-2 sm:pb-2.5 border-b border-dashed border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-green-50 dark:bg-green-950/50 text-green-600 dark:text-green-400">
+                    <span className="text-sm">🥗</span>
+                  </div>
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Lunch In
+                  </span>
+                </div>
+                <span className={`text-xs font-black font-mono ${selectedDetailLog.lunchIn ? 'text-green-600 dark:text-green-400' : 'text-slate-400'}`}>
+                  {selectedDetailLog.lunchIn ? formatClockTime(selectedDetailLog.lunchIn) : '—'}
+                </span>
+              </div>
+
               {/* Check Out */}
               <div className="flex items-center justify-between pb-2 sm:pb-2.5 border-b border-dashed border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2.5">
