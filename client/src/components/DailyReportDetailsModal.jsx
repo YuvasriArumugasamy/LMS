@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Modal } from './Modal';
 import { UserAvatar } from './UserAvatar';
 import {
@@ -528,10 +529,10 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
         </div>
       </Modal>
 
-      {/* Delete Confirmation Modal matching Screenshot 1 */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-slate-100 dark:border-slate-800 text-center space-y-5 animate-in zoom-in-95 duration-200">
+      {/* Delete Confirmation Modal rendered via Portal on top of parent Modal */}
+      {showDeleteConfirm && createPortal(
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-slate-100 dark:border-slate-800 text-center space-y-5 animate-in zoom-in-95 duration-200 relative z-[100001]">
             {/* Trash Badge Icon */}
             <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
               <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-rose-500 to-red-400 flex items-center justify-center shadow-lg shadow-rose-500/30 text-white">
@@ -575,7 +576,8 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
