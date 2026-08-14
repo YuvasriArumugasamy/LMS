@@ -349,7 +349,7 @@ export const updateAttendance = asyncHandler(async (req, res, next) => {
 
 // Get Live Status of all currently clocked-in employees (for CEO/Admin/HR/TL)
 export const getLiveStatus = asyncHandler(async (req, res, next) => {
-  const { start } = getTodayDateRange();
+  const { start: todayStart, end: todayEnd } = getTodayDateRange();
 
   // Exclude CEO users
   const ceoUsers = await User.find({ role: 'CEO' }).select('_id');
@@ -372,10 +372,9 @@ export const getLiveStatus = asyncHandler(async (req, res, next) => {
 
   // Get today's attendance for all these employees
   const employeeIds = allEmployees.map((e) => e._id);
-  const { start, end } = getTodayDateRange();
   const todayLogs = await Attendance.find({
     user: { $in: employeeIds },
-    date: { $gte: start, $lte: end }
+    date: { $gte: todayStart, $lte: todayEnd }
   }).lean();
 
   const logMap = {};
