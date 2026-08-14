@@ -37,11 +37,15 @@ export const DailyReportDetailsModal = ({
   isOpen,
   onClose,
   report: initialReport,
+  reportsList: initialReportsList = [],
   currentUser,
   onUpdateSuccess,
   onEditReport
 }) => {
   const [currentReport, setCurrentReport] = React.useState(initialReport);
+  const [reportsGroup, setReportsGroup] = React.useState(
+    initialReportsList && initialReportsList.length ? initialReportsList : (initialReport ? [initialReport] : [])
+  );
   const [feedback, setFeedback] = useState(initialReport?.feedback || '');
   const [reviewStatus, setReviewStatus] = useState(initialReport?.status || 'REVIEWED');
   const [submitting, setSubmitting] = useState(false);
@@ -51,9 +55,11 @@ export const DailyReportDetailsModal = ({
 
   React.useEffect(() => {
     setCurrentReport(initialReport);
+    const list = (initialReportsList && initialReportsList.length) ? initialReportsList : (initialReport ? [initialReport] : []);
+    setReportsGroup(list);
     setFeedback(initialReport?.feedback || '');
     setReviewStatus(initialReport?.status || 'REVIEWED');
-  }, [initialReport]);
+  }, [initialReport, initialReportsList]);
 
   if (!currentReport) return null;
 
@@ -62,6 +68,12 @@ export const DailyReportDetailsModal = ({
   const currentUserId = currentUser?._id ? currentUser._id.toString() : '';
   const isOwner = reportUserId && currentUserId && reportUserId === currentUserId;
   const canModify = isOwner;
+
+  const handleSelectReportFromGroup = (rep) => {
+    setCurrentReport(rep);
+    setFeedback(rep?.feedback || '');
+    setReviewStatus(rep?.status || 'REVIEWED');
+  };
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
@@ -100,19 +112,21 @@ export const DailyReportDetailsModal = ({
     
     try {
       setIsLoadingDate(true);
+      const targetUserId = currentReport.user?._id || currentReport.user;
       // Fetch user's report history
-      const res = await api.get(`/daily-reports/history/${currentReport.user._id || currentReport.user}`);
+      const res = await api.get(`/daily-reports/history/${targetUserId}`);
       const historyReports = res.data?.data?.reports || [];
       
-      // Find report for the selected date
-      const foundReport = historyReports.find(r => 
+      // Find all reports for the selected date
+      const matchingReports = historyReports.filter(r => 
         new Date(r.date).toISOString().split('T')[0] === selectedDate
       );
       
-      if (foundReport) {
-        setCurrentReport(foundReport);
-        setFeedback(foundReport.feedback || '');
-        setReviewStatus(foundReport.status || 'REVIEWED');
+      if (matchingReports.length > 0) {
+        setReportsGroup(matchingReports);
+        setCurrentReport(matchingReports[0]);
+        setFeedback(matchingReports[0].feedback || '');
+        setReviewStatus(matchingReports[0].status || 'REVIEWED');
       } else {
         alert('No report found for ' + selectedDate);
       }
@@ -240,6 +254,39 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
               </span>
             </div>
           </div>
+
+          {/* Multiple Reports Selector Tabs if employee submitted more than 1 report for this date */}
+          {reportsGroup.length > 1 && (
+            <div className="p-3 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800 space-y-2">
+              <div className="flex items-center justify-between text-xs font-black text-indigo-900 dark:text-indigo-300">
+                <span>Multiple Reports Submitted ({reportsGroup.length} Reports on {new Date(currentReport.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}):</span>
+                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold">Select report to view</span>
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {reportsGroup.map((rep, index) => {
+                  const isSelected = rep._id === currentReport._id;
+                  return (
+                    <button
+                      key={rep._id || index}
+                      type="button"
+                      onClick={() => handleSelectReportFromGroup(rep)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400 scale-[1.02]'
+                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-indigo-100 dark:hover:bg-slate-700 border border-indigo-200 dark:border-indigo-800'
+                      }`}
+                    >
+                      <span>Report #{index + 1}:</span>
+                      <span className="truncate max-w-[130px]">{rep.title || rep.projectTitle || 'Work Report'}</span>
+                      {rep.reportSlot && rep.reportSlot !== 'GENERAL' && (
+                        <span className="text-[9px] opacity-80 uppercase font-black">({rep.reportSlot})</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Action Toolbar (Icon Only Edit & Delete Buttons) */}
           {canModify && (

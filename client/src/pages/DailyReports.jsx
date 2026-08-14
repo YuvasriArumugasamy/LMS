@@ -133,6 +133,7 @@ export const DailyReports = () => {
   // Modals
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [selectedReportsGroup, setSelectedReportsGroup] = useState([]);
   const [editingReport, setEditingReport] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
@@ -213,8 +214,9 @@ export const DailyReports = () => {
     fetchReportsData();
   };
 
-  const handleOpenDetails = (r) => {
+  const handleOpenDetails = (r, reportsGroup = []) => {
     setSelectedReport(r);
+    setSelectedReportsGroup(reportsGroup && reportsGroup.length > 0 ? reportsGroup : (r ? [r] : []));
     setIsDetailsModalOpen(true);
   };
 
@@ -489,7 +491,7 @@ export const DailyReports = () => {
                 key={item._id}
                 onClick={() => {
                   if (item.hasSubmitted && item.report) {
-                    handleOpenDetails(item.report);
+                    handleOpenDetails(item.report, item.reports);
                   } else {
                     handleOpenHistory(item.user?._id);
                   }
@@ -637,7 +639,7 @@ export const DailyReports = () => {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (item.report) handleOpenDetails(item.report);
+                          if (item.report) handleOpenDetails(item.report, item.reports);
                         }}
                         className={`flex-1 py-3 px-4 rounded-full ${palette.btnBg} text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer hover:scale-[1.02]`}
                       >
@@ -735,6 +737,7 @@ export const DailyReports = () => {
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         report={selectedReport}
+        reportsList={selectedReportsGroup}
         currentUser={user}
         onUpdateSuccess={fetchReportsData}
         onEditReport={handleEditReport}
