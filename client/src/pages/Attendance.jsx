@@ -84,6 +84,44 @@ const CARD_THEMES = [
   }
 ];
 
+const LIVE_CARD_PALETTES = [
+  {
+    leftBorder: 'border-l-[4px] border-l-purple-500',
+    avatarBg: '!bg-purple-600',
+    badge: 'bg-purple-100/80 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/80 font-black'
+  },
+  {
+    leftBorder: 'border-l-[4px] border-l-blue-500',
+    avatarBg: '!bg-blue-600',
+    badge: 'bg-blue-100/80 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/80 font-black'
+  },
+  {
+    leftBorder: 'border-l-[4px] border-l-teal-500',
+    avatarBg: '!bg-teal-600',
+    badge: 'bg-teal-100/80 text-teal-600 dark:bg-teal-950/50 dark:text-teal-300 border border-teal-200/80 dark:border-teal-800/80 font-black'
+  },
+  {
+    leftBorder: 'border-l-[4px] border-l-amber-500',
+    avatarBg: '!bg-amber-600',
+    badge: 'bg-amber-100/80 text-amber-600 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 font-black'
+  },
+  {
+    leftBorder: 'border-l-[4px] border-l-rose-500',
+    avatarBg: '!bg-rose-500',
+    badge: 'bg-rose-100/80 text-rose-600 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/80 font-black'
+  },
+  {
+    leftBorder: 'border-l-[4px] border-l-purple-500',
+    avatarBg: '!bg-purple-600',
+    badge: 'bg-purple-100/80 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/80 font-black'
+  },
+  {
+    leftBorder: 'border-l-[4px] border-l-cyan-500',
+    avatarBg: '!bg-cyan-600',
+    badge: 'bg-cyan-100/80 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-300 border border-cyan-200/80 dark:border-cyan-800/80 font-black'
+  }
+];
+
 export const Attendance = () => {
   const { user } = useAuth();
   const [todayAttendance, setTodayAttendance] = useState(null);
@@ -833,62 +871,138 @@ export const Attendance = () => {
           ) : liveStatus.length === 0 ? (
             <div className="py-12 text-center text-slate-400 text-sm font-medium">No employee data found.</div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {liveStatus.map((item) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {liveStatus.map((item, idx) => {
                 const emp = item.employee;
-                const statusConfig = {
-                  CHECKED_IN:     { label: 'Checked In',     dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300', border: 'border-emerald-200 dark:border-emerald-800' },
-                  ON_LUNCH:       { label: 'On Lunch Break', dot: 'bg-amber-500',   badge: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300',     border: 'border-amber-200 dark:border-amber-800' },
-                  NOT_CHECKED_IN: { label: 'Not Checked In', dot: 'bg-slate-400',   badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',         border: 'border-slate-200 dark:border-slate-700' },
-                  CHECKED_OUT:    { label: 'Checked Out',    dot: 'bg-blue-500',    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',          border: 'border-blue-200 dark:border-blue-800' }
-                }[item.statusLabel] || { label: item.statusLabel, dot: 'bg-slate-400', badge: 'bg-slate-100 text-slate-600', border: 'border-slate-200' };
+                const palette = LIVE_CARD_PALETTES[idx % LIVE_CARD_PALETTES.length];
 
-                const canForceCheckout = item.statusLabel === 'CHECKED_IN' || item.statusLabel === 'ON_LUNCH';
+                const isCheckedOut = item.statusLabel === 'CHECKED_OUT';
+                const isCheckedIn = item.statusLabel === 'CHECKED_IN';
+                const isOnLunch = item.statusLabel === 'ON_LUNCH';
+
+                const canForceCheckout = isCheckedIn || isOnLunch;
+
+                // Card background & border style matching Image 1
+                let cardStyle = `bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 ${palette.leftBorder}`;
+                let badgeStyle = palette.badge;
+                let badgeText = '• Not Checked In';
+                let dotClass = 'bg-slate-400';
+
+                if (isCheckedOut) {
+                  cardStyle = 'bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-emerald-100/50 dark:from-emerald-950/40 dark:to-slate-900 border-emerald-300/80 dark:border-emerald-800 border-l-[4px] border-l-emerald-500 relative overflow-hidden';
+                  badgeStyle = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800';
+                  badgeText = '✔ Checked Out';
+                  dotClass = 'bg-emerald-500';
+                } else if (isCheckedIn) {
+                  cardStyle = 'bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-sky-100/50 dark:from-blue-950/40 dark:to-slate-900 border-blue-300/80 dark:border-blue-800 border-l-[4px] border-l-blue-600 relative overflow-hidden';
+                  badgeStyle = 'bg-emerald-500 text-white font-extrabold shadow-xs';
+                  badgeText = '• Checked In';
+                  dotClass = 'bg-white animate-pulse';
+                } else if (isOnLunch) {
+                  cardStyle = 'bg-gradient-to-br from-amber-50/70 via-orange-50/30 to-amber-100/50 dark:from-amber-950/40 dark:to-slate-900 border-amber-300/80 dark:border-amber-800 border-l-[4px] border-l-amber-500 relative overflow-hidden';
+                  badgeStyle = 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/80';
+                  badgeText = '• On Lunch Break';
+                  dotClass = 'bg-amber-500 animate-pulse';
+                }
 
                 return (
-                  <div key={emp._id} className={`bg-white dark:bg-slate-900 rounded-2xl border ${statusConfig.border} p-4 shadow-xs space-y-3`}>
-                    {/* Employee Info */}
-                    <div className="flex items-center justify-between gap-2">
+                  <div
+                    key={emp._id}
+                    className={`rounded-2xl border p-4 shadow-2xs hover:shadow-md transition-all duration-200 space-y-3.5 ${cardStyle}`}
+                  >
+                    {/* Background watermark for Checked Out / Checked In cards matching Image 1 */}
+                    {(isCheckedOut || isCheckedIn) && (
+                      <div className="absolute right-0 bottom-0 pointer-events-none opacity-15 dark:opacity-10 text-emerald-600 dark:text-emerald-400">
+                        <svg className="w-28 h-28" viewBox="0 0 200 200" fill="currentColor">
+                          <path d="M40 180 L40 100 L80 60 L120 100 L120 180 Z M130 180 L130 120 L160 100 L190 120 L190 180 Z" opacity="0.6"/>
+                          <circle cx="160" cy="60" r="15" opacity="0.4"/>
+                        </svg>
+                      </div>
+                    )}
+
+                    {/* Employee Info Header matching Image 1 */}
+                    <div className="flex items-center justify-between gap-2 relative z-10">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <UserAvatar user={emp} size="w-9 h-9 text-xs shrink-0" />
+                        <UserAvatar
+                          user={emp}
+                          size="w-9 h-9 text-xs font-black shrink-0"
+                          customBg={palette.avatarBg}
+                          className="ring-2 ring-white dark:ring-slate-800 shadow-xs"
+                        />
                         <div className="min-w-0">
-                          <p className="text-xs font-black text-slate-900 dark:text-white truncate">{emp.firstName} {emp.lastName}</p>
-                          <p className="text-[10px] text-slate-400 font-mono">{emp.employeeId} · {emp.department?.name || '—'}</p>
+                          <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate leading-tight">
+                            {getEmpDisplayName(emp)}
+                          </p>
+                          <p className="text-[10px] text-slate-400 font-bold mt-0.5 truncate">
+                            {getEmpId(emp)} • {getEmpDept(emp)}
+                          </p>
                         </div>
                       </div>
-                      <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black ${statusConfig.badge} shrink-0`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot} ${item.statusLabel === 'CHECKED_IN' ? 'animate-pulse' : ''}`} />
-                        {statusConfig.label}
+
+                      <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black shrink-0 shadow-2xs ${badgeStyle}`}>
+                        {(!isCheckedOut) && <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />}
+                        <span>{badgeText}</span>
                       </span>
                     </div>
 
-                    {/* Times */}
-                    <div className="grid grid-cols-2 gap-2 text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                      <div>
-                        <span className="text-slate-400 font-medium block">Clock In</span>
-                        <span className="text-slate-800 dark:text-slate-200">
-                          {item.clockInTime ? new Date(item.clockInTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—'}
-                        </span>
+                    {/* 4 Metric Items matching Image 1 (Icon Badges: Clock In, Clock Out, Location, Hours) */}
+                    <div className="grid grid-cols-2 gap-y-3 gap-x-2 pt-1 border-t border-slate-100/80 dark:border-slate-800/80 relative z-10">
+                      {/* Clock In */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-7 h-7 rounded-full bg-purple-100/80 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                          <LogIn className="w-3.5 h-3.5 stroke-[2.2]" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 block leading-none">Clock In</span>
+                          <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
+                            {item.clockInTime ? new Date(item.clockInTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase() : '—'}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-slate-400 font-medium block">Clock Out</span>
-                        <span className="text-slate-800 dark:text-slate-200">
-                          {item.clockOutTime ? new Date(item.clockOutTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—'}
-                        </span>
+
+                      {/* Clock Out */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-7 h-7 rounded-full bg-orange-100/80 dark:bg-orange-950/60 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0">
+                          <LogOut className="w-3.5 h-3.5 stroke-[2.2]" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 block leading-none">Clock Out</span>
+                          <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
+                            {item.clockOutTime ? new Date(item.clockOutTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase() : '—'}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-slate-400 font-medium block">Location</span>
-                        <span className="text-slate-800 dark:text-slate-200">{item.workLocation === 'WFH' ? '🏡 WFH' : item.workLocation === 'IN_OFFICE' ? '🏢 Office' : '—'}</span>
+
+                      {/* Location */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-7 h-7 rounded-full bg-blue-100/80 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                          <MapPin className="w-3.5 h-3.5 stroke-[2.2]" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 block leading-none">Location</span>
+                          <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
+                            {item.workLocation === 'WFH' ? '🏡 WFH' : item.workLocation === 'IN_OFFICE' ? '🏢 Office' : '—'}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-slate-400 font-medium block">Hours</span>
-                        <span className="text-slate-800 dark:text-slate-200">{item.totalHours ? `${item.totalHours}h` : item.clockInTime && !item.clockOutTime ? '⏱ Active' : '—'}</span>
+
+                      {/* Hours */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-7 h-7 rounded-full bg-emerald-100/80 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                          <Clock className="w-3.5 h-3.5 stroke-[2.2]" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 block leading-none">Hours</span>
+                          <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
+                            {item.totalHours ? `${item.totalHours}h` : item.clockInTime && !item.clockOutTime ? '⏱ Active' : '—'}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Force Checkout Button */}
+                    {/* Force Checkout Action Bar matching Image 1 */}
                     {canForceCheckout && (
-                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div className="pt-2 border-t border-slate-100/80 dark:border-slate-800/80 relative z-10">
                         {forceCheckoutUserId === emp._id ? (
                           <div className="space-y-2">
                             <input
@@ -896,19 +1010,19 @@ export const Attendance = () => {
                               value={forceCheckoutReason}
                               onChange={(e) => setForceCheckoutReason(e.target.value)}
                               placeholder="Reason (optional)..."
-                              className="w-full px-2.5 py-1.5 text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none"
+                              className="w-full px-2.5 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-rose-500"
                             />
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleForceCheckout(emp._id)}
                                 disabled={forceCheckoutLoading}
-                                className="flex-1 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black transition-all disabled:opacity-50"
+                                className="flex-1 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black transition-all disabled:opacity-50 shadow-2xs"
                               >
                                 {forceCheckoutLoading ? 'Processing...' : '✓ Confirm Force Check-Out'}
                               </button>
                               <button
                                 onClick={() => { setForceCheckoutUserId(null); setForceCheckoutReason(''); }}
-                                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold"
+                                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold hover:bg-slate-200 transition-all"
                               >
                                 Cancel
                               </button>
@@ -917,7 +1031,7 @@ export const Attendance = () => {
                         ) : (
                           <button
                             onClick={() => setForceCheckoutUserId(emp._id)}
-                            className="w-full py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-[10px] font-black hover:bg-rose-100 transition-all flex items-center justify-center gap-1.5"
+                            className="w-full py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-[10px] font-black hover:bg-rose-100 transition-all flex items-center justify-center gap-1.5 shadow-2xs hover:scale-[1.01]"
                           >
                             <LogOut className="w-3 h-3" /> Force Check-Out
                           </button>
