@@ -11,7 +11,7 @@ git rm -r --cached server/node_modules 2>nul
 git rm -r --cached client/dist 2>nul
 node convert_utf8.mjs
 git add .
-git commit -m "fix(ui): completely remove entire filter bar card for Employee view in DailyReports"
+git commit -m "feat(reports): allow multiple daily report submissions per day with session slots"
 git push -u origin main
 echo Completed Git Push!
 pause

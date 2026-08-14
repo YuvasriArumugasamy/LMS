@@ -50,6 +50,11 @@ const dailyReportSchema = new mongoose.Schema(
       enum: ['IN_PROGRESS', 'PENDING', 'COMPLETED'],
       default: 'IN_PROGRESS'
     },
+    reportSlot: {
+      type: String,
+      enum: ['MORNING', 'AFTERNOON', 'EVENING', 'GENERAL'],
+      default: 'GENERAL'
+    },
     status: {
       type: String,
       enum: ['SUBMITTED', 'REVIEWED', 'APPROVED'],

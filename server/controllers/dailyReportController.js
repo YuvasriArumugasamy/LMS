@@ -13,10 +13,10 @@ const getTodayRange = () => {
   return { start, end };
 };
 
-// Submit Daily Report — same day = update existing, different day = new report
+// Submit Daily Report — always create a new report record for every submission
 export const submitDailyReport = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const { title, projectTitle, moduleName, tasksCompleted, pendingTasks, blockers, hoursWorked, workStatus } = req.body;
+  const { title, projectTitle, moduleName, tasksCompleted, pendingTasks, blockers, hoursWorked, workStatus, reportSlot } = req.body;
 
   if (!title || !title.trim()) {
     return next(new AppError('Please provide a report title.', 400));
@@ -25,45 +25,23 @@ export const submitDailyReport = asyncHandler(async (req, res, next) => {
     return next(new AppError('Please describe tasks completed today.', 400));
   }
 
-  const { start, end } = getTodayRange();
-
-  // Check if a report already exists for today — if yes, update it
-  let report = await DailyReport.findOne({
-    user: userId,
-    date: { $gte: start, $lte: end }
-  });
-
   const now = new Date();
 
-  if (report) {
-    // Update existing today's report
-    report.title = title.trim();
-    report.projectTitle = (projectTitle || 'Attendance Project').trim();
-    report.moduleName = (moduleName || 'General').trim();
-    report.tasksCompleted = tasksCompleted.trim();
-    report.pendingTasks = (pendingTasks || '').trim();
-    report.blockers = (blockers || '').trim();
-    report.hoursWorked = Math.min(24, Math.max(0.5, Number(hoursWorked) || 8));
-    if (workStatus) report.workStatus = workStatus;
-    report.status = 'SUBMITTED';
-    report.date = now;
-    await report.save();
-  } else {
-    // Create new report for today
-    report = await DailyReport.create({
-      user: userId,
-      date: now,
-      title: title.trim(),
-      projectTitle: (projectTitle || 'Attendance Project').trim(),
-      moduleName: (moduleName || 'General').trim(),
-      tasksCompleted: tasksCompleted.trim(),
-      pendingTasks: (pendingTasks || '').trim(),
-      blockers: (blockers || '').trim(),
-      hoursWorked: Math.min(24, Math.max(0.5, Number(hoursWorked) || 8)),
-      workStatus: workStatus || 'IN_PROGRESS',
-      status: 'SUBMITTED'
-    });
-  }
+  // Create new report for today
+  const report = await DailyReport.create({
+    user: userId,
+    date: now,
+    title: title.trim(),
+    projectTitle: (projectTitle || 'Attendance Project').trim(),
+    moduleName: (moduleName || 'General').trim(),
+    tasksCompleted: tasksCompleted.trim(),
+    pendingTasks: (pendingTasks || '').trim(),
+    blockers: (blockers || '').trim(),
+    hoursWorked: Math.min(24, Math.max(0.5, Number(hoursWorked) || 8)),
+    workStatus: workStatus || 'IN_PROGRESS',
+    reportSlot: reportSlot || 'GENERAL',
+    status: 'SUBMITTED'
+  });
 
   res.status(200).json({
     status: 'success',
@@ -71,21 +49,23 @@ export const submitDailyReport = asyncHandler(async (req, res, next) => {
   });
 });
 
-// Check if current user submitted today's report
+// Check if current user submitted today's reports
 export const getTodayReportStatus = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { start, end } = getTodayRange();
 
-  const report = await DailyReport.findOne({
+  const reports = await DailyReport.find({
     user: userId,
     date: { $gte: start, $lte: end }
-  });
+  }).sort({ date: -1 });
 
   res.status(200).json({
     status: 'success',
     data: {
-      hasSubmitted: !!report,
-      report
+      hasSubmitted: reports.length > 0,
+      submittedCount: reports.length,
+      report: reports[0] || null,
+      reports
     }
   });
 });
@@ -167,23 +147,28 @@ export const getDailyReports = asyncHandler(async (req, res, next) => {
     .populate('reviewedBy', 'firstName lastName role')
     .sort({ date: -1, createdAt: -1 });
 
-  // Map user ID to their report
+  // Map user ID to their array of reports
   const reportMap = {};
   reports.forEach((r) => {
     if (r.user) {
-      reportMap[r.user._id.toString()] = r;
+      const uid = r.user._id.toString();
+      if (!reportMap[uid]) reportMap[uid] = [];
+      reportMap[uid].push(r);
     }
   });
 
   // 3. Build unified employee status list
   let employeeStatuses = trackingUsers.map((u) => {
-    const report = reportMap[u._id.toString()] || null;
+    const userReports = reportMap[u._id.toString()] || [];
+    const latestReport = userReports[0] || null;
     return {
-      _id: report ? report._id : `pending_${u._id}`,
+      _id: latestReport ? latestReport._id : `pending_${u._id}`,
       user: u,
-      hasSubmitted: !!report,
-      reportStatus: report ? report.status : 'NOT_SUBMITTED',
-      report: report
+      hasSubmitted: userReports.length > 0,
+      submittedCount: userReports.length,
+      reportStatus: latestReport ? latestReport.status : 'NOT_SUBMITTED',
+      report: latestReport,
+      reports: userReports
     };
   });
 

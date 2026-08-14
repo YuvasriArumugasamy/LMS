@@ -28,9 +28,18 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
   const [tasksCompleted, setTasksCompleted] = useState('');
   const [pendingTasks, setPendingTasks] = useState('');
   const [blockers, setBlockers] = useState('');
+  const [reportSlot, setReportSlot] = useState('GENERAL');
   const [hoursWorked, setHoursWorked] = useState(8);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const autoDetectSlot = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'MORNING';
+    if (hour < 16) return 'AFTERNOON';
+    if (hour < 20) return 'EVENING';
+    return 'GENERAL';
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -39,6 +48,7 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
         setProjectTitle(existingReport.projectTitle || '');
         setModuleName(existingReport.moduleName || '');
         setWorkStatus(existingReport.workStatus || 'IN_PROGRESS');
+        setReportSlot(existingReport.reportSlot || 'GENERAL');
         setTasksCompleted(existingReport.tasksCompleted || '');
         setPendingTasks(existingReport.pendingTasks || '');
         setBlockers(existingReport.blockers || '');
@@ -48,6 +58,7 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
         setProjectTitle('');
         setModuleName('');
         setWorkStatus('IN_PROGRESS');
+        setReportSlot(autoDetectSlot());
         setTasksCompleted('');
         setPendingTasks('');
         setBlockers('');
@@ -71,6 +82,7 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
       projectTitle: projectTitle.trim() || '',
       moduleName: moduleName.trim() || '',
       workStatus,
+      reportSlot,
       tasksCompleted: tasksCompleted.trim(),
       pendingTasks: pendingTasks.trim(),
       blockers: blockers.trim(),
@@ -107,30 +119,34 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
                 {existingReport ? 'Edit Daily Work Report' : 'Submit Daily Work Report'}
               </h2>
               <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-400 font-medium truncate">
-                Update your daily progress and keep track of your tasks.
+                {existingReport ? 'Update your report details below.' : 'Add a new work report entry for today.'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Info banner: existing report will be updated */}
+        {/* Info banner: Editing an existing report */}
         {existingReport && (
           <div className="flex items-start gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300">
             <Info className="w-4 h-4 shrink-0 mt-0.5" />
             <div className="text-[11px] font-bold">
-              <p>You already submitted a report today at <span className="font-black">{new Date(existingReport.updatedAt || existingReport.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>.</p>
-              <p className="font-medium mt-0.5 text-amber-600 dark:text-amber-400">Re-submitting will <span className="font-black underline">update</span> your existing report — previous data will be replaced.</p>
+              <p>Editing report submitted at <span className="font-black">{new Date(existingReport.date || existingReport.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>.</p>
             </div>
           </div>
         )}
 
-        {/* Info: New report — show current time */}
+        {/* Info: New report entry */}
         {!existingReport && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-300">
-            <CalendarClock className="w-4 h-4 shrink-0" />
-            <p className="text-[11px] font-bold">
-              Submitting for <span className="font-black">{new Date().toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}</span> at <span className="font-black">{new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
-            </p>
+          <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-300">
+            <div className="flex items-center gap-2">
+              <CalendarClock className="w-4 h-4 shrink-0" />
+              <p className="text-[11px] font-bold">
+                New entry for <span className="font-black">{new Date().toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}</span> at <span className="font-black">{new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+              </p>
+            </div>
+            <span className="px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 text-[10px] font-black text-blue-700 dark:text-blue-300">
+              Multiple Reports Allowed
+            </span>
           </div>
         )}
 
@@ -246,6 +262,60 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Report Session / Shift Slot Selection */}
+        <div className="p-3 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 space-y-2">
+          <label className="block text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center justify-between">
+            <span>Report Session / Time Slot *</span>
+            <span className="text-[10px] text-slate-400 font-bold normal-case">Allows multiple reports per day</span>
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button
+              type="button"
+              onClick={() => setReportSlot('MORNING')}
+              className={`p-2 rounded-xl border text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                reportSlot === 'MORNING'
+                  ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/25 scale-[1.02]'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-amber-400'
+              }`}
+            >
+              <span>🌅 Morning</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setReportSlot('AFTERNOON')}
+              className={`p-2 rounded-xl border text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                reportSlot === 'AFTERNOON'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/25 scale-[1.02]'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-400'
+              }`}
+            >
+              <span>☀️ Afternoon</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setReportSlot('EVENING')}
+              className={`p-2 rounded-xl border text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                reportSlot === 'EVENING'
+                  ? 'bg-purple-600 text-white border-purple-600 shadow-md shadow-purple-500/25 scale-[1.02]'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-purple-400'
+              }`}
+            >
+              <span>🌆 Evening</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setReportSlot('GENERAL')}
+              className={`p-2 rounded-xl border text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                reportSlot === 'GENERAL'
+                  ? 'bg-slate-700 text-white border-slate-700 shadow-md shadow-slate-500/25 scale-[1.02]'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-400'
+              }`}
+            >
+              <span>📝 General</span>
+            </button>
           </div>
         </div>
 

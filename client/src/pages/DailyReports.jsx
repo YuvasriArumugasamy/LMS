@@ -287,7 +287,7 @@ export const DailyReports = () => {
               </div>
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-snug mt-0.5">
                 {todayStatus?.hasSubmitted
-                  ? `Submitted: "${todayStatus.report?.title}"`
+                  ? `Submitted ${todayStatus.submittedCount || 1} Report${(todayStatus.submittedCount || 1) > 1 ? 's' : ''} Today  Latest: "${todayStatus.report?.title}"`
                   : "You haven't submitted your daily work report for today yet."}
               </h3>
             </div>
@@ -298,7 +298,7 @@ export const DailyReports = () => {
             className="px-4 py-2 rounded-full border border-emerald-500/40 bg-emerald-50/80 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-2xs hover:scale-105"
           >
             <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Submit Another Report</span>
+            <span>{todayStatus?.hasSubmitted ? '+ Submit Another Report' : 'Submit Daily Report'}</span>
           </button>
         </div>
       )}
@@ -441,7 +441,7 @@ export const DailyReports = () => {
             </div>
 
             <div className="relative flex items-center flex-1">
-              <select
+              {user?.role !== 'EMPLOYEE' && ( <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full px-3 py-2 pr-7 bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white rounded-2xl outline-none cursor-pointer appearance-none"
@@ -451,7 +451,7 @@ export const DailyReports = () => {
                 <option value="REVIEWED">Reviewed</option>
                 <option value="APPROVED">Approved</option>
                 <option value="NOT_SUBMITTED">Not Submitted</option>
-              </select>
+              </select> )}
               <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 pointer-events-none" />
             </div>
           </div>
@@ -561,16 +561,24 @@ export const DailyReports = () => {
                     </span>
                   </div>
 
-                  {/* Row 2: Hours Logged */}
-                  <div className="flex items-center gap-2 pt-1 border-t border-slate-200/50 dark:border-slate-800/50">
-                    <Clock className={`w-3.5 h-3.5 ${palette.iconColor} shrink-0`} />
-                    {item.hasSubmitted ? (
-                      <span className="text-xs font-black text-slate-900 dark:text-white">
-                        {item.report?.hoursWorked || 8} Hours Logged
-                      </span>
-                    ) : (
-                      <span className="text-xs font-extrabold text-amber-600 dark:text-amber-400">
-                        0 Hours Logged (Awaiting Submission)
+                  {/* Row 2: Hours Logged & Multiple Reports Badge */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/50 dark:border-slate-800/50 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <Clock className={`w-3.5 h-3.5 ${palette.iconColor} shrink-0`} />
+                      {item.hasSubmitted ? (
+                        <span className="text-xs font-black text-slate-900 dark:text-white">
+                          {(item.reports || [item.report]).reduce((sum, r) => sum + (r?.hoursWorked || 8), 0)} Hours Logged
+                        </span>
+                      ) : (
+                        <span className="text-xs font-extrabold text-amber-600 dark:text-amber-400">
+                          0 Hours Logged (Awaiting Submission)
+                        </span>
+                      )}
+                    </div>
+
+                    {item.hasSubmitted && (item.submittedCount || 1) > 1 && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-300 dark:border-purple-800">
+                        {item.submittedCount} Reports Today
                       </span>
                     )}
                   </div>
@@ -579,11 +587,16 @@ export const DailyReports = () => {
                   {item.hasSubmitted ? (
                     <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 space-y-1.5">
                       <div className="flex items-center gap-1.5 flex-wrap">
+                        {item.report?.reportSlot && item.report.reportSlot !== 'GENERAL' && (
+                          <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[10px] font-black border border-amber-200 dark:border-amber-800">
+                            {item.report.reportSlot === 'MORNING' ? ' Morning' : item.report.reportSlot === 'AFTERNOON' ? ' Afternoon' : ' Evening'}
+                          </span>
+                        )}
                         <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-black border border-indigo-200 dark:border-indigo-800 truncate max-w-[150px]">
-                          ?? {item.report?.projectTitle || 'Attendance Project'}
+                           {item.report?.projectTitle || 'Attendance Project'}
                         </span>
                         <span className="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[10px] font-black border border-purple-200 dark:border-purple-800 truncate max-w-[150px]">
-                          ?? {item.report?.moduleName || 'Employee Management'}
+                           {item.report?.moduleName || 'Employee Management'}
                         </span>
                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
                           item.report?.workStatus === 'PENDING'
@@ -592,19 +605,19 @@ export const DailyReports = () => {
                             ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
                             : 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-300 dark:border-blue-800'
                         }`}>
-                          {item.report?.workStatus === 'PENDING' ? '?? Pending' : item.report?.workStatus === 'COMPLETED' ? '?? Completed' : '?? On Progress'}
+                          {item.report?.workStatus === 'PENDING' ? ' Pending' : item.report?.workStatus === 'COMPLETED' ? ' Completed' : ' On Progress'}
                         </span>
                       </div>
 
                       <div className="text-xs font-black text-slate-900 dark:text-white line-clamp-1 mt-1">
-                        ?? {item.report?.title || 'Daily Work Report'}
+                         {item.report?.title || 'Daily Work Report'}
                       </div>
                       <div className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold line-clamp-2 leading-relaxed">
                         {item.report?.tasksCompleted}
                       </div>
                       {item.report?.blockers && (
                         <div className="text-[10px] text-rose-600 dark:text-rose-400 font-bold truncate">
-                          ?? Blocker: {item.report.blockers}
+                           Blocker: {item.report.blockers}
                         </div>
                       )}
                     </div>

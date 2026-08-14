@@ -268,7 +268,12 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
           {/* Project Title, Module Name & Work Status Badge */}
           <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs space-y-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {currentReport.reportSlot && currentReport.reportSlot !== 'GENERAL' && (
+                  <span className="px-3 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-xs font-black border border-amber-200 dark:border-amber-800">
+                    {currentReport.reportSlot === 'MORNING' ? '🌅 Morning Session' : currentReport.reportSlot === 'AFTERNOON' ? '☀️ Afternoon Session' : '🌆 Evening Session'}
+                  </span>
+                )}
                 <span className="px-3 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-black border border-indigo-200 dark:border-indigo-800">
                   📁 Project: {currentReport.projectTitle || 'Attendance Project'}
                 </span>
