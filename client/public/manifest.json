@@ -3,9 +3,21 @@
   "name": "Life Changers Ind — LMS Portal",
   "icons": [
     {
-      "src": "/src/assets/Screenshot 2026-08-01 113959.webp",
+      "src": "/logo.webp",
       "type": "image/webp",
       "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
       "purpose": "any maskable"
     }
   ],
