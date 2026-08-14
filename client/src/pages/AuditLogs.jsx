@@ -90,10 +90,10 @@ export const AuditLogs = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-card p-4 space-y-3">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="glass-card p-3.5 sm:p-4 space-y-3 max-w-full overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-wrap">
           {/* Action Search */}
-          <div className="relative flex-1 min-w-[180px]">
+          <div className="relative flex-1 min-w-0 sm:min-w-[180px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input
               type="text"
@@ -104,39 +104,41 @@ export const AuditLogs = () => {
             />
           </div>
 
-          {/* Module Filter */}
-          <div className="flex items-center gap-1.5 min-w-[150px]">
-            <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <select
-              value={moduleFilter}
-              onChange={(e) => setModuleFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-primary"
-            >
-              <option value="">All Modules</option>
-              {MODULE_OPTIONS.filter(Boolean).map((m) => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
-          </div>
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+            {/* Module Filter */}
+            <div className="flex items-center gap-1.5 flex-1 sm:flex-initial min-w-[120px]">
+              <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <select
+                value={moduleFilter}
+                onChange={(e) => setModuleFilter(e.target.value)}
+                className="w-full px-2.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-primary"
+              >
+                <option value="">All Modules</option>
+                {MODULE_OPTIONS.filter(Boolean).map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Date Range */}
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="px-2 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
-              title="From date"
-            />
-            <span className="text-slate-400 text-xs font-bold">—</span>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="px-2 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
-              title="To date"
-            />
+            {/* Date Range */}
+            <div className="flex items-center gap-1 flex-1 sm:flex-initial min-w-0">
+              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0 hidden sm:inline-block" />
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="w-full min-w-0 px-1.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] sm:text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                title="From date"
+              />
+              <span className="text-slate-400 text-xs font-bold shrink-0">—</span>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="w-full min-w-0 px-1.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] sm:text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                title="To date"
+              />
+            </div>
           </div>
 
           {/* Clear Filters */}
