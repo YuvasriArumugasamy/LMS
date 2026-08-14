@@ -84,7 +84,29 @@ export const clockIn = asyncHandler(async (req, res, next) => {
 
   let existingAttendance = await Attendance.findOne({ user: userId, date: start });
   if (existingAttendance && existingAttendance.clockIn) {
-    return next(new AppError('You have already clocked in for today.', 400));
+    if (!existingAttendance.clockOut) {
+      return next(new AppError('You have already clocked in for today.', 400));
+    }
+    
+    // Employee was checked out (forced by manager or voluntary) and wants to Re-Check In
+    const now = new Date();
+    const { hours, minutes, isSunday } = getISTTime(now);
+    const isLate = hours >= 9 && (hours > 9 || minutes > 40);
+
+    existingAttendance.clockOut = undefined;
+    existingAttendance.totalHours = 0;
+    if (workLocation) existingAttendance.workLocation = workLocation;
+    
+    const timeLogStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    const newNote = `Re-clocked in at ${timeLogStr} IST`;
+    existingAttendance.notes = existingAttendance.notes ? `${existingAttendance.notes} | ${newNote}` : newNote;
+
+    await existingAttendance.save();
+    return res.status(200).json({
+      status: 'success',
+      message: 'Re-checked in successfully.',
+      data: { attendance: existingAttendance }
+    });
   }
 
   const now = new Date();

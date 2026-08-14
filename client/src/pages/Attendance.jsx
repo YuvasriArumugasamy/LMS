@@ -773,8 +773,28 @@ export const Attendance = () => {
                 Check Out
               </UiverseStarButton>
             ) : (
-              <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
-                <CheckCircle2 className="w-4 h-4" /> Attendance Completed
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
+                  <CheckCircle2 className="w-4 h-4" /> Checked Out
+                </div>
+
+                <select
+                  value={workLocation}
+                  onChange={(e) => setWorkLocation(e.target.value)}
+                  className="px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:ring-2 focus:ring-primary/20 shadow-2xs"
+                >
+                  <option value="WFH">🏡 Remote / WFH</option>
+                  <option value="IN_OFFICE">🏢 In-Office</option>
+                </select>
+
+                <UiverseStarButton
+                  disabled={actionLoading}
+                  onClick={handleInitiateClockIn}
+                  variant="emerald"
+                  icon={Play}
+                >
+                  Check In Again
+                </UiverseStarButton>
               </div>
             )}
           </div>
