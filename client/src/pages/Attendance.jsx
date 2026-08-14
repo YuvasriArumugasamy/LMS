@@ -908,29 +908,29 @@ export const Attendance = () => {
                 return (
                   <div
                     key={emp._id}
-                    className={`rounded-2xl border p-4 shadow-2xs hover:shadow-md transition-all duration-200 space-y-3.5 ${cardStyle}`}
+                    className={`rounded-3xl border p-4 sm:p-5 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 space-y-4 ${cardStyle}`}
                   >
-                    {/* Background watermark for Checked Out / Checked In cards matching Image 1 */}
+                    {/* Background watermark illustration for Checked Out / Checked In cards */}
                     {(isCheckedOut || isCheckedIn) && (
-                      <div className="absolute right-0 bottom-0 pointer-events-none opacity-15 dark:opacity-10 text-emerald-600 dark:text-emerald-400">
-                        <svg className="w-28 h-28" viewBox="0 0 200 200" fill="currentColor">
+                      <div className="absolute right-0 bottom-0 pointer-events-none opacity-20 dark:opacity-10 text-emerald-600 dark:text-emerald-400">
+                        <svg className="w-32 h-32" viewBox="0 0 200 200" fill="currentColor">
                           <path d="M40 180 L40 100 L80 60 L120 100 L120 180 Z M130 180 L130 120 L160 100 L190 120 L190 180 Z" opacity="0.6"/>
                           <circle cx="160" cy="60" r="15" opacity="0.4"/>
                         </svg>
                       </div>
                     )}
 
-                    {/* Employee Info Header matching Image 1 */}
+                    {/* Employee Info Header */}
                     <div className="flex items-center justify-between gap-2 relative z-10">
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
                         <UserAvatar
                           user={emp}
-                          size="w-9 h-9 text-xs font-black shrink-0"
+                          size="w-10 h-10 text-xs font-black shrink-0"
                           customBg={palette.avatarBg}
-                          className="ring-2 ring-white dark:ring-slate-800 shadow-xs"
+                          className="ring-2 ring-white dark:ring-slate-800 shadow-md"
                         />
                         <div className="min-w-0">
-                          <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate leading-tight">
+                          <p className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate leading-tight">
                             {getEmpDisplayName(emp)}
                           </p>
                           <p className="text-[10px] text-slate-400 font-bold mt-0.5 truncate">
@@ -939,60 +939,60 @@ export const Attendance = () => {
                         </div>
                       </div>
 
-                      <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black shrink-0 shadow-2xs ${badgeStyle}`}>
+                      <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black shrink-0 shadow-2xs tracking-wide ${badgeStyle}`}>
                         {(!isCheckedOut) && <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />}
                         <span>{badgeText}</span>
                       </span>
                     </div>
 
-                    {/* 4 Metric Items matching Image 1 (Icon Badges: Clock In, Clock Out, Location, Hours) */}
-                    <div className="grid grid-cols-2 gap-y-3 gap-x-2 pt-1 border-t border-slate-100/80 dark:border-slate-800/80 relative z-10">
-                      {/* Clock In */}
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-full bg-purple-100/80 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
-                          <LogIn className="w-3.5 h-3.5 stroke-[2.2]" />
+                    {/* 4 Metric Widget Tiles (Clock In, Clock Out, Location, Hours) */}
+                    <div className="grid grid-cols-2 gap-2.5 pt-1 relative z-10">
+                      {/* Clock In Tile */}
+                      <div className="p-2.5 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-100/80 dark:border-purple-900/40 flex items-center gap-2.5 min-w-0 shadow-2xs">
+                        <div className="w-7 h-7 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <LogIn className="w-3.5 h-3.5 stroke-[2.5]" />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 block leading-none">Clock In</span>
+                          <span className="text-[9px] font-extrabold text-purple-600/80 dark:text-purple-300/80 uppercase tracking-wider block leading-none">Clock In</span>
                           <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
                             {item.clockInTime ? new Date(item.clockInTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase() : '—'}
                           </span>
                         </div>
                       </div>
 
-                      {/* Clock Out */}
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-full bg-orange-100/80 dark:bg-orange-950/60 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0">
-                          <LogOut className="w-3.5 h-3.5 stroke-[2.2]" />
+                      {/* Clock Out Tile */}
+                      <div className="p-2.5 rounded-2xl bg-orange-50/60 dark:bg-orange-950/30 border border-orange-100/80 dark:border-orange-900/40 flex items-center gap-2.5 min-w-0 shadow-2xs">
+                        <div className="w-7 h-7 rounded-xl bg-orange-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <LogOut className="w-3.5 h-3.5 stroke-[2.5]" />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 block leading-none">Clock Out</span>
+                          <span className="text-[9px] font-extrabold text-orange-600/80 dark:text-orange-300/80 uppercase tracking-wider block leading-none">Clock Out</span>
                           <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
                             {item.clockOutTime ? new Date(item.clockOutTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase() : '—'}
                           </span>
                         </div>
                       </div>
 
-                      {/* Location */}
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-full bg-blue-100/80 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-                          <MapPin className="w-3.5 h-3.5 stroke-[2.2]" />
+                      {/* Location Tile */}
+                      <div className="p-2.5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100/80 dark:border-blue-900/40 flex items-center gap-2.5 min-w-0 shadow-2xs">
+                        <div className="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <MapPin className="w-3.5 h-3.5 stroke-[2.5]" />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 block leading-none">Location</span>
+                          <span className="text-[9px] font-extrabold text-blue-600/80 dark:text-blue-300/80 uppercase tracking-wider block leading-none">Location</span>
                           <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
                             {item.workLocation === 'WFH' ? '🏡 WFH' : item.workLocation === 'IN_OFFICE' ? '🏢 Office' : '—'}
                           </span>
                         </div>
                       </div>
 
-                      {/* Hours */}
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-full bg-emerald-100/80 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                          <Clock className="w-3.5 h-3.5 stroke-[2.2]" />
+                      {/* Hours Tile */}
+                      <div className="p-2.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100/80 dark:border-emerald-900/40 flex items-center gap-2.5 min-w-0 shadow-2xs">
+                        <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <Clock className="w-3.5 h-3.5 stroke-[2.5]" />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 block leading-none">Hours</span>
+                          <span className="text-[9px] font-extrabold text-emerald-600/80 dark:text-emerald-300/80 uppercase tracking-wider block leading-none">Hours</span>
                           <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
                             {item.totalHours ? `${item.totalHours}h` : item.clockInTime && !item.clockOutTime ? '⏱ Active' : '—'}
                           </span>
@@ -1000,9 +1000,9 @@ export const Attendance = () => {
                       </div>
                     </div>
 
-                    {/* Force Checkout Action Bar matching Image 1 */}
+                    {/* Force Checkout Action Bar */}
                     {canForceCheckout && (
-                      <div className="pt-2 border-t border-slate-100/80 dark:border-slate-800/80 relative z-10">
+                      <div className="pt-2.5 border-t border-slate-100/80 dark:border-slate-800/80 relative z-10">
                         {forceCheckoutUserId === emp._id ? (
                           <div className="space-y-2">
                             <input
@@ -1010,19 +1010,19 @@ export const Attendance = () => {
                               value={forceCheckoutReason}
                               onChange={(e) => setForceCheckoutReason(e.target.value)}
                               placeholder="Reason (optional)..."
-                              className="w-full px-2.5 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-rose-500"
+                              className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-rose-500"
                             />
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleForceCheckout(emp._id)}
                                 disabled={forceCheckoutLoading}
-                                className="flex-1 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black transition-all disabled:opacity-50 shadow-2xs"
+                                className="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black transition-all disabled:opacity-50 shadow-xs"
                               >
                                 {forceCheckoutLoading ? 'Processing...' : '✓ Confirm Force Check-Out'}
                               </button>
                               <button
                                 onClick={() => { setForceCheckoutUserId(null); setForceCheckoutReason(''); }}
-                                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold hover:bg-slate-200 transition-all"
+                                className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold hover:bg-slate-200 transition-all"
                               >
                                 Cancel
                               </button>
@@ -1031,9 +1031,9 @@ export const Attendance = () => {
                         ) : (
                           <button
                             onClick={() => setForceCheckoutUserId(emp._id)}
-                            className="w-full py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-[10px] font-black hover:bg-rose-100 transition-all flex items-center justify-center gap-1.5 shadow-2xs hover:scale-[1.01]"
+                            className="w-full py-2 rounded-xl bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/40 dark:to-pink-950/40 border border-rose-200/90 dark:border-rose-800/80 text-rose-600 dark:text-rose-300 text-[11px] font-black hover:from-rose-100 hover:to-pink-100 transition-all flex items-center justify-center gap-1.5 shadow-2xs hover:scale-[1.01] active:scale-[0.99]"
                           >
-                            <LogOut className="w-3 h-3" /> Force Check-Out
+                            <LogOut className="w-3.5 h-3.5" /> Force Check-Out
                           </button>
                         )}
                       </div>
