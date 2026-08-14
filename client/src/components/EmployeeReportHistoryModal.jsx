@@ -284,18 +284,12 @@ export const EmployeeReportHistoryModal = ({ isOpen, onClose, userId, onSelectRe
         </div>
 
         {/* ── Footer ── */}
-        <div className="px-5 py-3.5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between">
+        <div className="px-5 py-3.5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-start">
           <button
             onClick={() => {}}
             className="text-xs font-black text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
           >
             <ExternalLink className="w-3.5 h-3.5" /> View All — full timesheet
-          </button>
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all"
-          >
-            Close
           </button>
         </div>
       </div>
