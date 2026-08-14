@@ -86,39 +86,46 @@ const CARD_THEMES = [
 
 const LIVE_CARD_PALETTES = [
   {
-    leftBorder: 'border-l-[4px] border-l-purple-500',
-    avatarBg: '!bg-purple-600',
-    badge: 'bg-purple-100/80 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/80 font-black'
+    leftBorder: 'border-l-[5px] border-l-purple-500',
+    cardBg: 'bg-gradient-to-br from-purple-50/70 via-white to-indigo-50/40 dark:from-purple-950/30 dark:to-slate-900 border-purple-200/80 dark:border-purple-800/80',
+    avatarBg: '!bg-gradient-to-tr !from-purple-600 !to-indigo-500 text-white',
+    badge: 'bg-purple-100/90 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/90 dark:border-purple-800/80 font-black'
   },
   {
-    leftBorder: 'border-l-[4px] border-l-blue-500',
-    avatarBg: '!bg-blue-600',
-    badge: 'bg-blue-100/80 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/80 font-black'
+    leftBorder: 'border-l-[5px] border-l-blue-500',
+    cardBg: 'bg-gradient-to-br from-blue-50/70 via-white to-sky-50/40 dark:from-blue-950/30 dark:to-slate-900 border-blue-200/80 dark:border-blue-800/80',
+    avatarBg: '!bg-gradient-to-tr !from-blue-600 !to-cyan-500 text-white',
+    badge: 'bg-blue-100/90 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/90 dark:border-blue-800/80 font-black'
   },
   {
-    leftBorder: 'border-l-[4px] border-l-teal-500',
-    avatarBg: '!bg-teal-600',
-    badge: 'bg-teal-100/80 text-teal-600 dark:bg-teal-950/50 dark:text-teal-300 border border-teal-200/80 dark:border-teal-800/80 font-black'
+    leftBorder: 'border-l-[5px] border-l-teal-500',
+    cardBg: 'bg-gradient-to-br from-teal-50/70 via-white to-emerald-50/40 dark:from-teal-950/30 dark:to-slate-900 border-teal-200/80 dark:border-teal-800/80',
+    avatarBg: '!bg-gradient-to-tr !from-teal-600 !to-emerald-500 text-white',
+    badge: 'bg-teal-100/90 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border border-teal-200/90 dark:border-teal-800/80 font-black'
   },
   {
-    leftBorder: 'border-l-[4px] border-l-amber-500',
-    avatarBg: '!bg-amber-600',
-    badge: 'bg-amber-100/80 text-amber-600 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 font-black'
+    leftBorder: 'border-l-[5px] border-l-amber-500',
+    cardBg: 'bg-gradient-to-br from-amber-50/70 via-white to-orange-50/40 dark:from-amber-950/30 dark:to-slate-900 border-amber-200/80 dark:border-amber-800/80',
+    avatarBg: '!bg-gradient-to-tr !from-amber-500 !to-orange-500 text-white',
+    badge: 'bg-amber-100/90 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/90 dark:border-amber-800/80 font-black'
   },
   {
-    leftBorder: 'border-l-[4px] border-l-rose-500',
-    avatarBg: '!bg-rose-500',
-    badge: 'bg-rose-100/80 text-rose-600 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/80 font-black'
+    leftBorder: 'border-l-[5px] border-l-rose-500',
+    cardBg: 'bg-gradient-to-br from-rose-50/70 via-white to-pink-50/40 dark:from-rose-950/30 dark:to-slate-900 border-rose-200/80 dark:border-rose-800/80',
+    avatarBg: '!bg-gradient-to-tr !from-rose-500 !to-pink-500 text-white',
+    badge: 'bg-rose-100/90 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/90 dark:border-rose-800/80 font-black'
   },
   {
-    leftBorder: 'border-l-[4px] border-l-purple-500',
-    avatarBg: '!bg-purple-600',
-    badge: 'bg-purple-100/80 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/80 font-black'
+    leftBorder: 'border-l-[5px] border-l-purple-500',
+    cardBg: 'bg-gradient-to-br from-purple-50/70 via-white to-indigo-50/40 dark:from-purple-950/30 dark:to-slate-900 border-purple-200/80 dark:border-purple-800/80',
+    avatarBg: '!bg-gradient-to-tr !from-purple-600 !to-indigo-500 text-white',
+    badge: 'bg-purple-100/90 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/90 dark:border-purple-800/80 font-black'
   },
   {
-    leftBorder: 'border-l-[4px] border-l-cyan-500',
-    avatarBg: '!bg-cyan-600',
-    badge: 'bg-cyan-100/80 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-300 border border-cyan-200/80 dark:border-cyan-800/80 font-black'
+    leftBorder: 'border-l-[5px] border-l-cyan-500',
+    cardBg: 'bg-gradient-to-br from-cyan-50/70 via-white to-sky-50/40 dark:from-cyan-950/30 dark:to-slate-900 border-cyan-200/80 dark:border-cyan-800/80',
+    avatarBg: '!bg-gradient-to-tr !from-cyan-600 !to-blue-500 text-white',
+    badge: 'bg-cyan-100/90 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-200/90 dark:border-cyan-800/80 font-black'
   }
 ];
 
@@ -883,7 +890,7 @@ export const Attendance = () => {
                 const canForceCheckout = isCheckedIn || isOnLunch;
 
                 // Card background & border style matching Image 1
-                let cardStyle = `bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 ${palette.leftBorder}`;
+                let cardStyle = `${palette.cardBg} ${palette.leftBorder}`;
                 let badgeStyle = palette.badge;
                 let badgeText = 'Not Checked In';
                 let dotClass = 'bg-slate-400';
