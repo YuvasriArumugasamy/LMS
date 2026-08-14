@@ -85,21 +85,21 @@ export const clockIn = asyncHandler(async (req, res, next) => {
   let existingAttendance = await Attendance.findOne({
     user: userId,
     date: { $gte: start, $lte: end }
-  });
-  if (existingAttendance && existingAttendance.clockIn) {
-    if (!existingAttendance.clockOut) {
-      return next(new AppError('You have already clocked in for today.', 400));
-    }
-    
-    // Employee was checked out (forced by manager or voluntary) and wants to Re-Check In
+  }).sort({ createdAt: -1 });
+
+  if (existingAttendance) {
     const now = new Date();
     const { hours, minutes, isSunday } = getISTTime(now);
     const isLate = hours >= 9 && (hours > 9 || minutes > 40);
 
+    existingAttendance.clockIn = now;
     existingAttendance.clockOut = undefined;
     existingAttendance.totalHours = 0;
     if (workLocation) existingAttendance.workLocation = workLocation;
-    
+
+    const attendanceStatus = isSunday ? 'OVER_DUTY' : (isLate ? 'LATE' : 'PRESENT');
+    existingAttendance.status = attendanceStatus;
+
     const timeLogStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
     const newNote = `Re-clocked in at ${timeLogStr} IST`;
     existingAttendance.notes = existingAttendance.notes ? `${existingAttendance.notes} | ${newNote}` : newNote;
@@ -107,7 +107,7 @@ export const clockIn = asyncHandler(async (req, res, next) => {
     await existingAttendance.save();
     return res.status(200).json({
       status: 'success',
-      message: 'Re-checked in successfully.',
+      message: 'Checked in successfully.',
       data: { attendance: existingAttendance }
     });
   }
