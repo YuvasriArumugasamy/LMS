@@ -70,11 +70,19 @@ const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
   return { valid: true, distance };
 };
 
+// Helper to check if a given date corresponds to today in IST (Asia/Kolkata)
+const isTodayInIST = (dateVal) => {
+  if (!dateVal) return false;
+  const todayISTStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+  const recordISTStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(dateVal));
+  return todayISTStr === recordISTStr;
+};
+
 // Clock In
 export const clockIn = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { workLocation, notes, faceDescriptor } = req.body;
-  const { start, end } = getTodayDateRange();
+  const { start } = getTodayDateRange();
 
   // Face Verification Check
   const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
@@ -82,22 +90,27 @@ export const clockIn = asyncHandler(async (req, res, next) => {
     return next(new AppError(faceVerification.message, 400));
   }
 
+  // 1. Find user's latest attendance document
   let existingAttendance = await Attendance.findOne({
-    user: userId,
-    date: { $gte: start, $lte: end }
-  }).sort({ createdAt: -1 });
+    user: userId
+  }).sort({ date: -1, createdAt: -1 });
 
-  if (existingAttendance) {
-    const now = new Date();
-    const { hours, minutes, isSunday } = getISTTime(now);
-    const isLate = hours >= 9 && (hours > 9 || minutes > 40);
+  // 2. Check if the latest attendance document belongs to today in IST
+  const isTodayDoc = existingAttendance && (
+    isTodayInIST(existingAttendance.date) ||
+    isTodayInIST(existingAttendance.clockIn)
+  );
 
+  const now = new Date();
+  const { hours, minutes, isSunday } = getISTTime(now);
+  const isLate = hours >= 9 && (hours > 9 || minutes > 40);
+  const attendanceStatus = isSunday ? 'OVER_DUTY' : (isLate ? 'LATE' : 'PRESENT');
+
+  if (isTodayDoc && existingAttendance) {
     existingAttendance.clockIn = now;
     existingAttendance.clockOut = undefined;
     existingAttendance.totalHours = 0;
     if (workLocation) existingAttendance.workLocation = workLocation;
-
-    const attendanceStatus = isSunday ? 'OVER_DUTY' : (isLate ? 'LATE' : 'PRESENT');
     existingAttendance.status = attendanceStatus;
 
     const timeLogStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
@@ -112,34 +125,47 @@ export const clockIn = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const now = new Date();
-  const { hours, minutes, isSunday } = getISTTime(now);
-  // Late if after 9:40 AM IST
-  const isLate = hours >= 9 && (hours > 9 || minutes > 40);
+  // 3. First check-in of the day for this user
+  try {
+    const attendance = await Attendance.create({
+      user: userId,
+      date: start,
+      clockIn: now,
+      workLocation: workLocation || 'IN_OFFICE',
+      status: attendanceStatus,
+      notes: notes || (isSunday ? 'Sunday Special Over Duty (OD)' : '')
+    });
 
-  // Auto-detect Sunday / Holiday Check-in as OVER_DUTY (OD)
-  const attendanceStatus = isSunday ? 'OVER_DUTY' : (isLate ? 'LATE' : 'PRESENT');
-
-  const attendance = await Attendance.create({
-    user: userId,
-    date: start,
-    clockIn: now,
-    workLocation: workLocation || 'IN_OFFICE',
-    status: attendanceStatus,
-    notes: notes || (isSunday ? 'Sunday Special Over Duty (OD)' : '')
-  });
-
-  res.status(201).json({
-    status: 'success',
-    data: { attendance }
-  });
+    return res.status(201).json({
+      status: 'success',
+      data: { attendance }
+    });
+  } catch (err) {
+    // If MongoDB E11000 duplicate key error occurs on user_1_date_1 index, update the existing document!
+    if (err.code === 11000) {
+      let duplicateDoc = await Attendance.findOne({ user: userId }).sort({ date: -1, createdAt: -1 });
+      if (duplicateDoc) {
+        duplicateDoc.clockIn = now;
+        duplicateDoc.clockOut = undefined;
+        duplicateDoc.totalHours = 0;
+        if (workLocation) duplicateDoc.workLocation = workLocation;
+        duplicateDoc.status = attendanceStatus;
+        await duplicateDoc.save();
+        return res.status(200).json({
+          status: 'success',
+          message: 'Checked in successfully.',
+          data: { attendance: duplicateDoc }
+        });
+      }
+    }
+    throw err;
+  }
 });
 
 // Lunch Out
 export const lunchOut = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { faceDescriptor } = req.body;
-  const { start, end } = getTodayDateRange();
 
   // Face Verification Check
   const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
@@ -147,10 +173,9 @@ export const lunchOut = asyncHandler(async (req, res, next) => {
     return next(new AppError(faceVerification.message, 400));
   }
 
-  const attendance = await Attendance.findOne({
-    user: userId,
-    date: { $gte: start, $lte: end }
-  });
+  const latest = await Attendance.findOne({ user: userId }).sort({ date: -1, createdAt: -1 });
+  const attendance = (latest && (isTodayInIST(latest.date) || isTodayInIST(latest.clockIn))) ? latest : null;
+
   if (!attendance) {
     return next(new AppError('No clock-in record found for today.', 404));
   }
@@ -177,7 +202,6 @@ export const lunchOut = asyncHandler(async (req, res, next) => {
 export const lunchIn = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { faceDescriptor } = req.body;
-  const { start, end } = getTodayDateRange();
 
   // Face Verification Check
   const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
@@ -185,10 +209,9 @@ export const lunchIn = asyncHandler(async (req, res, next) => {
     return next(new AppError(faceVerification.message, 400));
   }
 
-  const attendance = await Attendance.findOne({
-    user: userId,
-    date: { $gte: start, $lte: end }
-  });
+  const latest = await Attendance.findOne({ user: userId }).sort({ date: -1, createdAt: -1 });
+  const attendance = (latest && (isTodayInIST(latest.date) || isTodayInIST(latest.clockIn))) ? latest : null;
+
   if (!attendance) {
     return next(new AppError('No clock-in record found for today.', 404));
   }
@@ -219,7 +242,6 @@ export const lunchIn = asyncHandler(async (req, res, next) => {
 export const clockOut = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { faceDescriptor } = req.body;
-  const { start, end } = getTodayDateRange();
 
   // Face Verification Check
   const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
@@ -227,10 +249,9 @@ export const clockOut = asyncHandler(async (req, res, next) => {
     return next(new AppError(faceVerification.message, 400));
   }
 
-  const attendance = await Attendance.findOne({
-    user: userId,
-    date: { $gte: start, $lte: end }
-  });
+  const latest = await Attendance.findOne({ user: userId }).sort({ date: -1, createdAt: -1 });
+  const attendance = (latest && (isTodayInIST(latest.date) || isTodayInIST(latest.clockIn))) ? latest : null;
+
   if (!attendance) {
     return next(new AppError('No clock-in record found for today.', 404));
   }
@@ -271,12 +292,9 @@ export const clockOut = asyncHandler(async (req, res, next) => {
 // Get Today Attendance Status
 export const getTodayAttendance = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const { start, end } = getTodayDateRange();
 
-  const attendance = await Attendance.findOne({
-    user: userId,
-    date: { $gte: start, $lte: end }
-  });
+  const latest = await Attendance.findOne({ user: userId }).sort({ date: -1, createdAt: -1 });
+  const attendance = (latest && (isTodayInIST(latest.date) || isTodayInIST(latest.clockIn))) ? latest : null;
 
   res.status(200).json({
     status: 'success',
