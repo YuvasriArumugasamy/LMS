@@ -74,7 +74,7 @@ const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
 export const clockIn = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { workLocation, notes, faceDescriptor } = req.body;
-  const { start } = getTodayDateRange();
+  const { start, end } = getTodayDateRange();
 
   // Face Verification Check
   const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
@@ -82,7 +82,10 @@ export const clockIn = asyncHandler(async (req, res, next) => {
     return next(new AppError(faceVerification.message, 400));
   }
 
-  let existingAttendance = await Attendance.findOne({ user: userId, date: start });
+  let existingAttendance = await Attendance.findOne({
+    user: userId,
+    date: { $gte: start, $lte: end }
+  });
   if (existingAttendance && existingAttendance.clockIn) {
     if (!existingAttendance.clockOut) {
       return next(new AppError('You have already clocked in for today.', 400));
@@ -136,7 +139,7 @@ export const clockIn = asyncHandler(async (req, res, next) => {
 export const lunchOut = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { faceDescriptor } = req.body;
-  const { start } = getTodayDateRange();
+  const { start, end } = getTodayDateRange();
 
   // Face Verification Check
   const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
@@ -144,7 +147,10 @@ export const lunchOut = asyncHandler(async (req, res, next) => {
     return next(new AppError(faceVerification.message, 400));
   }
 
-  const attendance = await Attendance.findOne({ user: userId, date: start });
+  const attendance = await Attendance.findOne({
+    user: userId,
+    date: { $gte: start, $lte: end }
+  });
   if (!attendance) {
     return next(new AppError('No clock-in record found for today.', 404));
   }
@@ -171,7 +177,7 @@ export const lunchOut = asyncHandler(async (req, res, next) => {
 export const lunchIn = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { faceDescriptor } = req.body;
-  const { start } = getTodayDateRange();
+  const { start, end } = getTodayDateRange();
 
   // Face Verification Check
   const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
@@ -179,7 +185,10 @@ export const lunchIn = asyncHandler(async (req, res, next) => {
     return next(new AppError(faceVerification.message, 400));
   }
 
-  const attendance = await Attendance.findOne({ user: userId, date: start });
+  const attendance = await Attendance.findOne({
+    user: userId,
+    date: { $gte: start, $lte: end }
+  });
   if (!attendance) {
     return next(new AppError('No clock-in record found for today.', 404));
   }
@@ -210,7 +219,7 @@ export const lunchIn = asyncHandler(async (req, res, next) => {
 export const clockOut = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { faceDescriptor } = req.body;
-  const { start } = getTodayDateRange();
+  const { start, end } = getTodayDateRange();
 
   // Face Verification Check
   const faceVerification = verifyUserFaceDescriptor(req.user, faceDescriptor);
@@ -218,7 +227,10 @@ export const clockOut = asyncHandler(async (req, res, next) => {
     return next(new AppError(faceVerification.message, 400));
   }
 
-  const attendance = await Attendance.findOne({ user: userId, date: start });
+  const attendance = await Attendance.findOne({
+    user: userId,
+    date: { $gte: start, $lte: end }
+  });
   if (!attendance) {
     return next(new AppError('No clock-in record found for today.', 404));
   }
@@ -259,9 +271,12 @@ export const clockOut = asyncHandler(async (req, res, next) => {
 // Get Today Attendance Status
 export const getTodayAttendance = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const { start } = getTodayDateRange();
+  const { start, end } = getTodayDateRange();
 
-  const attendance = await Attendance.findOne({ user: userId, date: start });
+  const attendance = await Attendance.findOne({
+    user: userId,
+    date: { $gte: start, $lte: end }
+  });
 
   res.status(200).json({
     status: 'success',
@@ -438,7 +453,7 @@ export const getLiveStatus = asyncHandler(async (req, res, next) => {
 export const forceCheckOut = asyncHandler(async (req, res, next) => {
   const { userId } = req.params;
   const { reason } = req.body;
-  const { start } = getTodayDateRange();
+  const { start, end } = getTodayDateRange();
 
   const targetEmployee = await User.findById(userId);
   if (!targetEmployee || targetEmployee.isDeleted) {
@@ -453,7 +468,10 @@ export const forceCheckOut = asyncHandler(async (req, res, next) => {
     }
   }
 
-  const attendance = await Attendance.findOne({ user: userId, date: start });
+  const attendance = await Attendance.findOne({
+    user: userId,
+    date: { $gte: start, $lte: end }
+  });
   if (!attendance) {
     return next(new AppError('No check-in record found for this employee today.', 404));
   }
