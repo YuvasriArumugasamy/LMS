@@ -13,7 +13,7 @@ const getTodayRange = () => {
   return { start, end };
 };
 
-// Submit / Upsert Daily Report for Today
+// Submit Daily Report — no per-day restriction, multiple reports allowed
 export const submitDailyReport = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { title, projectTitle, moduleName, tasksCompleted, pendingTasks, blockers, hoursWorked, workStatus } = req.body;
@@ -25,39 +25,20 @@ export const submitDailyReport = asyncHandler(async (req, res, next) => {
     return next(new AppError('Please describe tasks completed today.', 400));
   }
 
-  const { start, end } = getTodayRange();
-
-  let report = await DailyReport.findOne({
+  // Always create a new report — no one-per-day restriction
+  const report = await DailyReport.create({
     user: userId,
-    date: { $gte: start, $lte: end }
+    date: new Date(),
+    title: title.trim(),
+    projectTitle: (projectTitle || 'Attendance Project').trim(),
+    moduleName: (moduleName || 'General').trim(),
+    tasksCompleted: tasksCompleted.trim(),
+    pendingTasks: (pendingTasks || '').trim(),
+    blockers: (blockers || '').trim(),
+    hoursWorked: Math.min(24, Math.max(0.5, Number(hoursWorked) || 8)),
+    workStatus: workStatus || 'IN_PROGRESS',
+    status: 'SUBMITTED'
   });
-
-  if (report) {
-    report.title = title.trim();
-    report.projectTitle = (projectTitle || 'Attendance Project').trim();
-    report.moduleName = (moduleName || 'General').trim();
-    report.tasksCompleted = tasksCompleted.trim();
-    report.pendingTasks = (pendingTasks || '').trim();
-    report.blockers = (blockers || '').trim();
-    report.hoursWorked = Math.min(24, Math.max(0.5, Number(hoursWorked) || 8));
-    if (workStatus) report.workStatus = workStatus;
-    report.status = 'SUBMITTED';
-    await report.save();
-  } else {
-    report = await DailyReport.create({
-      user: userId,
-      date: new Date(),
-      title: title.trim(),
-      projectTitle: (projectTitle || 'Attendance Project').trim(),
-      moduleName: (moduleName || 'General').trim(),
-      tasksCompleted: tasksCompleted.trim(),
-      pendingTasks: (pendingTasks || '').trim(),
-      blockers: (blockers || '').trim(),
-      hoursWorked: Math.min(24, Math.max(0.5, Number(hoursWorked) || 8)),
-      workStatus: workStatus || 'IN_PROGRESS',
-      status: 'SUBMITTED'
-    });
-  }
 
   res.status(200).json({
     status: 'success',
