@@ -35,6 +35,7 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new AppError('Invalid email or password. Please verify your credentials.', 401));
   }
 
+
   // Strict password validation — no backdoor passwords allowed
   const isValidPassword = await user.comparePassword(password);
   if (!isValidPassword) {
@@ -73,6 +74,7 @@ export const login = asyncHandler(async (req, res, next) => {
     }
   });
 });
+
 
 export const refreshToken = asyncHandler(async (req, res, next) => {
   const { token } = req.body;
@@ -268,4 +270,3 @@ export const saveFcmToken = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ status: 'success', message: 'FCM token saved successfully.' });
 });
-
