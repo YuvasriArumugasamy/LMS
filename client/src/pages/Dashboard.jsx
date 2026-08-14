@@ -85,7 +85,7 @@ export const Dashboard = () => {
   const currentHour = currentTime.getHours();
   const currentMinutes = currentTime.getMinutes();
   
-  const isBeforeLunchOut = currentHour < 13 || (currentHour === 13 && currentMinutes < 30);
+  const isBeforeLunchOut = currentHour < 14;
   const isBeforeLunchIn = currentHour < 14 || (currentHour === 14 && currentMinutes < 15);
   const isBeforeClockOut = currentHour < 18 || (currentHour === 18 && currentMinutes < 30);
   const [todayAttendance, setTodayAttendance] = useState(null);
@@ -381,9 +381,11 @@ export const Dashboard = () => {
                       <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
                         {!todayAttendance?.lunchOut ? (
                           <>
-                            <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchOut} variant="checkout">
-                              Lunch Out
-                            </UiverseStarButton>
+                            {isBeforeLunchOut && (
+                              <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchOut} variant="checkout">
+                                Lunch Out
+                              </UiverseStarButton>
+                            )}
                             <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
                               Check Out
                             </UiverseStarButton>
