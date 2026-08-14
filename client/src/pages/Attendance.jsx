@@ -196,7 +196,12 @@ export const Attendance = () => {
 
     const start = new Date(log.clockIn);
     const end = new Date(log.clockOut);
-    const totalMins = Math.max(0, Math.round((end - start) / (1000 * 60)));
+    let totalMins = Math.max(0, Math.round((end - start) / (1000 * 60)));
+
+    if (log.lunchOut && log.lunchIn) {
+      const lunchMins = Math.max(0, Math.round((new Date(log.lunchIn) - new Date(log.lunchOut)) / (1000 * 60)));
+      totalMins = Math.max(0, totalMins - lunchMins);
+    }
 
     if (totalMins < 1) return '00h 00m';
     const hrs = Math.floor(totalMins / 60);
