@@ -13,7 +13,7 @@ const getTodayRange = () => {
   return { start, end };
 };
 
-// Submit Daily Report — no per-day restriction, multiple reports allowed
+// Submit Daily Report — same day = update existing, different day = new report
 export const submitDailyReport = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { title, projectTitle, moduleName, tasksCompleted, pendingTasks, blockers, hoursWorked, workStatus } = req.body;
@@ -25,20 +25,45 @@ export const submitDailyReport = asyncHandler(async (req, res, next) => {
     return next(new AppError('Please describe tasks completed today.', 400));
   }
 
-  // Always create a new report — no one-per-day restriction
-  const report = await DailyReport.create({
+  const { start, end } = getTodayRange();
+
+  // Check if a report already exists for today — if yes, update it
+  let report = await DailyReport.findOne({
     user: userId,
-    date: new Date(),
-    title: title.trim(),
-    projectTitle: (projectTitle || 'Attendance Project').trim(),
-    moduleName: (moduleName || 'General').trim(),
-    tasksCompleted: tasksCompleted.trim(),
-    pendingTasks: (pendingTasks || '').trim(),
-    blockers: (blockers || '').trim(),
-    hoursWorked: Math.min(24, Math.max(0.5, Number(hoursWorked) || 8)),
-    workStatus: workStatus || 'IN_PROGRESS',
-    status: 'SUBMITTED'
+    date: { $gte: start, $lte: end }
   });
+
+  const now = new Date();
+
+  if (report) {
+    // Update existing today's report
+    report.title = title.trim();
+    report.projectTitle = (projectTitle || 'Attendance Project').trim();
+    report.moduleName = (moduleName || 'General').trim();
+    report.tasksCompleted = tasksCompleted.trim();
+    report.pendingTasks = (pendingTasks || '').trim();
+    report.blockers = (blockers || '').trim();
+    report.hoursWorked = Math.min(24, Math.max(0.5, Number(hoursWorked) || 8));
+    if (workStatus) report.workStatus = workStatus;
+    report.status = 'SUBMITTED';
+    report.date = now;
+    await report.save();
+  } else {
+    // Create new report for today
+    report = await DailyReport.create({
+      user: userId,
+      date: now,
+      title: title.trim(),
+      projectTitle: (projectTitle || 'Attendance Project').trim(),
+      moduleName: (moduleName || 'General').trim(),
+      tasksCompleted: tasksCompleted.trim(),
+      pendingTasks: (pendingTasks || '').trim(),
+      blockers: (blockers || '').trim(),
+      hoursWorked: Math.min(24, Math.max(0.5, Number(hoursWorked) || 8)),
+      workStatus: workStatus || 'IN_PROGRESS',
+      status: 'SUBMITTED'
+    });
+  }
 
   res.status(200).json({
     status: 'success',

@@ -113,6 +113,27 @@ export const DailyReportSubmitModal = ({ isOpen, onClose, onSuccess, existingRep
           </div>
         </div>
 
+        {/* Info banner: existing report will be updated */}
+        {existingReport && (
+          <div className="flex items-start gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300">
+            <Info className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="text-[11px] font-bold">
+              <p>You already submitted a report today at <span className="font-black">{new Date(existingReport.updatedAt || existingReport.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>.</p>
+              <p className="font-medium mt-0.5 text-amber-600 dark:text-amber-400">Re-submitting will <span className="font-black underline">update</span> your existing report — previous data will be replaced.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Info: New report — show current time */}
+        {!existingReport && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-300">
+            <CalendarClock className="w-4 h-4 shrink-0" />
+            <p className="text-[11px] font-bold">
+              Submitting for <span className="font-black">{new Date().toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}</span> at <span className="font-black">{new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+            </p>
+          </div>
+        )}
+
         {error && (
           <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
