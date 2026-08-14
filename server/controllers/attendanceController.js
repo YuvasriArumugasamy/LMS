@@ -372,9 +372,10 @@ export const getLiveStatus = asyncHandler(async (req, res, next) => {
 
   // Get today's attendance for all these employees
   const employeeIds = allEmployees.map((e) => e._id);
+  const { start, end } = getTodayDateRange();
   const todayLogs = await Attendance.find({
     user: { $in: employeeIds },
-    date: start
+    date: { $gte: start, $lte: end }
   }).lean();
 
   const logMap = {};
