@@ -712,7 +712,7 @@ export const Attendance = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-28 sm:pb-8">
       {/* Compact Header + Tabs */}
       <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/40 p-3.5 sm:p-4 shadow-2xs">
         <div className="relative flex items-center justify-between gap-3 flex-wrap">

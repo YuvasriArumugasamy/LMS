@@ -226,7 +226,7 @@ export const DailyReports = () => {
   const pendingSubmissionCount = metrics.pendingCount || employeeStatuses.filter((e) => !e.hasSubmitted).length;
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6 pb-28 sm:pb-8 relative">
       {/* Toast Notification Popup */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl bg-slate-900 text-white text-xs font-extrabold shadow-2xl flex items-center gap-2 border border-slate-700 animate-bounce">

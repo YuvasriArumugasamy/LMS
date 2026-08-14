@@ -298,7 +298,7 @@ export const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 pb-28 sm:pb-8">
       {/* Error Toast for face verification / clock-in failures */}
       {clockErrorMsg && (
         <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl bg-rose-600 text-white text-xs font-extrabold shadow-2xl flex items-center gap-2 border border-rose-700 animate-bounce max-w-xs">
