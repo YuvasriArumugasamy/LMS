@@ -885,23 +885,23 @@ export const Attendance = () => {
                 // Card background & border style matching Image 1
                 let cardStyle = `bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 ${palette.leftBorder}`;
                 let badgeStyle = palette.badge;
-                let badgeText = '• Not Checked In';
+                let badgeText = 'Not Checked In';
                 let dotClass = 'bg-slate-400';
 
                 if (isCheckedOut) {
                   cardStyle = 'bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-emerald-100/50 dark:from-emerald-950/40 dark:to-slate-900 border-emerald-300/80 dark:border-emerald-800 border-l-[4px] border-l-emerald-500 relative overflow-hidden';
                   badgeStyle = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800';
-                  badgeText = '✔ Checked Out';
+                  badgeText = 'Checked Out';
                   dotClass = 'bg-emerald-500';
                 } else if (isCheckedIn) {
                   cardStyle = 'bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-sky-100/50 dark:from-blue-950/40 dark:to-slate-900 border-blue-300/80 dark:border-blue-800 border-l-[4px] border-l-blue-600 relative overflow-hidden';
                   badgeStyle = 'bg-emerald-500 text-white font-extrabold shadow-xs';
-                  badgeText = '• Checked In';
+                  badgeText = 'Check In';
                   dotClass = 'bg-white animate-pulse';
                 } else if (isOnLunch) {
                   cardStyle = 'bg-gradient-to-br from-amber-50/70 via-orange-50/30 to-amber-100/50 dark:from-amber-950/40 dark:to-slate-900 border-amber-300/80 dark:border-amber-800 border-l-[4px] border-l-amber-500 relative overflow-hidden';
                   badgeStyle = 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/80';
-                  badgeText = '• On Lunch Break';
+                  badgeText = 'On Lunch Break';
                   dotClass = 'bg-amber-500 animate-pulse';
                 }
 
