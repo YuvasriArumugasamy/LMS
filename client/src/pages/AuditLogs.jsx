@@ -120,22 +120,71 @@ export const AuditLogs = () => {
               </select>
             </div>
 
-            {/* Date Range */}
-            <div className="flex items-center gap-1 flex-1 sm:flex-initial min-w-0">
-              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0 hidden sm:inline-block" />
+            {/* Date Range - Mobile View (Calendar Icons Only) */}
+            <div className="flex items-center gap-1.5 sm:hidden shrink-0">
+              {/* From Date Icon Button */}
+              <div className="relative inline-flex items-center">
+                <button
+                  type="button"
+                  className={`p-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                    fromDate
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500'
+                  }`}
+                  title={fromDate ? `From: ${fromDate}` : 'Pick From Date'}
+                >
+                  <Calendar className="w-4 h-4" />
+                  {fromDate && <span className="text-[10px] font-mono">{fromDate.slice(5)}</span>}
+                </button>
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                />
+              </div>
+
+              <span className="text-slate-400 text-xs font-bold">—</span>
+
+              {/* To Date Icon Button */}
+              <div className="relative inline-flex items-center">
+                <button
+                  type="button"
+                  className={`p-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                    toDate
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500'
+                  }`}
+                  title={toDate ? `To: ${toDate}` : 'Pick To Date'}
+                >
+                  <Calendar className="w-4 h-4" />
+                  {toDate && <span className="text-[10px] font-mono">{toDate.slice(5)}</span>}
+                </button>
+                <input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                />
+              </div>
+            </div>
+
+            {/* Date Range - Desktop View */}
+            <div className="hidden sm:flex items-center gap-1.5 flex-initial">
+              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <input
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
-                className="w-full min-w-0 px-1.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] sm:text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                className="px-2 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 title="From date"
               />
-              <span className="text-slate-400 text-xs font-bold shrink-0">—</span>
+              <span className="text-slate-400 text-xs font-bold">—</span>
               <input
                 type="date"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
-                className="w-full min-w-0 px-1.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] sm:text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                className="px-2 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 title="To date"
               />
             </div>
