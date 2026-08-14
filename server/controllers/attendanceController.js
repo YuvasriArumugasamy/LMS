@@ -346,3 +346,136 @@ export const updateAttendance = asyncHandler(async (req, res, next) => {
     data: { attendance }
   });
 });
+
+// Get Live Status of all currently clocked-in employees (for CEO/Admin/HR/TL)
+export const getLiveStatus = asyncHandler(async (req, res, next) => {
+  const { start } = getTodayDateRange();
+
+  // Exclude CEO users
+  const ceoUsers = await User.find({ role: 'CEO' }).select('_id');
+  const ceoIds = ceoUsers.map((u) => u._id);
+
+  let userQuery = { isDeleted: false, status: 'ACTIVE' };
+  if (ceoIds.length > 0) userQuery._id = { $nin: ceoIds };
+
+  // TEAM_LEAD: only show direct reports
+  if (req.user.role === 'TEAM_LEAD') {
+    const teamMembers = await User.find({ reportingManager: req.user._id, isDeleted: false }).select('_id');
+    const teamIds = teamMembers.map((m) => m._id);
+    userQuery._id = { $in: teamIds };
+  }
+
+  const allEmployees = await User.find(userQuery)
+    .select('firstName lastName employeeId profileImage department designation role')
+    .populate('department', 'name')
+    .populate('designation', 'name');
+
+  // Get today's attendance for all these employees
+  const employeeIds = allEmployees.map((e) => e._id);
+  const todayLogs = await Attendance.find({
+    user: { $in: employeeIds },
+    date: start
+  }).lean();
+
+  const logMap = {};
+  todayLogs.forEach((log) => { logMap[log.user.toString()] = log; });
+
+  const liveStatus = allEmployees.map((emp) => {
+    const log = logMap[emp._id.toString()] || null;
+    let statusLabel = 'NOT_CHECKED_IN';
+    if (log) {
+      if (log.clockOut) statusLabel = 'CHECKED_OUT';
+      else if (log.lunchOut && !log.lunchIn) statusLabel = 'ON_LUNCH';
+      else statusLabel = 'CHECKED_IN';
+    }
+
+    return {
+      employee: emp,
+      attendance: log,
+      statusLabel,
+      clockInTime: log?.clockIn || null,
+      clockOutTime: log?.clockOut || null,
+      lunchOutTime: log?.lunchOut || null,
+      lunchInTime: log?.lunchIn || null,
+      workLocation: log?.workLocation || null,
+      totalHours: log?.totalHours || null
+    };
+  });
+
+  // Sort: CHECKED_IN first, then ON_LUNCH, then NOT_CHECKED_IN, then CHECKED_OUT
+  const order = { CHECKED_IN: 0, ON_LUNCH: 1, NOT_CHECKED_IN: 2, CHECKED_OUT: 3 };
+  liveStatus.sort((a, b) => (order[a.statusLabel] ?? 4) - (order[b.statusLabel] ?? 4));
+
+  res.status(200).json({
+    status: 'success',
+    data: { liveStatus }
+  });
+});
+
+// Force Check-Out an employee (CEO/Admin/HR/TL only)
+export const forceCheckOut = asyncHandler(async (req, res, next) => {
+  const { userId } = req.params;
+  const { reason } = req.body;
+  const { start } = getTodayDateRange();
+
+  const targetEmployee = await User.findById(userId);
+  if (!targetEmployee || targetEmployee.isDeleted) {
+    return next(new AppError('Employee not found.', 404));
+  }
+
+  // TEAM_LEAD can only force checkout their direct reports
+  if (req.user.role === 'TEAM_LEAD') {
+    const isDirectReport = targetEmployee.reportingManager?.toString() === req.user._id.toString();
+    if (!isDirectReport) {
+      return next(new AppError('You can only force check-out your direct team members.', 403));
+    }
+  }
+
+  const attendance = await Attendance.findOne({ user: userId, date: start });
+  if (!attendance) {
+    return next(new AppError('No check-in record found for this employee today.', 404));
+  }
+  if (attendance.clockOut) {
+    return next(new AppError('This employee has already checked out.', 400));
+  }
+
+  const now = new Date();
+  let diffMs = now - new Date(attendance.clockIn);
+  if (attendance.lunchOut && attendance.lunchIn) {
+    diffMs -= new Date(attendance.lunchIn) - new Date(attendance.lunchOut);
+  }
+  const totalHours = Number((diffMs / (1000 * 60 * 60)).toFixed(2));
+
+  attendance.clockOut = now;
+  attendance.totalHours = totalHours;
+  attendance.notes = `Force checked out by ${req.user.firstName} ${req.user.lastName} (${req.user.role})${reason ? ': ' + reason : ''}`;
+  if (totalHours < 4 && attendance.status !== 'LATE') attendance.status = 'HALF_DAY';
+  await attendance.save();
+
+  // Notify the employee
+  const { Notification } = await import('../models/Notification.js');
+  await Notification.safeCreate({
+    recipient: userId,
+    title: '⚠️ You have been checked out',
+    message: `${req.user.firstName} ${req.user.lastName} (${req.user.role}) has checked you out at ${now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} IST.${reason ? ' Reason: ' + reason : ''}`,
+    type: 'SYSTEM',
+    targetUrl: '/attendance'
+  });
+
+  // Audit Log
+  const { AuditLog } = await import('../models/AuditLog.js');
+  await AuditLog.create({
+    user: req.user._id,
+    userName: `${req.user.firstName} ${req.user.lastName}`,
+    userRole: req.user.role,
+    action: 'FORCE_CHECKOUT',
+    module: 'ATTENDANCE',
+    details: `Force checked out ${targetEmployee.firstName} ${targetEmployee.lastName} (${targetEmployee.employeeId}) at ${now.toISOString()}${reason ? ' — Reason: ' + reason : ''}`
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: `${targetEmployee.firstName} ${targetEmployee.lastName} has been checked out successfully.`,
+    data: { attendance }
+  });
+});

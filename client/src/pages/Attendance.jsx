@@ -91,6 +91,13 @@ export const Attendance = () => {
   const [allEmployees, setAllEmployees] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('logs'); // 'logs' | 'live'
+  const [liveStatus, setLiveStatus] = useState([]);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [forceCheckoutUserId, setForceCheckoutUserId] = useState(null);
+  const [forceCheckoutReason, setForceCheckoutReason] = useState('');
+  const [forceCheckoutLoading, setForceCheckoutLoading] = useState(false);
+  const [forceCheckoutSuccess, setForceCheckoutSuccess] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [workLocation, setWorkLocation] = useState('WFH');
   const [statusFilter, setStatusFilter] = useState('');
@@ -590,10 +597,47 @@ export const Attendance = () => {
     }
   };
 
+  const fetchLiveStatus = async () => {
+    try {
+      setLiveLoading(true);
+      const res = await api.get('/attendance/live-status');
+      setLiveStatus(res.data.data.liveStatus || []);
+    } catch (err) {
+      console.error('[Live Status Error]', err);
+    } finally {
+      setLiveLoading(false);
+    }
+  };
+
+  const handleForceCheckout = async (userId) => {
+    setForceCheckoutLoading(true);
+    try {
+      const res = await api.post(`/attendance/force-checkout/${userId}`, { reason: forceCheckoutReason });
+      setForceCheckoutSuccess(res.data.message);
+      setForceCheckoutUserId(null);
+      setForceCheckoutReason('');
+      fetchLiveStatus();
+      setTimeout(() => setForceCheckoutSuccess(''), 4000);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Force checkout failed.');
+    } finally {
+      setForceCheckoutLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchTodayStatus();
     fetchAttendanceLogs();
   }, [statusFilter]);
+
+  useEffect(() => {
+    if (activeTab === 'live' && ['CEO', 'ADMIN', 'HR', 'TEAM_LEAD'].includes(user?.role)) {
+      fetchLiveStatus();
+      // Auto-refresh every 30s
+      const interval = setInterval(fetchLiveStatus, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
 
   const handleInitiateClockIn = () => {
     setPendingClockAction('clockIn');
@@ -626,7 +670,7 @@ export const Attendance = () => {
 
   return (
     <div className="space-y-6">
-      {/* Compact Header */}
+      {/* Compact Header + Tabs */}
       <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/40 p-3.5 sm:p-4 shadow-2xs">
         <div className="relative flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2.5">
@@ -638,6 +682,33 @@ export const Attendance = () => {
             Real-time attendance tracking and employee workforce logs
           </p>
         </div>
+
+        {/* Tab Switcher — only for managers */}
+        {['CEO', 'ADMIN', 'HR', 'TEAM_LEAD'].includes(user?.role) && (
+          <div className="flex items-center gap-2 mt-3">
+            <button
+              onClick={() => setActiveTab('logs')}
+              className={`px-4 py-1.5 rounded-full text-xs font-black transition-all ${
+                activeTab === 'logs'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
+              }`}
+            >
+              📋 Attendance Logs
+            </button>
+            <button
+              onClick={() => setActiveTab('live')}
+              className={`px-4 py-1.5 rounded-full text-xs font-black transition-all flex items-center gap-1.5 ${
+                activeTab === 'live'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
+              Live Status
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Daily Punch Widget Banner */}
@@ -708,6 +779,137 @@ export const Attendance = () => {
             )}
           </div>
         </div>
+
+      {/* ── LIVE STATUS TAB ── */}
+      {activeTab === 'live' && ['CEO', 'ADMIN', 'HR', 'TEAM_LEAD'].includes(user?.role) && (
+        <div className="space-y-4">
+          {/* Success toast */}
+          {forceCheckoutSuccess && (
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0" /> {forceCheckoutSuccess}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-black text-slate-900 dark:text-white">Employee Live Status</h2>
+              <p className="text-xs text-slate-400 font-medium">Real-time check-in status — auto refreshes every 30s</p>
+            </div>
+            <button
+              onClick={fetchLiveStatus}
+              className="px-3 py-1.5 text-xs font-bold rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 transition-all"
+            >
+              🔄 Refresh
+            </button>
+          </div>
+
+          {liveLoading ? (
+            <div className="py-12 text-center text-slate-400 text-sm font-medium animate-pulse">Loading live status...</div>
+          ) : liveStatus.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 text-sm font-medium">No employee data found.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {liveStatus.map((item) => {
+                const emp = item.employee;
+                const statusConfig = {
+                  CHECKED_IN:     { label: 'Checked In',     dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300', border: 'border-emerald-200 dark:border-emerald-800' },
+                  ON_LUNCH:       { label: 'On Lunch Break', dot: 'bg-amber-500',   badge: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300',     border: 'border-amber-200 dark:border-amber-800' },
+                  NOT_CHECKED_IN: { label: 'Not Checked In', dot: 'bg-slate-400',   badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',         border: 'border-slate-200 dark:border-slate-700' },
+                  CHECKED_OUT:    { label: 'Checked Out',    dot: 'bg-blue-500',    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',          border: 'border-blue-200 dark:border-blue-800' }
+                }[item.statusLabel] || { label: item.statusLabel, dot: 'bg-slate-400', badge: 'bg-slate-100 text-slate-600', border: 'border-slate-200' };
+
+                const canForceCheckout = item.statusLabel === 'CHECKED_IN' || item.statusLabel === 'ON_LUNCH';
+
+                return (
+                  <div key={emp._id} className={`bg-white dark:bg-slate-900 rounded-2xl border ${statusConfig.border} p-4 shadow-xs space-y-3`}>
+                    {/* Employee Info */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <UserAvatar user={emp} size="w-9 h-9 text-xs shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-black text-slate-900 dark:text-white truncate">{emp.firstName} {emp.lastName}</p>
+                          <p className="text-[10px] text-slate-400 font-mono">{emp.employeeId} · {emp.department?.name || '—'}</p>
+                        </div>
+                      </div>
+                      <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black ${statusConfig.badge} shrink-0`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot} ${item.statusLabel === 'CHECKED_IN' ? 'animate-pulse' : ''}`} />
+                        {statusConfig.label}
+                      </span>
+                    </div>
+
+                    {/* Times */}
+                    <div className="grid grid-cols-2 gap-2 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                      <div>
+                        <span className="text-slate-400 font-medium block">Clock In</span>
+                        <span className="text-slate-800 dark:text-slate-200">
+                          {item.clockInTime ? new Date(item.clockInTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 font-medium block">Clock Out</span>
+                        <span className="text-slate-800 dark:text-slate-200">
+                          {item.clockOutTime ? new Date(item.clockOutTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 font-medium block">Location</span>
+                        <span className="text-slate-800 dark:text-slate-200">{item.workLocation === 'WFH' ? '🏡 WFH' : item.workLocation === 'IN_OFFICE' ? '🏢 Office' : '—'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 font-medium block">Hours</span>
+                        <span className="text-slate-800 dark:text-slate-200">{item.totalHours ? `${item.totalHours}h` : item.clockInTime && !item.clockOutTime ? '⏱ Active' : '—'}</span>
+                      </div>
+                    </div>
+
+                    {/* Force Checkout Button */}
+                    {canForceCheckout && (
+                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                        {forceCheckoutUserId === emp._id ? (
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              value={forceCheckoutReason}
+                              onChange={(e) => setForceCheckoutReason(e.target.value)}
+                              placeholder="Reason (optional)..."
+                              className="w-full px-2.5 py-1.5 text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleForceCheckout(emp._id)}
+                                disabled={forceCheckoutLoading}
+                                className="flex-1 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black transition-all disabled:opacity-50"
+                              >
+                                {forceCheckoutLoading ? 'Processing...' : '✓ Confirm Force Check-Out'}
+                              </button>
+                              <button
+                                onClick={() => { setForceCheckoutUserId(null); setForceCheckoutReason(''); }}
+                                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setForceCheckoutUserId(emp._id)}
+                            className="w-full py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-[10px] font-black hover:bg-rose-100 transition-all flex items-center justify-center gap-1.5"
+                          >
+                            <LogOut className="w-3 h-3" /> Force Check-Out
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Show rest of page only when logs tab is active */}
+      {activeTab === 'logs' && (
+      <>
 
       {/* Top 4 KPI Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1577,6 +1779,8 @@ export const Attendance = () => {
         </div>,
         document.body
       )}
+    </>
+    )}
     </div>
   );
 };
