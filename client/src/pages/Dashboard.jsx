@@ -399,9 +399,26 @@ export const Dashboard = () => {
                         )}
                       </div>
                     ) : (
-                      <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs font-black rounded-xl flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Checked Out
-                      </span>
+                      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
+                        <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs font-black rounded-xl flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Checked Out
+                        </span>
+                        <select
+                          value={dashWorkLocation}
+                          onChange={(e) => setDashWorkLocation(e.target.value)}
+                          className="px-2 sm:px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer shadow-xs"
+                        >
+                          <option value="WFH">🏡 WFH</option>
+                          <option value="IN_OFFICE">🏢 In-Office</option>
+                        </select>
+                        <UiverseStarButton
+                          disabled={actionLoading}
+                          onClick={handleQuickClockIn}
+                          variant="checkin"
+                        >
+                          Check In Again
+                        </UiverseStarButton>
+                      </div>
                     )}
                   </div>
                 )}
