@@ -1,0 +1,16 @@
+{
+  "short_name": "LC IND LMS",
+  "name": "Life Changers Ind — LMS Portal",
+  "icons": [
+    {
+      "src": "/src/assets/Screenshot 2026-08-01 113959.webp",
+      "type": "image/webp",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "display": "standalone"
+}
