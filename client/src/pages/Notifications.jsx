@@ -86,7 +86,7 @@ export const Notifications = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 pb-28 sm:pb-8">
       {/* Toast Alert for Push Message */}
       {pushMessage && (
         <div className="p-4 rounded-2xl bg-indigo-600 text-white font-semibold text-sm shadow-lg flex items-center justify-between animate-bounce">

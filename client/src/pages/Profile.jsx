@@ -355,7 +355,7 @@ export const Profile = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 pb-28 sm:pb-8">
       {/* Profile Banner Card */}
       <div className="glass-card p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
         {/* Profile Avatar Container (Shows Initials Badge if no custom photo) */}

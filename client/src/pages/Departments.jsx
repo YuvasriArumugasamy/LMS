@@ -293,7 +293,7 @@ export const Departments = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-28 sm:pb-8">
       {/* Top Header Section matching Image 1 */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
