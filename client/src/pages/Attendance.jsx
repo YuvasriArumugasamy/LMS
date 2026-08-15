@@ -1060,63 +1060,65 @@ export const Attendance = () => {
 
 
       {/* Filter Bar */}
-      <div className="glass-card p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="flex items-center gap-2.5 w-full sm:w-auto">
-            <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-            <div className="relative w-full max-w-[260px] sm:w-64">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search employee name or ID..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary"
-              />
+      {user?.role !== 'EMPLOYEE' && (
+        <div className="glass-card p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+              <div className="relative w-full max-w-[260px] sm:w-64">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search employee name or ID..."
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-full sm:w-auto max-w-[220px]"
+              >
+                <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Statuses</option>
+                <option value="PRESENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Present Only</option>
+                <option value="LATE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Late Only</option>
+                <option value="HALF_DAY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Half Day Only</option>
+                <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">WFH / Remote</option>
+                <option value="ABSENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Absent Only</option>
+                <option value="OVER_DUTY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">⚡ Over Duty (OD)</option>
+              </select>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 w-full sm:w-auto">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-full sm:w-auto max-w-[220px]"
-            >
-              <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Statuses</option>
-              <option value="PRESENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Present Only</option>
-              <option value="LATE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Late Only</option>
-              <option value="HALF_DAY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Half Day Only</option>
-              <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">WFH / Remote</option>
-              <option value="ABSENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Absent Only</option>
-              <option value="OVER_DUTY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">⚡ Over Duty (OD)</option>
-            </select>
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="text-xs font-extrabold text-slate-400 shrink-0 self-start sm:self-auto pt-0.5 sm:pt-0 mr-2">
+              Showing {filteredEmployeeGroupList.length} Employee Card{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
+            </div>
+            {user?.role !== 'EMPLOYEE' && (
+              <>
+                <button
+                  onClick={() => setIsReportModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  View Report
+                </button>
+                <button
+                  onClick={handleDownloadExcel}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Download
+                </button>
+              </>
+            )}
           </div>
         </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="text-xs font-extrabold text-slate-400 shrink-0 self-start sm:self-auto pt-0.5 sm:pt-0 mr-2">
-            Showing {filteredEmployeeGroupList.length} Employee Card{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
-          </div>
-          {user?.role !== 'EMPLOYEE' && (
-            <>
-              <button
-                onClick={() => setIsReportModalOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-                View Report
-              </button>
-              <button
-                onClick={handleDownloadExcel}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Download
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Grouped Employee Attendance Cards (Every Directory Employee Has A Card) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
