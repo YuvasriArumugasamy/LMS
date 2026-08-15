@@ -151,19 +151,7 @@ export const EmployeeReportHistoryModal = ({ isOpen, onClose, userId, onSelectRe
                   </div>
                 </div>
 
-                {/* Stat Boxes */}
-                <div className="flex items-center gap-2.5 shrink-0">
-                  <div className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center shadow-xs min-w-[90px]">
-                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Total Reports</p>
-                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none">{stats.totalSubmitted || 0}</p>
-                    <p className="text-[9px] text-emerald-500 font-bold mt-0.5">↑ 5% this month</p>
-                  </div>
-                  <div className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center shadow-xs min-w-[90px]">
-                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-0.5">Hours Logged</p>
-                    <p className="text-lg font-black text-blue-600 dark:text-blue-400 leading-none">{stats.totalHours || 0}</p>
-                    <p className="text-[9px] text-emerald-500 font-bold mt-0.5">↑ 6% this month</p>
-                  </div>
-                </div>
+
               </div>
 
               {/* ── Monthly Tables ── */}
