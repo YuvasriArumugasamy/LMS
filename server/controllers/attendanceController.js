@@ -113,7 +113,7 @@ export const clockIn = asyncHandler(async (req, res, next) => {
     if (workLocation) existingAttendance.workLocation = workLocation;
     existingAttendance.status = attendanceStatus;
 
-    const timeLogStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    const timeLogStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
     const newNote = `Re-clocked in at ${timeLogStr} IST`;
     existingAttendance.notes = existingAttendance.notes ? `${existingAttendance.notes} | ${newNote}` : newNote;
 
@@ -515,7 +515,7 @@ export const forceCheckOut = asyncHandler(async (req, res, next) => {
   await Notification.safeCreate({
     recipient: userId,
     title: '⚠️ You have been checked out',
-    message: `${req.user.firstName} ${req.user.lastName} (${req.user.role}) has checked you out at ${now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} IST.${reason ? ' Reason: ' + reason : ''}`,
+    message: `${req.user.firstName} ${req.user.lastName} (${req.user.role}) has checked you out at ${now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })} IST.${reason ? ' Reason: ' + reason : ''}`,
     type: 'SYSTEM',
     targetUrl: '/attendance'
   });
