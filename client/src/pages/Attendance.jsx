@@ -800,8 +800,8 @@ export const Attendance = () => {
                   onChange={(e) => setWorkLocation(e.target.value)}
                   className="px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:ring-2 focus:ring-primary/20 shadow-2xs"
                 >
-                  <option value="WFH">🏡 Remote / WFH</option>
-                  <option value="IN_OFFICE">🏢 In-Office</option>
+                  <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏡 Remote / WFH</option>
+                  <option value="IN_OFFICE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏢 In-Office</option>
                 </select>
 
                 <UiverseStarButton
@@ -833,8 +833,8 @@ export const Attendance = () => {
                   onChange={(e) => setWorkLocation(e.target.value)}
                   className="px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:ring-2 focus:ring-primary/20 shadow-2xs"
                 >
-                  <option value="WFH">🏡 Remote / WFH</option>
-                  <option value="IN_OFFICE">🏢 In-Office</option>
+                  <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏡 Remote / WFH</option>
+                  <option value="IN_OFFICE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏢 In-Office</option>
                 </select>
 
                 <UiverseStarButton
@@ -1163,13 +1163,13 @@ export const Attendance = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-full sm:w-auto max-w-[220px]"
             >
-              <option value="">All Statuses</option>
-              <option value="PRESENT">Present Only</option>
-              <option value="LATE">Late Only</option>
-              <option value="HALF_DAY">Half Day Only</option>
-              <option value="WFH">WFH / Remote</option>
-              <option value="ABSENT">Absent Only</option>
-              <option value="OVER_DUTY">⚡ Over Duty (OD)</option>
+              <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Statuses</option>
+              <option value="PRESENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Present Only</option>
+              <option value="LATE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Late Only</option>
+              <option value="HALF_DAY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Half Day Only</option>
+              <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">WFH / Remote</option>
+              <option value="ABSENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Absent Only</option>
+              <option value="OVER_DUTY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">⚡ Over Duty (OD)</option>
             </select>
           </div>
         </div>
@@ -1416,11 +1416,11 @@ export const Attendance = () => {
                     }}
                     className="bg-transparent text-[11px] sm:text-xs font-extrabold text-slate-800 dark:text-slate-200 outline-none cursor-pointer w-full pr-1 truncate"
                   >
-                    <option value="this_month">This Month</option>
-                    <option value="all">All History (Last 90 Days)</option>
-                    <option value="last_30_days">Last 30 Days</option>
-                    <option value="last_month">Last Month</option>
-                    <option value="custom">Custom Date Range...</option>
+                    <option value="this_month" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">This Month</option>
+                    <option value="all" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All History (Last 90 Days)</option>
+                    <option value="last_30_days" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Last 30 Days</option>
+                    <option value="last_month" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Last Month</option>
+                    <option value="custom" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Custom Date Range...</option>
                   </select>
                 </div>
 
@@ -1434,12 +1434,12 @@ export const Attendance = () => {
                     }}
                     className="bg-transparent text-[11px] sm:text-xs font-extrabold text-slate-800 dark:text-slate-200 outline-none cursor-pointer pr-1"
                   >
-                    <option value="">All Status</option>
-                    <option value="PRESENT">Present</option>
-                    <option value="LATE">Late</option>
-                    <option value="ABSENT">Absent</option>
-                    <option value="WEEK_OFF">Week Off</option>
-                    <option value="HALF_DAY">Half Day</option>
+                    <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Status</option>
+                    <option value="PRESENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Present</option>
+                    <option value="LATE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Late</option>
+                    <option value="ABSENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Absent</option>
+                    <option value="WEEK_OFF" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Week Off</option>
+                    <option value="HALF_DAY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Half Day</option>
                   </select>
                 </div>
               </div>
