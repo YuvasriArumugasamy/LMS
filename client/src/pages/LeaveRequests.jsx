@@ -114,8 +114,8 @@ export const LeaveRequests = () => {
       </div>
 
       {/* Filter Dropdown */}
-      <div className="glass-card p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
-        <div className="flex items-center gap-2.5">
+      <div className="glass-card p-3 sm:p-4 flex items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-2.5 shrink-0">
           <Filter className="w-4 h-4 text-slate-400 shrink-0" />
           <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Filter by Status:</span>
         </div>
@@ -123,7 +123,7 @@ export const LeaveRequests = () => {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-full sm:w-auto max-w-[220px]"
+          className="px-3 py-2 sm:px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-auto min-w-0"
         >
           <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Leaves</option>
           <option value="PENDING" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Pending</option>
