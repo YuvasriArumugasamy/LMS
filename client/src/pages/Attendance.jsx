@@ -1775,74 +1775,158 @@ export const Attendance = () => {
 
       {/* ===== ATTENDANCE REPORT MODAL via Portal ===== */}
       {isReportModalOpen && createPortal(
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-slate-900/70 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-5xl flex flex-col max-h-[92vh] overflow-hidden">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-0 sm:p-6 bg-slate-900/70 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 sm:rounded-3xl border-0 sm:border border-slate-200 dark:border-slate-800 shadow-2xl w-full h-full sm:h-auto sm:max-w-5xl flex flex-col sm:max-h-[92vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-indigo-50/80 via-blue-50/40 to-white dark:from-slate-800/80 dark:to-slate-900 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
-                  <FileSpreadsheet className="w-5 h-5" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sm:bg-gradient-to-r sm:from-indigo-50/80 sm:via-blue-50/40 sm:to-white sm:dark:from-slate-800/80 sm:dark:to-slate-900 shrink-0 gap-4 sm:gap-0">
+              <div className="flex items-start sm:items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl sm:rounded-2xl bg-blue-600 sm:bg-gradient-to-br sm:from-indigo-600 sm:to-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25 sm:shadow-indigo-500/25 shrink-0">
+                    <FileSpreadsheet className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                      Attendance Report
+                    </h2>
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 sm:text-slate-400 font-medium mt-0.5">
+                      {filteredEmployeeGroupList.length} employee{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
+                      {' '}· {MONTH_NAMES[reportMonth]} {reportYear}
+                      {statusFilter ? ` · ${statusFilter}` : ' · All Statuses'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                    Attendance Report
-                  </h2>
-                  <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                    {filteredEmployeeGroupList.length} employee{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
-                    {' '}· {MONTH_NAMES[reportMonth]} {reportYear}
-                    {statusFilter ? ` · ${statusFilter}` : ' · All Statuses'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap justify-end">
-                {/* Month Filter */}
-                <select
-                  value={reportMonth}
-                  onChange={e => setReportMonth(Number(e.target.value))}
-                  className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
-                >
-                  {MONTH_NAMES.map((m, i) => (
-                    <option key={i} value={i}>{m}</option>
-                  ))}
-                </select>
-                {/* Year Filter */}
-                <select
-                  value={reportYear}
-                  onChange={e => setReportYear(Number(e.target.value))}
-                  className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs"
-                >
-                  {[reportYear - 1, reportYear, reportYear + 1].map(y => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
-                </select>
-                <button onClick={handleDownloadExcel} className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-md shadow-emerald-500/25 hover:scale-105">
-                  <Download className="w-3.5 h-3.5" /> Download Excel
+                {/* Mobile Close Icon (Top Right) */}
+                <button onClick={() => setIsReportModalOpen(false)} className="sm:hidden p-1.5 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-all">
+                  <X className="w-6 h-6" strokeWidth={2.5} />
                 </button>
-                <button onClick={() => setIsReportModalOpen(false)} className="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-all cursor-pointer shadow-md shadow-red-500/25 hover:scale-105">
+              </div>
+
+              {/* Action & Filters Row */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-2 flex-wrap sm:flex-nowrap justify-end w-full sm:w-auto">
+                {/* Mobile Filters (Side-by-side) */}
+                <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:gap-2">
+                  <select
+                    value={reportMonth}
+                    onChange={e => setReportMonth(Number(e.target.value))}
+                    className="px-3 py-2 sm:py-1.5 rounded-xl sm:rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs w-full sm:w-auto"
+                  >
+                    {MONTH_NAMES.map((m, i) => (
+                      <option key={i} value={i}>{m}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={reportYear}
+                    onChange={e => setReportYear(Number(e.target.value))}
+                    className="px-3 py-2 sm:py-1.5 rounded-xl sm:rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs w-full sm:w-auto"
+                  >
+                    {[reportYear - 1, reportYear, reportYear + 1].map(y => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                {/* Download Button */}
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button onClick={handleDownloadExcel} className="flex-1 sm:flex-none flex items-center justify-center gap-2 sm:gap-1.5 px-3.5 py-3 sm:py-2 rounded-xl sm:rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-md shadow-emerald-500/25 hover:scale-105">
+                    <Download className="w-4 h-4 sm:w-3.5 sm:h-3.5" /> Download Excel
+                  </button>
+                  {/* Filter Icon button (from reference image - hidden on desktop as it's already there) */}
+                  <div className="sm:hidden w-11 h-11 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-xs text-rose-500">
+                    <Filter className="w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Desktop Close Icon */}
+                <button onClick={() => setIsReportModalOpen(false)} className="hidden sm:flex w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white items-center justify-center transition-all cursor-pointer shadow-md shadow-red-500/25 hover:scale-105 shrink-0">
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
-            {/* Summary Stats Bar - Month Filtered */}
-            <div className="flex items-center gap-4 px-5 py-3 bg-slate-50/80 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800 shrink-0 overflow-x-auto">
+            {/* Summary Stats Grid (Responsive) */}
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 px-4 py-4 sm:px-5 sm:py-3 bg-white sm:bg-slate-50/80 dark:bg-slate-900 sm:dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800 shrink-0 overflow-x-auto">
               {(() => {
                 const allStats = filteredEmployeeGroupList.map(e => getMonthFilteredStats(e));
                 return [
-                  { label: 'Employees', value: filteredEmployeeGroupList.length, color: 'text-indigo-600 dark:text-indigo-400' },
-                  { label: 'Total Present', value: allStats.reduce((s, e) => s + e.presentCount, 0), color: 'text-emerald-600 dark:text-emerald-400' },
-                  { label: 'Total WFH', value: allStats.reduce((s, e) => s + e.wfhCount, 0), color: 'text-purple-600 dark:text-purple-400' },
-                  { label: 'Total Late', value: allStats.reduce((s, e) => s + e.lateCount, 0), color: 'text-amber-600 dark:text-amber-400' },
-                  { label: 'Total Absent', value: allStats.reduce((s, e) => s + e.absentCount, 0), color: 'text-rose-600 dark:text-rose-400' },
+                  { label: 'Employees', value: filteredEmployeeGroupList.length, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/30', icon: <UserCheck className="w-4 h-4 text-indigo-500" /> },
+                  { label: 'Total Present', value: allStats.reduce((s, e) => s + e.presentCount, 0), color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/30', icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" /> },
+                  { label: 'Total WFH', value: allStats.reduce((s, e) => s + e.wfhCount, 0), color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/30', icon: <Home className="w-4 h-4 text-purple-500" /> },
+                  { label: 'Total Late', value: allStats.reduce((s, e) => s + e.lateCount, 0), color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/30', icon: <Clock className="w-4 h-4 text-amber-500" /> },
+                  { label: 'Total Halfday', value: allStats.reduce((s, e) => s + e.halfDayCount, 0), color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: <Clock className="w-4 h-4 text-blue-500" /> },
+                  { label: 'Total Absent', value: allStats.reduce((s, e) => s + e.absentCount, 0), color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-900/30', icon: <X className="w-4 h-4 text-rose-500" /> },
                 ].map((stat, i) => (
-                  <div key={i} className="flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider whitespace-nowrap">{stat.label}</span>
-                    <span className={`text-base font-black ${stat.color}`}>{stat.value}</span>
+                  <div key={i} className="flex flex-row-reverse sm:flex-row items-center sm:items-center justify-between sm:justify-start gap-2 shrink-0 p-3 sm:px-3 sm:py-1.5 rounded-2xl sm:rounded-xl bg-white dark:bg-slate-800 border border-slate-100 sm:border-slate-200/80 dark:border-slate-700 shadow-sm sm:shadow-xs">
+                    <div className={`w-8 h-8 sm:hidden rounded-full flex items-center justify-center shrink-0 ${stat.bg}`}>
+                      {stat.icon}
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+                      <span className="text-[10px] font-black text-slate-500 sm:text-slate-400 uppercase tracking-wider whitespace-nowrap">{stat.label}</span>
+                      <span className={`text-xl sm:text-base font-black leading-none ${stat.color}`}>{stat.value}</span>
+                    </div>
                   </div>
                 ));
               })()}
             </div>
-            {/* Excel-like Table */}
-            <div className="overflow-auto flex-1">
+
+            {/* Mobile List View (Hidden on Desktop) */}
+            <div className="sm:hidden flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 p-4">
+              <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 mb-4 tracking-tight">Employee Attendance</h3>
+              <div className="flex flex-col gap-3">
+                {filteredEmployeeGroupList.length === 0 ? (
+                  <div className="py-10 text-center text-slate-400 font-semibold text-xs bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">No attendance data found.</div>
+                ) : (
+                  filteredEmployeeGroupList.map((emp) => {
+                    const s = getMonthFilteredStats(emp);
+                    const displayParts = getEmpDisplayName(emp.user).split(' ');
+                    const initials = (displayParts[0]?.[0] || '') + (displayParts[1]?.[0] || '');
+                    return (
+                      <div key={emp.empId} className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col gap-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-black text-sm border border-indigo-100 dark:border-indigo-800 shrink-0">
+                              {initials.toUpperCase()}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-black text-slate-900 dark:text-white leading-tight">{getEmpDisplayName(emp.user)}</span>
+                              <span className="text-[10px] font-bold text-indigo-500 mt-0.5">{getEmpId(emp.user)}</span>
+                              <span className="text-[10px] text-slate-500">{getEmpDept(emp.user)}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end border-l border-slate-100 dark:border-slate-700 pl-3">
+                            <span className="text-[9px] font-extrabold text-slate-400">Total Days</span>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-lg font-black text-slate-800 dark:text-slate-200 leading-none">{s.totalDays}</span>
+                              <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Stat Pills */}
+                        <div className="flex items-center gap-1.5 pt-3 border-t border-slate-50 dark:border-slate-700 overflow-x-auto pb-1 hide-scrollbar">
+                          <div className="shrink-0 bg-emerald-50/80 dark:bg-emerald-900/20 text-emerald-600 text-[10px] font-black px-2 py-1.5 rounded-lg flex items-center justify-center gap-1">
+                            P {s.presentCount}
+                          </div>
+                          <div className="shrink-0 bg-purple-50/80 dark:bg-purple-900/20 text-purple-600 text-[10px] font-black px-2 py-1.5 rounded-lg flex items-center justify-center gap-1">
+                            WFH {s.wfhCount}
+                          </div>
+                          <div className={`shrink-0 text-[10px] font-black px-2 py-1.5 rounded-lg flex items-center justify-center gap-1 ${s.lateCount > 0 ? 'bg-amber-50/80 dark:bg-amber-900/20 text-amber-600' : 'bg-slate-50/80 dark:bg-slate-800/50 text-slate-400'}`}>
+                            Late {s.lateCount}
+                          </div>
+                          <div className={`shrink-0 text-[10px] font-black px-2 py-1.5 rounded-lg flex items-center justify-center gap-1 ${s.halfDayCount > 0 ? 'bg-blue-50/80 dark:bg-blue-900/20 text-blue-600' : 'bg-slate-50/80 dark:bg-slate-800/50 text-slate-400'}`}>
+                            Half {s.halfDayCount}
+                          </div>
+                          <div className={`shrink-0 text-[10px] font-black px-2 py-1.5 rounded-lg flex items-center justify-center gap-1 ${s.absentCount > 0 ? 'bg-rose-50/80 dark:bg-rose-900/20 text-rose-600' : 'bg-slate-50/80 dark:bg-slate-800/50 text-slate-400'}`}>
+                            Absent {s.absentCount}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Desktop Excel-like Table (Hidden on Mobile) */}
+            <div className="hidden sm:block overflow-auto flex-1">
               <table className="w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-100 dark:bg-slate-800 sticky top-0 z-10">
@@ -1877,8 +1961,8 @@ export const Attendance = () => {
               </table>
             </div>
             {/* Footer */}
-            <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 shrink-0">
-              <p className="text-[11px] text-slate-400 font-semibold">Life Changers Ind LMS · Attendance Report · {new Date().toLocaleString()}</p>
+            <div className="p-4 sm:px-5 sm:py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 shrink-0 text-center sm:text-left">
+              <p className="text-[10px] sm:text-[11px] text-slate-400 font-semibold">Life Changers Ind LMS · Attendance Report · {new Date().toLocaleString()}</p>
             </div>
           </div>
         </div>,
