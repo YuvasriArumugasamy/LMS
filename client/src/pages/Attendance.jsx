@@ -1102,27 +1102,27 @@ export const Attendance = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="text-xs font-extrabold text-slate-400 shrink-0 self-start sm:self-auto pt-0.5 sm:pt-0 mr-2">
-              Showing {filteredEmployeeGroupList.length} Employee Card{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
+          <div className="flex flex-row flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+            <div className="text-[11px] sm:text-xs font-extrabold text-slate-400">
+              Showing {filteredEmployeeGroupList.length} Card{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
             </div>
             {user?.role !== 'EMPLOYEE' && (
-              <>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsReportModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105"
+                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-[11px] sm:text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105 whitespace-nowrap"
                 >
-                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <FileSpreadsheet className="w-3.5 h-3.5 shrink-0" />
                   View Report
                 </button>
                 <button
                   onClick={handleDownloadExcel}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105"
+                  className="flex items-center justify-center p-1.5 px-2.5 sm:px-3.5 sm:py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] sm:text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105 whitespace-nowrap"
                 >
-                  <Download className="w-3.5 h-3.5" />
-                  Download
+                  <Download className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden sm:inline ml-1.5">Download</span>
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>
