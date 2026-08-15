@@ -1001,7 +1001,15 @@ export const Attendance = () => {
                         <div className="min-w-0">
                           <span className="text-[9px] font-extrabold text-emerald-600/80 dark:text-emerald-300/80 uppercase tracking-wider block leading-none">Hours</span>
                           <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
-                            {item.totalHours ? `${item.totalHours}h` : item.clockInTime && !item.clockOutTime ? '⏱ Active' : '—'}
+                            {item.totalHours ? (
+                              (() => {
+                                const h = Math.floor(item.totalHours);
+                                const m = Math.round((item.totalHours - h) * 60);
+                                if (h === 0) return `${m}m`;
+                                if (m === 0) return `${h}h`;
+                                return `${h}h ${m}m`;
+                              })()
+                            ) : item.clockInTime && !item.clockOutTime ? '⏱ Active' : '—'}
                           </span>
                         </div>
                       </div>
