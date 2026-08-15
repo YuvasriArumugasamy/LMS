@@ -113,61 +113,25 @@ export const LeaveRequests = () => {
         )}
       </div>
 
-      {/* Filter Tabs Grid (2 - 2 - 1 Alignment on Mobile, Single Row on Desktop) */}
-      <div className="glass-card p-3 sm:p-4 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5">
-        <button
-          onClick={() => setStatusFilter('')}
-          className={`px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all text-center ${
-            statusFilter === '' ? 'bg-primary text-white shadow-md shadow-primary/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
+      {/* Filter Dropdown */}
+      <div className="glass-card p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+          <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Filter by Status:</span>
+        </div>
+        
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-full sm:w-auto max-w-[220px]"
         >
-          All Leaves
-        </button>
-
-        <button
-          onClick={() => setStatusFilter('PENDING')}
-          className={`px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all text-center ${
-            statusFilter === 'PENDING' ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          Pending
-        </button>
-
-        <button
-          onClick={() => setStatusFilter('TEAM_LEAD_APPROVED')}
-          className={`px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all text-center ${
-            statusFilter === 'TEAM_LEAD_APPROVED' ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          TL Approved
-        </button>
-
-        <button
-          onClick={() => setStatusFilter('ESCALATED_TO_HR')}
-          className={`px-2 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all text-center ${
-            statusFilter === 'ESCALATED_TO_HR' ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          🚨 Escalated HR
-        </button>
-
-        <button
-          onClick={() => setStatusFilter('APPROVED')}
-          className={`px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all text-center ${
-            statusFilter === 'APPROVED' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          Approved
-        </button>
-
-        <button
-          onClick={() => setStatusFilter('REJECTED')}
-          className={`px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all text-center col-span-2 sm:col-span-1 ${
-            statusFilter === 'REJECTED' ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          Rejected
-        </button>
+          <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Leaves</option>
+          <option value="PENDING" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Pending</option>
+          <option value="TEAM_LEAD_APPROVED" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">TL Approved</option>
+          <option value="ESCALATED_TO_HR" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🚨 Escalated HR</option>
+          <option value="APPROVED" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Approved</option>
+          <option value="REJECTED" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Rejected</option>
+        </select>
       </div>
 
       {/* 12-Column Responsive Grid Cards for Perfect Alignment on Tablet & Desktop */}
