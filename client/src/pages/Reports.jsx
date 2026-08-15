@@ -133,18 +133,19 @@ export const Reports = () => {
             />
           </div>
 
-          <select
+          <input
+            type="number"
+            min="2000"
+            max="2100"
+            step="1"
             value={year}
             onChange={(e) => {
               setYear(Number(e.target.value));
               setSelectedCustomDate('');
             }}
-            className="w-auto px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500 shadow-2xs shrink-0"
-          >
-            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((yr) => (
-              <option key={yr} value={yr}>Year {yr}</option>
-            ))}
-          </select>
+            className="w-20 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-blue-500 shadow-2xs shrink-0"
+            placeholder="Year"
+          />
 
           {selectedCustomDate && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-extrabold shadow-2xs shrink-0 max-w-full overflow-hidden">
