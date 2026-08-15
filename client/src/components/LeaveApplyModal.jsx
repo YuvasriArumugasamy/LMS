@@ -266,7 +266,7 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
             type="text"
             value={contactNumber}
             onChange={(e) => setContactNumber(e.target.value)}
-            placeholder="+1 (555) 000-0000"
+            placeholder="9876543210"
             className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white outline-none focus:border-primary transition-all"
           />
         </div>
