@@ -475,11 +475,11 @@ export const Attendance = () => {
   };
 
   // ===== EXCEL REPORT FUNCTIONS =====
-  // Get year-filtered stats for a single employee group
-  const getYearFilteredStats = (emp) => {
+  // Get month-filtered stats for a single employee group
+  const getMonthFilteredStats = (emp) => {
     const filtered = (emp.logs || []).filter(log => {
       const d = new Date(log.clockIn || log.date);
-      return d.getFullYear() === reportYear;
+      return d.getMonth() === reportMonth && d.getFullYear() === reportYear;
     });
     const stats = { totalDays: filtered.length, presentCount: 0, wfhCount: 0, lateCount: 0, halfDayCount: 0, absentCount: 0 };
     filtered.forEach(log => {
@@ -495,15 +495,15 @@ export const Attendance = () => {
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   const handleDownloadExcel = () => {
-    const headers = ['#', 'Employee Name', 'Employee ID', 'Department', 'Year', 'Total Days', 'Present Days', 'WFH Days', 'Late Check-ins', 'Half Days', 'Absent Days'];
+    const headers = ['#', 'Employee Name', 'Employee ID', 'Department', 'Month', 'Total Days', 'Present Days', 'WFH Days', 'Late Check-ins', 'Half Days', 'Absent Days'];
     const rows = filteredEmployeeGroupList.map((emp, idx) => {
-      const s = getYearFilteredStats(emp);
+      const s = getMonthFilteredStats(emp);
       return [
         idx + 1,
         getEmpDisplayName(emp.user),
         getEmpId(emp.user),
         getEmpDept(emp.user),
-        `${reportYear}`,
+        `${MONTH_NAMES[reportMonth]} ${reportYear}`,
         s.totalDays,
         s.presentCount,
         s.wfhCount,
@@ -525,7 +525,7 @@ export const Attendance = () => {
     link.href = url;
     const today = new Date().toISOString().split('T')[0];
     const filterLabel = statusFilter ? `_${statusFilter}` : '_All';
-    link.download = `Attendance_Report_${reportYear}${filterLabel}.csv`;
+    link.download = `Attendance_Report_${MONTH_NAMES[reportMonth]}_${reportYear}${filterLabel}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1790,7 +1790,7 @@ export const Attendance = () => {
                     </h2>
                     <p className="text-[10px] sm:text-[11px] text-slate-500 sm:text-slate-400 font-medium mt-0.5">
                       {filteredEmployeeGroupList.length} employee{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
-                      {' '}· {reportYear}
+                      {' '}· {MONTH_NAMES[reportMonth]} {reportYear}
                       {statusFilter ? ` · ${statusFilter}` : ' · All Statuses'}
                     </p>
                   </div>
@@ -1803,8 +1803,17 @@ export const Attendance = () => {
 
               {/* Action & Filters Row */}
               <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-2 flex-wrap sm:flex-nowrap justify-end w-full sm:w-auto">
-                {/* Mobile Filters */}
-                <div className="w-full sm:w-auto sm:flex sm:gap-2">
+                {/* Mobile Filters (Side-by-side) */}
+                <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:gap-2">
+                  <select
+                    value={reportMonth}
+                    onChange={e => setReportMonth(Number(e.target.value))}
+                    className="px-3 py-2 sm:py-1.5 rounded-xl sm:rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs w-full sm:w-auto"
+                  >
+                    {MONTH_NAMES.map((m, i) => (
+                      <option key={i} value={i}>{m}</option>
+                    ))}
+                  </select>
                   <select
                     value={reportYear}
                     onChange={e => setReportYear(Number(e.target.value))}
@@ -1836,7 +1845,7 @@ export const Attendance = () => {
             {/* Summary Stats Grid (Responsive) */}
             <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 px-4 py-4 sm:px-5 sm:py-3 bg-white sm:bg-slate-50/80 dark:bg-slate-900 sm:dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-800 shrink-0 overflow-x-auto">
               {(() => {
-                const allStats = filteredEmployeeGroupList.map(e => getYearFilteredStats(e));
+                const allStats = filteredEmployeeGroupList.map(e => getMonthFilteredStats(e));
                 return [
                   { label: 'Employees', value: filteredEmployeeGroupList.length, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/30', icon: <UserCheck className="w-4 h-4 text-indigo-500" /> },
                   { label: 'Total Present', value: allStats.reduce((s, e) => s + e.presentCount, 0), color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/30', icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" /> },
@@ -1866,7 +1875,7 @@ export const Attendance = () => {
                   <div className="py-10 text-center text-slate-400 font-semibold text-xs bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">No attendance data found.</div>
                 ) : (
                   filteredEmployeeGroupList.map((emp) => {
-                    const s = getYearFilteredStats(emp);
+                    const s = getMonthFilteredStats(emp);
                     const displayParts = getEmpDisplayName(emp.user).split(' ');
                     const initials = (displayParts[0]?.[0] || '') + (displayParts[1]?.[0] || '');
                     return (
@@ -1931,7 +1940,7 @@ export const Attendance = () => {
                     <tr><td colSpan={10} className="py-16 text-center text-slate-400 font-semibold text-sm">No attendance data found.</td></tr>
                   ) : (
                     filteredEmployeeGroupList.map((emp, idx) => {
-                      const s = getYearFilteredStats(emp);
+                      const s = getMonthFilteredStats(emp);
                       return (
                       <tr key={emp.empId} className={`border-b border-slate-100 dark:border-slate-800 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/20 transition-colors ${idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-900/60'}`}>
                         <td className="px-3 py-2.5 font-bold text-slate-400 border-r border-slate-100 dark:border-slate-800 whitespace-nowrap">{idx + 1}</td>
