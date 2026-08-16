@@ -1854,14 +1854,14 @@ export const Attendance = () => {
                   { label: 'Total Halfday', value: allStats.reduce((s, e) => s + e.halfDayCount, 0), color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/30', icon: <Clock className="w-4 h-4 text-blue-500" /> },
                   { label: 'Total Absent', value: allStats.reduce((s, e) => s + e.absentCount, 0), color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-900/30', icon: <X className="w-4 h-4 text-rose-500" /> },
                 ].map((stat, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-start gap-1.5 sm:gap-2 shrink-0 p-3 sm:px-3 sm:py-1.5 rounded-2xl sm:rounded-xl bg-white dark:bg-slate-800 border border-slate-100 sm:border-slate-200/80 dark:border-slate-700 shadow-sm sm:shadow-xs">
-                    <div className="flex items-center justify-center gap-2 sm:gap-0">
-                      <div className={`w-7 h-7 sm:hidden rounded-full flex items-center justify-center shrink-0 ${stat.bg}`}>
+                  <div key={i} className="flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-start gap-1 sm:gap-2 shrink-0 p-2 sm:px-3 sm:py-1.5 rounded-2xl sm:rounded-xl bg-white dark:bg-slate-800 border border-slate-100 sm:border-slate-200/80 dark:border-slate-700 shadow-sm sm:shadow-xs">
+                    <div className="flex items-center justify-center gap-1.5 sm:gap-0">
+                      <div className={`w-6 h-6 sm:hidden rounded-full flex items-center justify-center shrink-0 ${stat.bg}`}>
                         {stat.icon}
                       </div>
-                      <span className="text-[10px] font-black text-slate-500 sm:text-slate-400 uppercase tracking-wider whitespace-nowrap">{stat.label}</span>
+                      <span className="text-[9px] font-black text-slate-500 sm:text-slate-400 uppercase tracking-wider whitespace-nowrap">{stat.label}</span>
                     </div>
-                    <span className={`text-2xl sm:text-base font-black leading-none mt-0.5 sm:mt-0 ${stat.color}`}>{stat.value}</span>
+                    <span className={`text-xl sm:text-base font-black leading-none mt-0.5 sm:mt-0 ${stat.color}`}>{stat.value}</span>
                   </div>
                 ));
               })()}
