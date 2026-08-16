@@ -43,6 +43,10 @@ const attendanceSchema = new mongoose.Schema(
     notes: {
       type: String,
       trim: true
+    },
+    role:{
+      type:string,
+      enum:["CEO","Admin","Hr","TL","empoyee"],
     }
   },
   {
