@@ -1819,7 +1819,7 @@ export const Attendance = () => {
                     onChange={e => setReportYear(Number(e.target.value))}
                     className="px-3 py-2 sm:py-1.5 rounded-xl sm:rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs w-full sm:w-auto"
                   >
-                    {[reportYear - 1, reportYear, reportYear + 1].map(y => (
+                    {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => (
                       <option key={y} value={y}>{y}</option>
                     ))}
                   </select>
