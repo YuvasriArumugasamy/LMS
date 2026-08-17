@@ -38,3 +38,21 @@ export const markAsRead = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ status: 'success', message: 'Notifications marked as read.' });
 });
+
+export const deleteNotification = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const notification = await Notification.findById(id);
+
+  if (!notification) {
+    return res.status(404).json({ status: 'error', message: 'Notification not found' });
+  }
+
+  // Ensure the user owns the notification
+  if (notification.recipient.toString() !== req.user._id.toString()) {
+    return res.status(403).json({ status: 'error', message: 'Not authorized to delete this notification' });
+  }
+
+  await notification.deleteOne();
+
+  res.status(200).json({ status: 'success', message: 'Notification deleted successfully' });
+});

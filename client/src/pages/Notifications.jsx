@@ -10,7 +10,8 @@ import {
   FileText,
   User,
   ShieldCheck,
-  Users
+  Users,
+  Trash2
 } from 'lucide-react';
 import { requestFcmToken, onForegroundMessage } from '../firebase';
 
@@ -113,6 +114,18 @@ export const Notifications = () => {
       });
     } else {
       alert("Please click 'Enable Push Notifications' first and allow permissions!");
+    }
+  };
+
+  const handleDeleteNotification = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this notification?")) return;
+    try {
+      await api.delete(`/notifications/${id}`);
+      setNotifications(prev => prev.filter(n => n._id !== id));
+      setTotal(prev => prev - 1);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete notification.');
     }
   };
 
@@ -253,7 +266,7 @@ export const Notifications = () => {
             return (
               <div
                 key={n._id}
-                className={`bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 flex items-center justify-between gap-4 border border-slate-200/80 dark:border-slate-800 ${palette.leftBorder} shadow-2xs hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5`}
+                className={`group relative bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 flex items-center justify-between gap-4 border border-slate-200/80 dark:border-slate-800 ${palette.leftBorder} shadow-2xs hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5`}
               >
                 {/* Left Side: Bell Icon + Content */}
                 <div className="flex items-start gap-4 min-w-0 flex-1">
@@ -275,8 +288,17 @@ export const Notifications = () => {
                 </div>
 
                 {/* Right Side: Category Circular Icon Badge matching Image 2 */}
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full ${palette.rightIconBg} flex items-center justify-center shrink-0 shadow-2xs`}>
-                  <RightIcon className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => handleDeleteNotification(n._id)}
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-900/40 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 sm:opacity-100 shadow-sm"
+                    title="Delete Notification"
+                  >
+                    <Trash2 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                  </button>
+                  <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full ${palette.rightIconBg} flex items-center justify-center shrink-0 shadow-2xs`}>
+                    <RightIcon className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
+                  </div>
                 </div>
               </div>
             );
