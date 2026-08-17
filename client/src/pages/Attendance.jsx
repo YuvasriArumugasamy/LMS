@@ -1776,7 +1776,7 @@ export const Attendance = () => {
       {/* ===== ATTENDANCE REPORT MODAL via Portal ===== */}
       {isReportModalOpen && createPortal(
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-0 sm:p-6 bg-slate-900/70 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 sm:rounded-3xl border-0 sm:border border-slate-200 dark:border-slate-800 shadow-2xl w-full h-full sm:h-auto sm:max-w-5xl flex flex-col sm:max-h-[92vh] overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 sm:rounded-3xl border-0 sm:border border-slate-200 dark:border-slate-800 shadow-2xl w-full h-full sm:h-auto sm:max-w-5xl flex flex-col sm:max-h-[92vh] overflow-y-auto sm:overflow-hidden">
             {/* Modal Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sm:bg-gradient-to-r sm:from-indigo-50/80 sm:via-blue-50/40 sm:to-white sm:dark:from-slate-800/80 sm:dark:to-slate-900 shrink-0 gap-4 sm:gap-0">
               <div className="flex items-start sm:items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
@@ -1868,7 +1868,7 @@ export const Attendance = () => {
             </div>
 
             {/* Mobile List View (Hidden on Desktop) */}
-            <div className="sm:hidden flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 p-4">
+            <div className="sm:hidden flex-1 overflow-visible sm:overflow-y-auto bg-slate-50 dark:bg-slate-900/50 p-4">
               <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 mb-4 tracking-tight">Employee Attendance</h3>
               <div className="flex flex-col gap-3">
                 {filteredEmployeeGroupList.length === 0 ? (
