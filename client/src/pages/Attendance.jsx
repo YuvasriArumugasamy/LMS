@@ -1084,16 +1084,16 @@ export const Attendance = () => {
             </div>
           </div>
 
-          <div className="flex flex-row items-center justify-between sm:justify-end gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+          <div className="flex flex-row items-center justify-between sm:justify-end gap-1.5 w-full sm:w-auto mt-1 sm:mt-0">
             <div className="hidden lg:block text-[11px] sm:text-xs font-extrabold text-slate-400 mr-2">
               Showing {filteredEmployeeGroupList.length} Card{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-end">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-3 pr-7 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-[115px] sm:w-[130px] tracking-tight shrink-0 text-ellipsis overflow-hidden whitespace-nowrap"
+                className="pl-2.5 pr-6 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-full max-w-[105px] sm:max-w-[130px] tracking-tight shrink text-ellipsis overflow-hidden whitespace-nowrap"
               >
                 <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Statuses</option>
                 <option value="PRESENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Present Only</option>
@@ -1105,7 +1105,7 @@ export const Attendance = () => {
               </select>
 
               {user?.role !== 'EMPLOYEE' && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   onClick={() => setIsReportModalOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-[11px] sm:text-xs font-extrabold transition-all cursor-pointer shadow-xs hover:scale-105 whitespace-nowrap"
