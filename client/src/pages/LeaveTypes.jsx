@@ -261,128 +261,142 @@ export const LeaveTypes = () => {
       )}
 
       {/* Create / Edit Leave Policy Modal */}
-      <Modal isOpen={isModalOpen} onClose={closeModal} title={editingId ? "Edit Leave Policy" : "Create Leave Policy"}>
-        <form onSubmit={handleSubmitForm} className="space-y-4">
-          {modalError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-bold">
-              {modalError}
+      <Modal isOpen={isModalOpen} onClose={closeModal} hideCloseButton={true} maxWidth="max-w-xl">
+        <div className="space-y-4">
+          <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 flex items-center justify-center shrink-0 border border-blue-200/60 dark:border-blue-800/40 shadow-xs">
+                <CalendarDays className="w-6 h-6 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  {editingId ? "Edit Leave Policy" : "Create Leave Policy"}
+                </h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  Configure enterprise leave quotas and rules
+                </p>
+              </div>
             </div>
-          )}
-          <div>
-            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Leave Policy Name *</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g. Paid Leave"
-              className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Code *</label>
-              <input
-                type="text"
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                placeholder="e.g. EL"
-                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Max Days / Year *</label>
-              <input
-                type="number"
-                min="1"
-                value={formData.maxDays}
-                onChange={(e) => setFormData({ ...formData, maxDays: Number(e.target.value) })}
-                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Description</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows="3"
-              placeholder="Optional policy notes"
-              className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Color Hex</label>
-              <input
-                type="color"
-                value={formData.colorBadge}
-                onChange={(e) => setFormData({ ...formData, colorBadge: e.target.value })}
-                className="w-full h-10 p-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none cursor-pointer"
-              />
-            </div>
-            <div className="flex flex-col justify-center gap-2">
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={formData.paidLeave}
-                  onChange={(e) => setFormData({ ...formData, paidLeave: e.target.checked })}
-                  className="rounded text-primary"
-                />
-                Paid Leave
-              </label>
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={formData.documentRequired}
-                  onChange={(e) => setFormData({ ...formData, documentRequired: e.target.checked })}
-                  className="rounded text-primary"
-                />
-                Document Required
-              </label>
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={formData.carryForward}
-                  onChange={(e) => setFormData({ ...formData, carryForward: e.target.checked })}
-                  className="rounded text-primary"
-                />
-                Carry Forward
-              </label>
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={formData.allowHalfDay}
-                  onChange={(e) => setFormData({ ...formData, allowHalfDay: e.target.checked })}
-                  className="rounded text-primary"
-                />
-                Allow Half Day
-              </label>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={closeModal}
-              className="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl"
+              className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors shrink-0"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-5 py-2 bg-primary hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer disabled:opacity-50"
-            >
-              {submitting ? 'Saving...' : editingId ? 'Save Changes' : 'Create Policy'}
+              ✕
             </button>
           </div>
-        </form>
+
+          <form onSubmit={handleSubmitForm} className="space-y-4">
+            {modalError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-bold flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" /> {modalError}
+              </div>
+            )}
+            <div>
+              <label className="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-1.5">Leave Policy Name <span className="text-rose-500">*</span></label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g. Paid Leave"
+                className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-1.5">Code <span className="text-rose-500">*</span></label>
+                <input
+                  type="text"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                  placeholder="e.g. EL"
+                  className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all uppercase"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-1.5">Max Days / Year <span className="text-rose-500">*</span></label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.maxDays}
+                  onChange={(e) => setFormData({ ...formData, maxDays: Number(e.target.value) })}
+                  className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-2">
+                <label className="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-1.5">Description</label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Optional policy notes"
+                  className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-1.5">Color Badge</label>
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={formData.colorBadge}
+                    onChange={(e) => setFormData({ ...formData, colorBadge: e.target.value })}
+                    className="w-full h-[42px] p-1 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Premium Toggle Switches for Settings */}
+            <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { id: 'paidLeave', label: 'Paid Leave', desc: 'Is this a paid leave?' },
+                { id: 'documentRequired', label: 'Require Doc', desc: 'Medical cert needed?' },
+                { id: 'carryForward', label: 'Carry Forward', desc: 'Transfer unused days?' },
+                { id: 'allowHalfDay', label: 'Half Day', desc: 'Allow partial day request?' }
+              ].map(setting => (
+                <label key={setting.id} className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group">
+                  <div className="pr-2">
+                    <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">{setting.label}</p>
+                    <p className="text-[10px] font-medium text-slate-500 mt-0.5 truncate">{setting.desc}</p>
+                  </div>
+                  <div className={`relative w-9 h-5 rounded-full transition-colors shrink-0 shadow-inner ${formData[setting.id] ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                    <div className={`absolute top-0.5 left-0.5 bg-white w-4 h-4 rounded-full shadow-sm transition-transform ${formData[setting.id] ? 'translate-x-4' : 'translate-x-0'}`} />
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={formData[setting.id]}
+                    onChange={(e) => setFormData({ ...formData, [setting.id]: e.target.checked })}
+                  />
+                </label>
+              ))}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-extrabold text-xs transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {submitting ? 'Saving...' : editingId ? 'Save Changes' : 'Create Policy'}
+              </button>
+            </div>
+          </form>
+        </div>
       </Modal>
 
       {/* Delete Confirmation Modal matching Screenshot 1 */}
