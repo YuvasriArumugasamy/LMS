@@ -877,7 +877,7 @@ export const Attendance = () => {
             </div>
             <button
               onClick={fetchLiveStatus}
-              className="px-3 py-1.5 text-xs font-bold rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 transition-all"
+              className="px-3 py-1.5 text-xs font-bold rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer shadow-xs"
             >
               🔄 Refresh
             </button>
