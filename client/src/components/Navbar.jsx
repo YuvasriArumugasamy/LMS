@@ -6,6 +6,7 @@ import { LogoutConfirmModal } from './LogoutConfirmModal';
 import api from '../services/api';
 import { Menu, Search, Sun, Moon } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { onForegroundMessage } from '../firebase';
 
 export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
   const { user, logout } = useAuth();
@@ -37,9 +38,26 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
     fetchUnreadNotifications();
     const interval = setInterval(fetchUnreadNotifications, 30000);
 
+    // Global listener for foreground push notifications
+    const unsubscribePush = onForegroundMessage((payload) => {
+      console.log('Global foreground notification:', payload);
+      setUnreadCount((prev) => prev + 1);
+
+      // Show native system notification like WhatsApp
+      if ('Notification' in window && Notification.permission === 'granted') {
+        const title = payload?.notification?.title || 'LMS Update';
+        const body = payload?.notification?.body || 'You have a new notification.';
+        new Notification(title, {
+          body,
+          icon: '/vite.svg'
+        });
+      }
+    });
+
     return () => {
       isMounted = false;
       clearInterval(interval);
+      if (typeof unsubscribePush === 'function') unsubscribePush();
     };
   }, [location.pathname]);
 
