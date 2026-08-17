@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Tooltip } from '../components/Tooltip';
 import UiverseDropdown from '../components/UiverseDropdown';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
