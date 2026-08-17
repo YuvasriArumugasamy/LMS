@@ -97,12 +97,16 @@ export const Notifications = () => {
     }
   };
 
-  const handleMarkAllRead = async () => {
+  const handleClearAll = async () => {
+    if (!window.confirm("Are you sure you want to delete all notifications? This action cannot be undone.")) return;
     try {
-      await api.patch('/notifications/all/read');
-      fetchAndMarkNotifications(page);
+      await api.delete('/notifications/all');
+      setNotifications([]);
+      setTotal(0);
+      setPage(1);
     } catch (err) {
       console.error(err);
+      alert('Failed to clear all notifications.');
     }
   };
 
@@ -176,10 +180,10 @@ export const Notifications = () => {
           </button>
 
           <button
-            onClick={handleMarkAllRead}
-            className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-extrabold text-slate-700 dark:text-slate-200 rounded-2xl flex items-center gap-2 transition-all shadow-2xs hover:scale-[1.02]"
+            onClick={handleClearAll}
+            className="px-4 py-2.5 bg-rose-50 dark:bg-rose-900/30 border border-rose-200/90 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-xs font-extrabold text-rose-600 dark:text-rose-400 rounded-2xl flex items-center gap-2 transition-all shadow-2xs hover:scale-[1.02]"
           >
-            <CheckCheck className="w-4 h-4 text-slate-500" /> Mark All Read
+            <Trash2 className="w-4 h-4" /> Clear All
           </button>
         </div>
       </div>

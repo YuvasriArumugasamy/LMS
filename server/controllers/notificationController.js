@@ -41,6 +41,12 @@ export const markAsRead = asyncHandler(async (req, res, next) => {
 
 export const deleteNotification = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
+
+  if (id === 'all') {
+    await Notification.deleteMany({ recipient: req.user._id });
+    return res.status(200).json({ status: 'success', message: 'All notifications cleared successfully' });
+  }
+
   const notification = await Notification.findById(id);
 
   if (!notification) {
