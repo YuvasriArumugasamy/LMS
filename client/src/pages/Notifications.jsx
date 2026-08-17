@@ -96,6 +96,17 @@ export const Notifications = () => {
     }
   };
 
+  const handleTestNotification = () => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification("🚀 LMS Test Notification", {
+        body: "இது ஒரு Test Notification! போனில் இது சரியாக வருகிறதா என்று பாருங்கள்.",
+        icon: "/vite.svg"
+      });
+    } else {
+      alert("Please click 'Enable Push Notifications' first and allow permissions!");
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-28 sm:pb-8">
       {/* Toast Alert for Push Message */}
@@ -134,6 +145,13 @@ export const Notifications = () => {
               {pushStatus === 'ENABLING' ? 'Enabling...' : 'Enable Push Notifications'}
             </button>
           )}
+
+          <button
+            onClick={handleTestNotification}
+            className="px-4 py-2.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-200/90 dark:border-blue-800 text-xs font-extrabold text-blue-600 dark:text-blue-400 rounded-2xl flex items-center gap-2 transition-all shadow-2xs hover:scale-[1.02]"
+          >
+            <Bell className="w-4 h-4" /> Test Alert
+          </button>
 
           <button
             onClick={handleMarkAllRead}
