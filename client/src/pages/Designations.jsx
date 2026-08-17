@@ -63,6 +63,7 @@ export const Designations = () => {
   const [designationToDelete, setDesignationToDelete] = useState(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [formData, setFormData] = useState({ name: '', code: '', department: '', grade: 'L2' });
 
   const fetchData = async () => {
     try {
