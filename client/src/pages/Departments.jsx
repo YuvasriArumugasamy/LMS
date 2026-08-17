@@ -308,9 +308,9 @@ export const Departments = () => {
         {['ADMIN', 'HR', 'CEO'].includes(user?.role) && (
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-full shadow-lg shadow-blue-600/30 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            className="group px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] sm:text-xs font-black rounded-full shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 flex items-center justify-center gap-2 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 cursor-pointer w-full sm:w-auto"
           >
-            <Plus className="w-4 h-4 stroke-[3]" /> Add Department
+            <Plus className="w-4 h-4 stroke-[3] group-hover:rotate-90 transition-transform duration-300" /> Add Department
           </button>
         )}      </div>
 
