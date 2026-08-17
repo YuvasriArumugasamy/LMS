@@ -792,7 +792,7 @@ export const Attendance = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0 sm:justify-end">
+          <div className="flex items-center justify-center sm:justify-end gap-2.5 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
             {!todayAttendance?.clockIn ? (
               <>
                 <select
