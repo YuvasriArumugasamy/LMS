@@ -798,7 +798,7 @@ export const Attendance = () => {
                 <select
                   value={workLocation}
                   onChange={(e) => setWorkLocation(e.target.value)}
-                  className="px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:ring-2 focus:ring-primary/20 shadow-2xs"
+                  className="px-4 py-[6px] bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-extrabold text-slate-700 dark:text-slate-200 outline-none cursor-pointer focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500/50 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-600 uppercase tracking-wider"
                 >
                   <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏡 Remote / WFH</option>
                   <option value="IN_OFFICE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏢 In-Office</option>
@@ -831,7 +831,7 @@ export const Attendance = () => {
                 <select
                   value={workLocation}
                   onChange={(e) => setWorkLocation(e.target.value)}
-                  className="px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:ring-2 focus:ring-primary/20 shadow-2xs"
+                  className="px-4 py-[6px] bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-extrabold text-slate-700 dark:text-slate-200 outline-none cursor-pointer focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500/50 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-600 uppercase tracking-wider"
                 >
                   <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏡 Remote / WFH</option>
                   <option value="IN_OFFICE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏢 In-Office</option>
