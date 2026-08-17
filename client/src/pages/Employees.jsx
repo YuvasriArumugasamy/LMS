@@ -534,7 +534,7 @@ export const Employees = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleCreateEmployee} className="space-y-3.5">
+          <form onSubmit={handleCreateEmployee} className="space-y-3.5" autoComplete="off">
             {/* First Name & Last Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
@@ -585,6 +585,7 @@ export const Employees = () => {
                   placeholder="Enter email address"
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                   required
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -663,6 +664,7 @@ export const Employees = () => {
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder="Default: 123456"
                     className="w-full pl-10 pr-10 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-mono text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
