@@ -736,26 +736,35 @@ export const Attendance = () => {
 
         {/* Tab Switcher — only for managers */}
         {['CEO', 'ADMIN', 'HR', 'TEAM_LEAD'].includes(user?.role) && (
-          <div className="flex items-center gap-2 mt-3">
+          <div className="relative inline-grid grid-cols-2 p-1 bg-slate-200/80 dark:bg-slate-800/80 rounded-full shadow-inner isolate border border-slate-300/50 dark:border-slate-700/50 mt-3 w-max">
+            {/* Sliding Pill */}
+            <div 
+              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full shadow-sm transition-all duration-500 ${
+                activeTab === 'logs' 
+                  ? 'bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600' 
+                  : 'bg-emerald-600 border border-emerald-500'
+              }`}
+              style={{
+                left: activeTab === 'logs' ? '4px' : '50%',
+                transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+              }}
+            />
+            
             <button
               onClick={() => setActiveTab('logs')}
-              className={`px-4 py-1.5 rounded-full text-xs font-black transition-all whitespace-nowrap ${
-                activeTab === 'logs'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
+              className={`relative z-10 px-4 sm:px-6 py-1.5 sm:py-2 text-[11px] sm:text-xs font-black transition-colors duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full ${
+                activeTab === 'logs' ? 'text-slate-800 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >
               📋 Attendance Logs
             </button>
             <button
               onClick={() => setActiveTab('live')}
-              className={`px-4 py-1.5 rounded-full text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                activeTab === 'live'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
+              className={`relative z-10 px-4 sm:px-6 py-1.5 sm:py-2 text-[11px] sm:text-xs font-black transition-colors duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full ${
+                activeTab === 'live' ? 'text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
+              <span className={`w-2 h-2 rounded-full ${activeTab === 'live' ? 'bg-white animate-pulse' : 'bg-slate-400'}`} />
               Live Status
             </button>
           </div>
