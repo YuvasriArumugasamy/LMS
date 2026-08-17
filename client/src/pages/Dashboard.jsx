@@ -347,7 +347,7 @@ export const Dashboard = () => {
           </div>
 
           {/* Left Content */}
-          <div className="relative z-10 flex-1 flex flex-col justify-between space-y-4">
+          <div className="relative z-[60] flex-1 flex flex-col justify-between space-y-4">
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 flex-wrap">
                 <div className="flex items-center justify-center sm:justify-start gap-2">
