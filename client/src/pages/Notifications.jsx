@@ -68,22 +68,31 @@ export const Notifications = () => {
   const handleEnablePush = async () => {
     setPushStatus('ENABLING');
     try {
+      // 1. Request native browser notification permission first
+      if ('Notification' in window) {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          setPushStatus('ENABLED');
+        } else if (permission === 'denied') {
+          setPushStatus('DENIED');
+          return; // Stop if they explicitly blocked it
+        }
+      }
+
+      // 2. Try to get FCM Token (Will fail silently if Firebase env vars are missing)
       const token = await requestFcmToken();
       if (token) {
         await api.post('/auth/fcm-token', { fcmToken: token });
-        setPushStatus('ENABLED');
         setPushMessage('Browser push notifications enabled successfully!');
         setTimeout(() => setPushMessage(''), 5000);
-      } else {
-        if ('Notification' in window && Notification.permission === 'denied') {
-          setPushStatus('DENIED');
-        } else {
-          setPushStatus('UNKNOWN');
-        }
       }
     } catch (err) {
       console.error('Failed to enable push notifications:', err);
-      setPushStatus('UNKNOWN');
+      if ('Notification' in window && Notification.permission === 'granted') {
+        setPushStatus('ENABLED');
+      } else {
+        setPushStatus('UNKNOWN');
+      }
     }
   };
 
