@@ -152,7 +152,7 @@ export const runAutoSeed = async () => {
       employeeId: 'EMP003',
       firstName: 'David',
       lastName: 'Miller',
-      email: 'manager@enterprise.com',
+      email: 'teamlead@enterprise.com',
       password: 'Password@123',
       role: 'TEAM_LEAD',
       department: engineering._id,
