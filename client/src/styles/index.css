@@ -657,218 +657,76 @@ html, body, #root {
   transform: scale(1.2);
 }
 
-/* From Uiverse.io by MuhammadHasann - Starburst Animated Button */
+/* From Uiverse.io by mrhyddenn - Custom Action Button */ 
 .uiverse-star-btn {
+  background: transparent;
   position: relative;
-  padding: 6px 16px;
-  background: #2563eb;
-  font-size: 11px;
-  font-weight: 800;
-  color: #ffffff;
-  border: 2px solid #2563eb;
-  border-radius: 9999px;
-  box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
+  padding: 8px 18px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  z-index: 1;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid var(--btn-color, #2563eb);
+  border-radius: 25px;
+  outline: none;
+  overflow: hidden;
+  color: var(--btn-color, #2563eb);
+  transition: color 0.3s 0.1s ease-out, border-color 0.3s;
+  text-align: center;
+  gap: 8px;
   white-space: nowrap;
 }
 
-.uiverse-star-btn.btn-checkout {
-  background: #f43f5e;
-  border-color: #f43f5e;
-  color: #ffffff;
-  box-shadow: 0 0 15px rgba(244, 63, 94, 0.35);
-}
-
 .uiverse-star-btn.btn-emerald {
-  background: #10b981;
-  border-color: #10b981;
-  color: #ffffff;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);
+  --btn-color: #10b981;
 }
 
-.uiverse-star-btn .star-1 {
-  position: absolute;
-  top: 20%;
-  left: 20%;
-  width: 25px;
-  height: auto;
-  opacity: 0;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 1s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+.uiverse-star-btn.btn-checkout {
+  --btn-color: #f43f5e;
 }
 
-.uiverse-star-btn .star-2 {
-  position: absolute;
-  top: 45%;
-  left: 45%;
-  width: 15px;
-  height: auto;
-  opacity: 0;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 1s cubic-bezier(0, 0.4, 0, 1.01);
+.uiverse-star-btn.btn-checkin {
+  --btn-color: rgb(40, 144, 241);
 }
 
-.uiverse-star-btn .star-3 {
-  position: absolute;
-  top: 40%;
-  left: 40%;
-  width: 5px;
-  height: auto;
-  opacity: 0;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 1s cubic-bezier(0, 0.4, 0, 1.01);
+.uiverse-star-btn:not(.btn-emerald):not(.btn-checkout):not(.btn-checkin) {
+  --btn-color: rgb(40, 144, 241);
 }
 
-.uiverse-star-btn .star-4 {
+.uiverse-star-btn::before {
   position: absolute;
-  top: 20%;
-  left: 40%;
-  width: 8px;
-  height: auto;
-  opacity: 0;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 0.8s cubic-bezier(0, 0.4, 0, 1.01);
-}
-
-.uiverse-star-btn .star-5 {
-  position: absolute;
-  top: 25%;
-  left: 45%;
-  width: 15px;
-  height: auto;
-  opacity: 0;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 0.6s cubic-bezier(0, 0.4, 0, 1.01);
-}
-
-.uiverse-star-btn .star-6 {
-  position: absolute;
-  top: 5%;
-  left: 50%;
-  width: 5px;
-  height: auto;
-  opacity: 0;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 0.8s ease;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  content: '';
+  border-radius: 50%;
+  display: block;
+  width: 20em;
+  height: 20em;
+  left: -5em;
+  text-align: center;
+  transition: box-shadow 0.5s ease-out;
+  z-index: -1;
 }
 
 .uiverse-star-btn:hover {
-  background: transparent;
-  color: #2563eb;
-  border-color: #2563eb;
-  box-shadow: 0 0 25px rgba(37, 99, 235, 0.6);
+  color: #fff;
+  border-color: var(--btn-color, #2563eb);
 }
 
-.uiverse-star-btn.btn-checkout:hover {
-  background: transparent;
-  color: #f43f5e;
-  border-color: #f43f5e;
-  box-shadow: 0 0 25px rgba(244, 63, 94, 0.6);
+.uiverse-star-btn:hover::before {
+  box-shadow: inset 0 0 0 10em var(--btn-color, #2563eb);
 }
 
-.uiverse-star-btn.btn-emerald:hover {
-  background: transparent;
-  color: #10b981;
-  border-color: #10b981;
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
-}
-
-.uiverse-star-btn:hover .star-1 {
-  position: absolute;
-  top: -80%;
-  left: -30%;
-  width: 25px;
-  height: auto;
-  opacity: 1;
-  z-index: 2;
-}
-
-.uiverse-star-btn:hover .star-2 {
-  position: absolute;
-  top: -25%;
-  left: 10%;
-  width: 15px;
-  height: auto;
-  opacity: 1;
-  z-index: 2;
-}
-
-.uiverse-star-btn:hover .star-3 {
-  position: absolute;
-  top: 55%;
-  left: 25%;
-  width: 5px;
-  height: auto;
-  opacity: 1;
-  z-index: 2;
-}
-
-.uiverse-star-btn:hover .star-4 {
-  position: absolute;
-  top: 30%;
-  left: 80%;
-  width: 8px;
-  height: auto;
-  opacity: 1;
-  z-index: 2;
-}
-
-.uiverse-star-btn:hover .star-5 {
-  position: absolute;
-  top: 25%;
-  left: 115%;
-  width: 15px;
-  height: auto;
-  opacity: 1;
-  z-index: 2;
-}
-
-.uiverse-star-btn:hover .star-6 {
-  position: absolute;
-  top: 5%;
-  left: 60%;
-  width: 5px;
-  height: auto;
-  opacity: 1;
-  z-index: 2;
-}
-
-.uiverse-star-btn .fil0 {
-  fill: #2563eb;
-  transition: fill 0.3s ease;
-}
-
-.uiverse-star-btn.btn-checkout .fil0 {
-  fill: #f43f5e;
-}
-
-.uiverse-star-btn.btn-emerald .fil0 {
-  fill: #10b981;
-}
-
-.uiverse-star-btn:hover [class^="star-"] {
-  filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.7));
-}
-
-.uiverse-star-btn.btn-checkout:hover [class^="star-"] {
-  filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.7));
-}
-
-.uiverse-star-btn.btn-emerald:hover [class^="star-"] {
-  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.7));
+.uiverse-star-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* High-Tech Face Scanner Laser Top-to-Bottom Animation */
