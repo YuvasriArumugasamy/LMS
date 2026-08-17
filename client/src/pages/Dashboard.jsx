@@ -589,11 +589,17 @@ export const Dashboard = () => {
           <div className="lg:col-span-8 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Your Leave Entitlements</h3>
-              <UiverseDropdown
-                options={Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((yr) => ({ value: yr, label: `Year ${yr}` }))}
-                value={selectedBalanceYear}
-                onChange={(val) => handleBalanceYearChange(Number(val))}
-              />
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-extrabold uppercase text-slate-500 tracking-wider hidden sm:block">Year</span>
+                <input
+                  type="number"
+                  value={selectedBalanceYear}
+                  onChange={(e) => handleBalanceYearChange(Number(e.target.value))}
+                  min="2000"
+                  max="2050"
+                  className="px-3 py-1.5 w-24 rounded-full bg-white dark:bg-slate-800 border border-blue-400 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500/30 shadow-xs text-center"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
