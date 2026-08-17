@@ -34,7 +34,7 @@ export const StatusBadge = ({ status, applicantRole }) => {  const styles = {
     PENDING: getPendingLabel(),
     TEAM_LEAD_APPROVED: 'TL Approved',
     TEAM_LEAD_REJECTED: 'TL Rejected ❌',
-    ESCALATED_TO_HR: 'Escalated to HR 🚨',
+    ESCALATED_TO_HR: 'Escalated to HR',
     HR_APPROVED: 'HR Approved',
     HR_REJECTED: 'HR Rejected ❌',
     ADMIN_APPROVED: applicantRole === 'EMPLOYEE' ? 'Final Approved ✅' : 'Admin Approved',

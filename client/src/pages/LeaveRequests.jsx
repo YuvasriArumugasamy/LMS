@@ -128,7 +128,7 @@ export const LeaveRequests = () => {
           <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Leaves</option>
           <option value="PENDING" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Pending</option>
           <option value="TEAM_LEAD_APPROVED" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">TL Approved</option>
-          <option value="ESCALATED_TO_HR" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🚨 Escalated HR</option>
+          <option value="ESCALATED_TO_HR" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Escalated HR</option>
           <option value="APPROVED" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Approved</option>
           <option value="REJECTED" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Rejected</option>
         </select>
