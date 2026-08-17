@@ -7,7 +7,6 @@ import blueBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_49 PM.webp';
 import greenBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_43 PM.webp';
 import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.webp';
 import orangeBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_34 PM.webp';
-import { QuickActions } from '../components/QuickActions';
 import UiverseDropdown from '../components/UiverseDropdown';
 import { Modal } from '../components/Modal';
 import { LeaveApplyModal } from '../components/LeaveApplyModal';
