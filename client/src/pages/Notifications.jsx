@@ -125,7 +125,7 @@ export const Notifications = () => {
       setTotal(prev => prev - 1);
     } catch (err) {
       console.error(err);
-      alert('Failed to delete notification.');
+      alert(`Failed to delete notification. Reason: ${err.response?.data?.message || err.message}`);
     }
   };
 
