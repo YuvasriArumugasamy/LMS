@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 export const StatusBadge = ({ status, applicantRole }) => {  const styles = {
     PENDING: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
@@ -45,8 +45,8 @@ export const StatusBadge = ({ status, applicantRole }) => {  const styles = {
     ACTIVE: 'Active',
     INACTIVE: 'Inactive',
     DRAFT: 'Draft',
-    OVER_DUTY: '⚡ Over Duty (OD)',
-    OD: '⚡ Over Duty (OD)',
+    OVER_DUTY: 'Over Duty (OD)',
+    OD: 'Over Duty (OD)',
     WEEK_OFF: '📅 Week Off'
   };
 

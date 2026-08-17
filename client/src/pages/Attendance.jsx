@@ -1101,7 +1101,7 @@ export const Attendance = () => {
                 <option value="HALF_DAY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Half Day Only</option>
                 <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">WFH / Remote</option>
                 <option value="ABSENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Absent Only</option>
-                <option value="OVER_DUTY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">⚡ Over Duty (OD)</option>
+                <option value="OVER_DUTY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Over Duty (OD)</option>
               </select>
 
               {user?.role !== 'EMPLOYEE' && (
