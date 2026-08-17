@@ -374,7 +374,7 @@ export const Dashboard = () => {
                           onClick={handleQuickClockIn}
                           variant="checkin"
                         >
-                          Check In
+                          Login
                         </UiverseStarButton>
                       </div>
                     ) : !todayAttendance?.clockOut ? (
@@ -387,7 +387,7 @@ export const Dashboard = () => {
                               </UiverseStarButton>
                             )}
                             <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
-                              Check Out
+                              Logout
                             </UiverseStarButton>
                           </>
                         ) : !todayAttendance?.lunchIn ? (
@@ -396,14 +396,14 @@ export const Dashboard = () => {
                           </UiverseStarButton>
                         ) : (
                           <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
-                            Check Out
+                            Logout
                           </UiverseStarButton>
                         )}
                       </div>
                     ) : (
                       <div className="flex flex-nowrap items-center justify-center sm:justify-end gap-2">
                         <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs font-black rounded-xl flex items-center gap-1 shrink-0 whitespace-nowrap">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Checked Out
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Logged Out
                         </span>
                         <select
                           value={dashWorkLocation}
@@ -418,7 +418,7 @@ export const Dashboard = () => {
                           onClick={handleQuickClockIn}
                           variant="checkin"
                         >
-                          Check In Again
+                          Login Again
                         </UiverseStarButton>
                       </div>
                     )}

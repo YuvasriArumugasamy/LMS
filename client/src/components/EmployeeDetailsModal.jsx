@@ -219,7 +219,7 @@ export const EmployeeDetailsModal = ({
                   {employee.role === 'CEO'
                     ? 'Executive Account — Exempt from biometric face verification requirements.'
                     : employee.isFaceRegistered
-                    ? 'Employee must scan face for attendance check-in/out.'
+                    ? 'Employee must scan face for attendance login/logout.'
                     : 'Only CEO and HR have permission to capture and set Face Lock.'}
                 </p>
               </div>

@@ -243,7 +243,7 @@ export const FaceCameraModal = ({
               <p className="text-xs text-slate-500 font-medium mt-0.5">
                 {mode === 'register'
                   ? `Setting up Face Lock for ${employeeName || 'Employee'}`
-                  : 'Scan your registered face to check in / out'}
+                  : 'Scan your registered face to login / logout'}
               </p>
             </div>
           </div>
@@ -350,7 +350,7 @@ export const FaceCameraModal = ({
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
               >
                 <UserCheck className="w-4 h-4 stroke-[2.5]" />
-                {isSubmitting ? 'Processing...' : mode === 'register' ? 'Save Face Lock' : 'Confirm & Check In/Out'}
+                {isSubmitting ? 'Processing...' : mode === 'register' ? 'Save Face Lock' : 'Confirm & Login/Logout'}
               </button>
             </>
           ) : (

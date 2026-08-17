@@ -495,7 +495,7 @@ export const Attendance = () => {
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   const handleDownloadExcel = () => {
-    const headers = ['#', 'Employee Name', 'Employee ID', 'Department', 'Month', 'Total Days', 'Present Days', 'WFH Days', 'Late Check-ins', 'Half Days', 'Absent Days'];
+    const headers = ['#', 'Employee Name', 'Employee ID', 'Department', 'Month', 'Total Days', 'Present Days', 'WFH Days', 'Late Logins', 'Half Days', 'Absent Days'];
     const rows = filteredEmployeeGroupList.map((emp, idx) => {
       const s = getMonthFilteredStats(emp);
       return [
@@ -712,7 +712,7 @@ export const Attendance = () => {
       await fetchTodayStatus();
       await fetchAttendanceLogs();
     } catch (err) {
-      alert(err.response?.data?.message || `Failed to ${pendingClockAction === 'clockIn' ? 'check in' : 'check out'}.`);
+      alert(err.response?.data?.message || `Failed to ${pendingClockAction === 'clockIn' ? 'login' : 'logout'}.`);
     } finally {
       setActionLoading(false);
     }
@@ -780,13 +780,13 @@ export const Attendance = () => {
 
               <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight mt-0.5 truncate">
                 {todayAttendance?.clockIn
-                  ? `Checked In at ${new Date(todayAttendance.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                  : 'Not Checked In Yet'}
+                  ? `Logged In at ${new Date(todayAttendance.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                  : 'Not Logged In Yet'}
               </h3>
 
               {todayAttendance?.clockOut && (
                 <p className="text-xs font-semibold text-emerald-500 mt-0.5 truncate">
-                  Checked Out at {new Date(todayAttendance.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ({formatWorkDuration(todayAttendance)} worked)
+                  Logged Out at {new Date(todayAttendance.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ({formatWorkDuration(todayAttendance)} worked)
                 </p>
               )}
             </div>
@@ -810,7 +810,7 @@ export const Attendance = () => {
                   variant="emerald"
                   icon={Play}
                 >
-                  Check In
+                  Login
                 </UiverseStarButton>
               </>
             ) : !todayAttendance?.clockOut ? (
@@ -820,12 +820,12 @@ export const Attendance = () => {
                 variant="checkout"
                 icon={Square}
               >
-                Check Out
+                Logout
               </UiverseStarButton>
             ) : (
               <div className="flex items-center gap-2">
                 <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
-                  <CheckCircle2 className="w-4 h-4" /> Checked Out
+                  <CheckCircle2 className="w-4 h-4" /> Logged Out
                 </div>
 
                 <select
@@ -843,7 +843,7 @@ export const Attendance = () => {
                   variant="emerald"
                   icon={Play}
                 >
-                  Check In Again
+                  Login Again
                 </UiverseStarButton>
               </div>
             )}
@@ -863,7 +863,7 @@ export const Attendance = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-black text-slate-900 dark:text-white">Employee Live Status</h2>
-              <p className="text-xs text-slate-400 font-medium">Real-time check-in status — auto refreshes every 30s</p>
+              <p className="text-xs text-slate-400 font-medium">Real-time login status — auto refreshes every 30s</p>
             </div>
             <button
               onClick={fetchLiveStatus}
@@ -892,18 +892,18 @@ export const Attendance = () => {
                 // Card background & border style matching Image 1
                 let cardStyle = `${palette.cardBg} ${palette.leftBorder}`;
                 let badgeStyle = palette.badge;
-                let badgeText = 'Not Checked In';
+                let badgeText = 'Not Logged In';
                 let dotClass = 'bg-slate-400';
 
                 if (isCheckedOut) {
                   cardStyle = 'bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-emerald-100/50 dark:from-emerald-950/40 dark:to-slate-900 border-emerald-300/80 dark:border-emerald-800 border-l-[4px] border-l-emerald-500 relative overflow-hidden';
                   badgeStyle = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800';
-                  badgeText = 'Checked Out';
+                  badgeText = 'Logged Out';
                   dotClass = 'bg-emerald-500';
                 } else if (isCheckedIn) {
                   cardStyle = 'bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-sky-100/50 dark:from-blue-950/40 dark:to-slate-900 border-blue-300/80 dark:border-blue-800 border-l-[4px] border-l-blue-600 relative overflow-hidden';
                   badgeStyle = 'bg-emerald-500 text-white font-extrabold shadow-xs';
-                  badgeText = 'Check In';
+                  badgeText = 'Login';
                   dotClass = 'bg-white animate-pulse';
                 } else if (isOnLunch) {
                   cardStyle = 'bg-gradient-to-br from-amber-50/70 via-orange-50/30 to-amber-100/50 dark:from-amber-950/40 dark:to-slate-900 border-amber-300/80 dark:border-amber-800 border-l-[4px] border-l-amber-500 relative overflow-hidden';
@@ -917,7 +917,7 @@ export const Attendance = () => {
                     key={emp._id}
                     className={`rounded-3xl border p-4 sm:p-5 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 space-y-4 ${cardStyle}`}
                   >
-                    {/* Background watermark illustration for Checked Out / Checked In cards */}
+                    {/* Background watermark illustration for Logged Out / Logged In cards */}
                     {(isCheckedOut || isCheckedIn) && (
                       <div className="absolute right-0 bottom-0 pointer-events-none opacity-20 dark:opacity-10 text-emerald-600 dark:text-emerald-400">
                         <svg className="w-32 h-32" viewBox="0 0 200 200" fill="currentColor">
@@ -1412,8 +1412,8 @@ export const Attendance = () => {
                     <span className="text-[9px] text-slate-400 font-bold">DAY</span>
                   </div>
                   <div className="text-left">
-                    CHECK-IN<br />
-                    <span className="text-[9px] text-slate-400 font-bold">CHECK-OUT</span>
+                    LOGIN<br />
+                    <span className="text-[9px] text-slate-400 font-bold">LOGOUT</span>
                   </div>
                   <div className="text-center hidden sm:block">DURATION</div>
                   <div className="text-center">STATUS</div>
@@ -1453,7 +1453,7 @@ export const Attendance = () => {
                           </div>
                         </div>
 
-                        {/* CHECK-IN / CHECK-OUT Column */}
+                        {/* LOGIN / LOGOUT Column */}
                         <div className="flex flex-col font-extrabold text-left">
                           <span className={`text-xs sm:text-sm ${isPresent ? 'text-emerald-600 dark:text-emerald-400' : isLate ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 font-normal'}`}>
                             {isPresent || isLate ? formatClockTime(log.clockIn) : '--'}
@@ -1662,14 +1662,14 @@ export const Attendance = () => {
 
             {/* Attendance Details Card */}
             <div className="p-2.5 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-2 sm:space-y-2.5 shadow-2xs">
-              {/* Check In */}
+              {/* Login */}
               <div className="flex items-center justify-between pb-2 sm:pb-2.5 border-b border-dashed border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2.5">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-purple-50 dark:bg-purple-950/50 text-[#7c3aed] dark:text-purple-400">
                     <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.2]" />
                   </div>
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Check In
+                    Login
                   </span>
                 </div>
                 <span className="text-xs font-black text-slate-900 dark:text-white font-mono">
@@ -1707,14 +1707,14 @@ export const Attendance = () => {
                 </span>
               </div>
 
-              {/* Check Out */}
+              {/* Logout */}
               <div className="flex items-center justify-between pb-2 sm:pb-2.5 border-b border-dashed border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2.5">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
                     <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.2]" />
                   </div>
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Check Out
+                    Logout
                   </span>
                 </div>
                 <span className="text-xs font-black text-slate-900 dark:text-white font-mono">
@@ -1758,7 +1758,7 @@ export const Attendance = () => {
         )}
       </Modal>
 
-      {/* Face Verification Modal for Check-In & Check-Out */}
+      {/* Face Verification Modal for Login & Logout */}
       <FaceCameraModal
         isOpen={isFaceModalOpen}
         onClose={() => {
