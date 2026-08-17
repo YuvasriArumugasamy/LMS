@@ -1823,15 +1823,14 @@ export const Attendance = () => {
                       <option key={i} value={i}>{m}</option>
                     ))}
                   </select>
-                  <select
+                  <input
+                    type="number"
                     value={reportYear}
                     onChange={e => setReportYear(Number(e.target.value))}
-                    className="px-3 py-2 sm:py-1.5 rounded-xl sm:rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-xs w-full sm:w-auto"
-                  >
-                    {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </select>
+                    min="2000"
+                    max="2050"
+                    className="px-3 py-2 sm:py-1.5 w-24 rounded-xl sm:rounded-full bg-white dark:bg-slate-800 border border-blue-400 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500/30 shadow-xs text-center"
+                  />
                 </div>
                 
                 {/* Download Button */}
