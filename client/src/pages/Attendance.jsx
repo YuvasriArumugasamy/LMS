@@ -1070,7 +1070,7 @@ export const Attendance = () => {
 
       {/* Filter Bar */}
       {user?.role !== 'EMPLOYEE' && (
-        <div className="glass-card p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
+        <div className="glass-card p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs relative z-50">
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <Filter className="w-4 h-4 text-slate-400 shrink-0" />
             <div className="relative w-full max-w-[260px] sm:w-64">

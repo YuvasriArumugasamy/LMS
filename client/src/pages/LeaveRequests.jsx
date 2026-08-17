@@ -115,7 +115,7 @@ export const LeaveRequests = () => {
       </div>
 
       {/* Filter Dropdown */}
-      <div className="glass-card p-3 sm:p-4 flex items-center justify-between gap-3 shadow-xs">
+      <div className="glass-card p-3 sm:p-4 flex items-center justify-between gap-3 shadow-xs relative z-50">
         <div className="flex items-center gap-2.5 shrink-0">
           <Filter className="w-4 h-4 text-slate-400 shrink-0" />
           <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Filter by Status:</span>
