@@ -312,6 +312,7 @@ export const Dashboard = () => {
             e.preventDefault();
             if (searchQuery.trim()) {
               navigate(`/employees?search=${encodeURIComponent(searchQuery)}`);
+              setSearchQuery('');
             }
           }}
           className="relative w-full"

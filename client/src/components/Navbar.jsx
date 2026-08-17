@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { UserAvatar } from './UserAvatar';
@@ -47,6 +47,7 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/employees?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery('');
     }
   };
 
