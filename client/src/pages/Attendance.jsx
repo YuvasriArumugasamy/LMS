@@ -738,7 +738,7 @@ export const Attendance = () => {
           <div className="flex items-center gap-2 mt-3">
             <button
               onClick={() => setActiveTab('logs')}
-              className={`px-4 py-1.5 rounded-full text-xs font-black transition-all ${
+              className={`px-4 py-1.5 rounded-full text-xs font-black transition-all whitespace-nowrap ${
                 activeTab === 'logs'
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
@@ -748,7 +748,7 @@ export const Attendance = () => {
             </button>
             <button
               onClick={() => setActiveTab('live')}
-              className={`px-4 py-1.5 rounded-full text-xs font-black transition-all flex items-center gap-1.5 ${
+              className={`px-4 py-1.5 rounded-full text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'live'
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
