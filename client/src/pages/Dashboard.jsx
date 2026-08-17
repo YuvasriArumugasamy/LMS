@@ -7,7 +7,8 @@ import blueBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_49 PM.webp';
 import greenBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_43 PM.webp';
 import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.webp';
 import orangeBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_34 PM.webp';
-import { StatusBadge } from '../components/Badge';
+import { QuickActions } from '../components/QuickActions';
+import UiverseDropdown from '../components/UiverseDropdown';
 import { Modal } from '../components/Modal';
 import { LeaveApplyModal } from '../components/LeaveApplyModal';
 import { FaceCameraModal } from '../components/FaceCameraModal';
@@ -361,14 +362,14 @@ export const Dashboard = () => {
                   <div className="shrink-0 flex justify-center sm:justify-end w-full sm:w-auto">
                     {!todayAttendance?.clockIn ? (
                       <div className="flex items-center justify-center sm:justify-end gap-2 flex-nowrap">
-                        <select
+                        <UiverseDropdown
+                          options={[
+                            { value: "WFH", label: "🏡 WFH" },
+                            { value: "IN_OFFICE", label: "🏢 In-Office" },
+                          ]}
                           value={dashWorkLocation}
-                          onChange={(e) => setDashWorkLocation(e.target.value)}
-                          className="px-2 sm:px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer shadow-xs"
-                        >
-                          <option value="WFH">🏡 WFH</option>
-                          <option value="IN_OFFICE">🏢 In-Office</option>
-                        </select>
+                          onChange={(val) => setDashWorkLocation(val)}
+                        />
                         <UiverseStarButton
                           disabled={actionLoading}
                           onClick={handleQuickClockIn}
@@ -405,14 +406,14 @@ export const Dashboard = () => {
                         <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs font-black rounded-xl flex items-center gap-1 shrink-0 whitespace-nowrap">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Logged Out
                         </span>
-                        <select
+                        <UiverseDropdown
+                          options={[
+                            { value: "WFH", label: "🏡 WFH" },
+                            { value: "IN_OFFICE", label: "🏢 In-Office" },
+                          ]}
                           value={dashWorkLocation}
-                          onChange={(e) => setDashWorkLocation(e.target.value)}
-                          className="px-2 sm:px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer shadow-xs"
-                        >
-                          <option value="WFH">🏡 WFH</option>
-                          <option value="IN_OFFICE">🏢 In-Office</option>
-                        </select>
+                          onChange={(val) => setDashWorkLocation(val)}
+                        />
                         <UiverseStarButton
                           disabled={actionLoading}
                           onClick={handleQuickClockIn}
@@ -589,15 +590,11 @@ export const Dashboard = () => {
           <div className="lg:col-span-8 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Your Leave Entitlements</h3>
-              <select
+              <UiverseDropdown
+                options={Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((yr) => ({ value: yr, label: `Year ${yr}` }))}
                 value={selectedBalanceYear}
-                onChange={(e) => handleBalanceYearChange(Number(e.target.value))}
-                className="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1 rounded-full border-none outline-none cursor-pointer transition-colors"
-              >
-                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((yr) => (
-                  <option key={yr} value={yr}>Year {yr}</option>
-                ))}
-              </select>
+                onChange={(val) => handleBalanceYearChange(Number(val))}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">

@@ -904,3 +904,175 @@ html, body, #root {
   z-index: 10;
 }
 
+/* From Uiverse.io by gharsh11032000 - Custom Dropdown */ 
+.uiverse-dropdown-menu {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #000000;
+  width: fit-content;
+  display: flex;
+  list-style: none;
+  z-index: 50;
+  position: relative;
+}
+
+.uiverse-dropdown-menu a {
+  text-decoration: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.uiverse-dropdown-menu .link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+  background: white;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.dark .uiverse-dropdown-menu .link {
+  background: #1e293b;
+  border-color: #334155;
+  color: white;
+}
+
+.uiverse-dropdown-menu .link::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #2563eb;
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.uiverse-dropdown-menu .link svg {
+  width: 14px;
+  height: 14px;
+  fill: #000000;
+  transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.dark .uiverse-dropdown-menu .link svg {
+  fill: #ffffff;
+}
+
+.uiverse-dropdown-menu .item {
+  position: relative;
+}
+
+.uiverse-dropdown-menu .item .submenu {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  border-radius: 0 0 16px 16px;
+  left: 0;
+  width: 100%;
+  min-width: max-content;
+  overflow: hidden;
+  border: 1px solid #cccccc;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-12px);
+  transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index: 50;
+  pointer-events: none;
+  list-style: none;
+  background: white;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.dark .uiverse-dropdown-menu .item .submenu {
+  background: #1e293b;
+  border-color: #334155;
+  color: white;
+}
+
+.uiverse-dropdown-menu .item.is-open .submenu,
+.uiverse-dropdown-menu .item:hover .submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  border-top: transparent;
+  border-color: #2563eb;
+}
+
+.uiverse-dropdown-menu .item.is-open .link,
+.uiverse-dropdown-menu .item:hover .link {
+  color: #ffffff;
+  border-radius: 12px 12px 0 0;
+  border-color: #2563eb;
+}
+
+.uiverse-dropdown-menu .item.is-open .link::after,
+.uiverse-dropdown-menu .item:hover .link::after {
+  transform: scaleX(1);
+  transform-origin: right;
+}
+
+.uiverse-dropdown-menu .item.is-open .link svg,
+.uiverse-dropdown-menu .item:hover .link svg {
+  fill: #ffffff;
+  transform: rotate(-180deg);
+}
+
+.uiverse-dropdown-menu .submenu-item {
+  width: 100%;
+  transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.uiverse-dropdown-menu .submenu-link {
+  display: block;
+  padding: 10px 16px;
+  width: 100%;
+  position: relative;
+  text-align: left;
+  transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.uiverse-dropdown-menu .submenu-item:last-child .submenu-link {
+  border-bottom: none;
+}
+
+.uiverse-dropdown-menu .submenu-link::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scaleX(0);
+  width: 100%;
+  height: 100%;
+  background-color: #2563eb;
+  z-index: -1;
+  transform-origin: left;
+  transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.uiverse-dropdown-menu .submenu-link:hover:before {
+  transform: scaleX(1);
+  transform-origin: right;
+}
+
+.uiverse-dropdown-menu .submenu-link:hover {
+  color: #ffffff;
+}

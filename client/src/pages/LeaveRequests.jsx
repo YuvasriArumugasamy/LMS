@@ -5,6 +5,7 @@ import { StatusBadge } from '../components/Badge';
 import { UserAvatar } from '../components/UserAvatar';
 import { LeaveApplyModal } from '../components/LeaveApplyModal';
 import { LeaveDetailsModal } from '../components/LeaveDetailsModal';
+import UiverseDropdown from '../components/UiverseDropdown';
 import { Plus, Search, Filter, Calendar, ChevronRight, ChevronLeft, Zap, Eye, CheckCircle2, XCircle } from 'lucide-react';
 
 const LIMIT = 10;
@@ -120,18 +121,18 @@ export const LeaveRequests = () => {
           <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Filter by Status:</span>
         </div>
         
-        <select
+        <UiverseDropdown
+          options={[
+            { value: "", label: "All Leaves" },
+            { value: "PENDING", label: "Pending" },
+            { value: "TEAM_LEAD_APPROVED", label: "TL Approved" },
+            { value: "ESCALATED_TO_HR", label: "Escalated HR" },
+            { value: "APPROVED", label: "Approved" },
+            { value: "REJECTED", label: "Rejected" },
+          ]}
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 sm:px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-auto min-w-0"
-        >
-          <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Leaves</option>
-          <option value="PENDING" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Pending</option>
-          <option value="TEAM_LEAD_APPROVED" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">TL Approved</option>
-          <option value="ESCALATED_TO_HR" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Escalated HR</option>
-          <option value="APPROVED" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Approved</option>
-          <option value="REJECTED" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Rejected</option>
-        </select>
+          onChange={(val) => setStatusFilter(val)}
+        />
       </div>
 
       {/* 12-Column Responsive Grid Cards for Perfect Alignment on Tablet & Desktop */}

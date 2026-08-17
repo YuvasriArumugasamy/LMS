@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { Tooltip } from '../components/Tooltip';
+import UiverseDropdown from '../components/UiverseDropdown';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
@@ -795,14 +797,14 @@ export const Attendance = () => {
           <div className="flex items-center justify-center sm:justify-end gap-2.5 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
             {!todayAttendance?.clockIn ? (
               <>
-                <select
+                <UiverseDropdown
+                  options={[
+                    { value: "WFH", label: "🏡 Remote / WFH" },
+                    { value: "IN_OFFICE", label: "🏢 In-Office" },
+                  ]}
                   value={workLocation}
-                  onChange={(e) => setWorkLocation(e.target.value)}
-                  className="px-2.5 py-[6px] bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-extrabold text-slate-700 dark:text-slate-200 outline-none cursor-pointer focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500/50 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-600 uppercase tracking-tight"
-                >
-                  <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏡 Remote / WFH</option>
-                  <option value="IN_OFFICE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏢 In-Office</option>
-                </select>
+                  onChange={(val) => setWorkLocation(val)}
+                />
 
                 <UiverseStarButton
                   disabled={actionLoading}
@@ -828,14 +830,14 @@ export const Attendance = () => {
                   <CheckCircle2 className="w-4 h-4" /> Logged Out
                 </div>
 
-                <select
+                <UiverseDropdown
+                  options={[
+                    { value: "WFH", label: "🏡 Remote / WFH" },
+                    { value: "IN_OFFICE", label: "🏢 In-Office" },
+                  ]}
                   value={workLocation}
-                  onChange={(e) => setWorkLocation(e.target.value)}
-                  className="px-2.5 py-[6px] bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-extrabold text-slate-700 dark:text-slate-200 outline-none cursor-pointer focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500/50 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-600 uppercase tracking-tight"
-                >
-                  <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏡 Remote / WFH</option>
-                  <option value="IN_OFFICE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">🏢 In-Office</option>
-                </select>
+                  onChange={(val) => setWorkLocation(val)}
+                />
 
                 <UiverseStarButton
                   disabled={actionLoading}
@@ -1090,19 +1092,19 @@ export const Attendance = () => {
             </div>
             
             <div className="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-end">
-              <select
+              <UiverseDropdown
+                options={[
+                  { value: "", label: "All Statuses" },
+                  { value: "PRESENT", label: "Present Only" },
+                  { value: "LATE", label: "Late Only" },
+                  { value: "HALF_DAY", label: "Half Day Only" },
+                  { value: "WFH", label: "WFH / Remote" },
+                  { value: "ABSENT", label: "Absent Only" },
+                  { value: "OVER_DUTY", label: "Over Duty (OD)" },
+                ]}
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-2.5 pr-6 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-full max-w-[105px] sm:max-w-[130px] tracking-tight shrink text-ellipsis overflow-hidden whitespace-nowrap"
-              >
-                <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Statuses</option>
-                <option value="PRESENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Present Only</option>
-                <option value="LATE" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Late Only</option>
-                <option value="HALF_DAY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Half Day Only</option>
-                <option value="WFH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">WFH / Remote</option>
-                <option value="ABSENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Absent Only</option>
-                <option value="OVER_DUTY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Over Duty (OD)</option>
-              </select>
+                onChange={(val) => setStatusFilter(val)}
+              />
 
               {user?.role !== 'EMPLOYEE' && (
               <div className="flex items-center gap-1.5 shrink-0">
