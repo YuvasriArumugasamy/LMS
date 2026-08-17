@@ -11,6 +11,7 @@ import UiverseDropdown from '../components/UiverseDropdown';
 import { Modal } from '../components/Modal';
 import { LeaveApplyModal } from '../components/LeaveApplyModal';
 import { FaceCameraModal } from '../components/FaceCameraModal';
+import { UiverseStarButton } from '../components/UiverseStarButton';
 import { useNavigate } from 'react-router-dom';
 import {
   Users,
@@ -368,51 +369,35 @@ export const Dashboard = () => {
                           value={dashWorkLocation}
                           onChange={(val) => setDashWorkLocation(val)}
                         />
-                        <button
+                        <UiverseStarButton
                           disabled={actionLoading}
                           onClick={handleQuickClockIn}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px]"
+                          variant="checkin"
                         >
                           Login
-                        </button>
+                        </UiverseStarButton>
                       </div>
                     ) : !todayAttendance?.clockOut ? (
                       <div className="flex flex-nowrap items-center justify-center sm:justify-end gap-2">
                         {!todayAttendance?.lunchOut ? (
                           <>
                             {isBeforeLunchOut && (
-                              <button
-                                disabled={actionLoading}
-                                onClick={handleQuickLunchOut}
-                                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px]"
-                              >
+                              <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchOut} variant="checkout">
                                 Lunch Out
-                              </button>
+                              </UiverseStarButton>
                             )}
-                            <button
-                              disabled={actionLoading}
-                              onClick={handleQuickClockOut}
-                              className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px]"
-                            >
+                            <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
                               Logout
-                            </button>
+                            </UiverseStarButton>
                           </>
                         ) : !todayAttendance?.lunchIn ? (
-                          <button
-                            disabled={actionLoading}
-                            onClick={handleQuickLunchIn}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px]"
-                          >
+                          <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchIn} variant="checkin">
                             Lunch In
-                          </button>
+                          </UiverseStarButton>
                         ) : (
-                          <button
-                            disabled={actionLoading}
-                            onClick={handleQuickClockOut}
-                            className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px]"
-                          >
+                          <UiverseStarButton disabled={actionLoading} onClick={handleQuickClockOut} variant="checkout">
                             Logout
-                          </button>
+                          </UiverseStarButton>
                         )}
                       </div>
                     ) : (
@@ -428,13 +413,13 @@ export const Dashboard = () => {
                           value={dashWorkLocation}
                           onChange={(val) => setDashWorkLocation(val)}
                         />
-                        <button
+                        <UiverseStarButton
                           disabled={actionLoading}
                           onClick={handleQuickClockIn}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px]"
+                          variant="checkin"
                         >
                           Login Again
-                        </button>
+                        </UiverseStarButton>
                       </div>
                     )}
                   </div>

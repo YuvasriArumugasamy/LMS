@@ -4,6 +4,7 @@ import UiverseDropdown from '../components/UiverseDropdown';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
+import { UiverseStarButton } from '../components/UiverseStarButton';
 import { Modal } from '../components/Modal';
 import { FaceCameraModal } from '../components/FaceCameraModal';
 import blueBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_49 PM.webp';
@@ -804,24 +805,24 @@ export const Attendance = () => {
                   onChange={(val) => setWorkLocation(val)}
                 />
 
-                <button
+                <UiverseStarButton
                   disabled={actionLoading}
                   onClick={handleInitiateClockIn}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px] gap-2"
+                  variant="emerald"
+                  icon={Play}
                 >
-                  <Play className="w-4 h-4" />
                   Login
-                </button>
+                </UiverseStarButton>
               </>
             ) : !todayAttendance?.clockOut ? (
-              <button
+              <UiverseStarButton
                 disabled={actionLoading}
                 onClick={handleInitiateClockOut}
-                className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px] gap-2"
+                variant="checkout"
+                icon={Square}
               >
-                <Square className="w-4 h-4" />
                 Logout
-              </button>
+              </UiverseStarButton>
             ) : (
               <div className="flex items-center gap-2">
                 <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
@@ -837,14 +838,14 @@ export const Attendance = () => {
                   onChange={(val) => setWorkLocation(val)}
                 />
 
-                <button
+                <UiverseStarButton
                   disabled={actionLoading}
                   onClick={handleInitiateClockIn}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center justify-center min-w-[120px] gap-2"
+                  variant="emerald"
+                  icon={Play}
                 >
-                  <Play className="w-4 h-4" />
                   Login Again
-                </button>
+                </UiverseStarButton>
               </div>
             )}
           </div>
