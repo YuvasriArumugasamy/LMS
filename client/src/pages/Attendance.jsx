@@ -1093,7 +1093,7 @@ export const Attendance = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-3 pr-7 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-auto tracking-tight shrink-0"
+                className="pl-3 pr-7 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-[115px] sm:w-[130px] tracking-tight shrink-0 text-ellipsis overflow-hidden whitespace-nowrap"
               >
                 <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Statuses</option>
                 <option value="PRESENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Present Only</option>
