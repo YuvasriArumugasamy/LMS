@@ -792,7 +792,7 @@ export const Attendance = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:justify-end">
+          <div className="flex items-center gap-2.5 shrink-0 sm:justify-end">
             {!todayAttendance?.clockIn ? (
               <>
                 <select
@@ -823,7 +823,7 @@ export const Attendance = () => {
                 Check Out
               </UiverseStarButton>
             ) : (
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
                 <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
                   <CheckCircle2 className="w-4 h-4" /> Checked Out
                 </div>
