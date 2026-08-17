@@ -741,7 +741,7 @@ export const Attendance = () => {
             <div 
               className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full shadow-sm transition-all duration-500 ${
                 activeTab === 'logs' 
-                  ? 'bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600' 
+                  ? 'bg-blue-600 border border-blue-500' 
                   : 'bg-emerald-600 border border-emerald-500'
               }`}
               style={{
@@ -753,7 +753,7 @@ export const Attendance = () => {
             <button
               onClick={() => setActiveTab('logs')}
               className={`relative z-10 px-4 sm:px-6 py-1.5 sm:py-2 text-[11px] sm:text-xs font-black transition-colors duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full ${
-                activeTab === 'logs' ? 'text-slate-800 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                activeTab === 'logs' ? 'text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >
               📋 Attendance Logs
