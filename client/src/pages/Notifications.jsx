@@ -108,7 +108,7 @@ export const Notifications = () => {
   const handleTestNotification = () => {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification("🚀 LMS Test Notification", {
-        body: "இது ஒரு Test Notification! போனில் இது சரியாக வருகிறதா என்று பாருங்கள்.",
+        body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
         icon: "/vite.svg"
       });
     } else {
