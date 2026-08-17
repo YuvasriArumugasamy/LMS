@@ -1070,26 +1070,30 @@ export const Attendance = () => {
       {/* Filter Bar */}
       {user?.role !== 'EMPLOYEE' && (
         <div className="glass-card p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="flex items-center gap-2.5 w-full sm:w-auto">
-              <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-              <div className="relative w-full max-w-[260px] sm:w-64">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search employee name or ID..."
-                  className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary"
-                />
-              </div>
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+            <div className="relative w-full max-w-[260px] sm:w-64">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search employee name or ID..."
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary"
+              />
             </div>
+          </div>
 
-            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <div className="flex flex-row items-center justify-between sm:justify-end gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+            <div className="hidden lg:block text-[11px] sm:text-xs font-extrabold text-slate-400 mr-2">
+              Showing {filteredEmployeeGroupList.length} Card{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
+            </div>
+            
+            <div className="flex items-center gap-2">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-3 pr-7 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-auto tracking-tight"
+                className="pl-3 pr-7 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-[11px] font-semibold text-slate-900 dark:text-white outline-none focus:border-primary cursor-pointer w-auto tracking-tight shrink-0"
               >
                 <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">All Statuses</option>
                 <option value="PRESENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Present Only</option>
@@ -1099,14 +1103,8 @@ export const Attendance = () => {
                 <option value="ABSENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Absent Only</option>
                 <option value="OVER_DUTY" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">⚡ Over Duty (OD)</option>
               </select>
-            </div>
-          </div>
 
-          <div className="flex flex-row flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto mt-1 sm:mt-0">
-            <div className="text-[11px] sm:text-xs font-extrabold text-slate-400">
-              Showing {filteredEmployeeGroupList.length} Card{filteredEmployeeGroupList.length !== 1 ? 's' : ''}
-            </div>
-            {user?.role !== 'EMPLOYEE' && (
+              {user?.role !== 'EMPLOYEE' && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsReportModalOpen(true)}
@@ -1124,6 +1122,7 @@ export const Attendance = () => {
                 </button>
               </div>
             )}
+            </div>
           </div>
         </div>
       )}
