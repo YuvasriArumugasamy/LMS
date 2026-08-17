@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function UiverseDropdown({ options, value, onChange, className = '', placeholder = 'Select...' }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +33,7 @@ export default function UiverseDropdown({ options, value, onChange, className = 
           onClick={() => setIsOpen(!isOpen)}
         >
           <span>{selectedOption ? selectedOption.label : placeholder}</span>
-          <svg viewBox="0 0 360 360" xmlSpace="preserve">
+          <svg viewBox="0 0 360 360">
             <g id="SVGRepo_iconCarrier">
               <path
                 id="XMLID_225_"
