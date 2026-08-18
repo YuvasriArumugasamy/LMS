@@ -10,22 +10,22 @@ export const AuditLogDetailsModal = ({ isOpen, onClose, log }) => {
     <Modal isOpen={isOpen} onClose={onClose} title="Security Audit Event Details" maxWidth="max-w-2xl">
       <div className="space-y-6 pr-2 sm:pr-4 pb-6">
         {/* Banner Overview */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-4">
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-primary/10 text-primary">
+            <div className="p-3 rounded-xl bg-primary/10 text-primary shrink-0">
               <ShieldAlert className="w-6 h-6" />
             </div>
-            <div>
-              <h4 className="text-base font-extrabold text-slate-900 dark:text-white leading-tight font-mono">
+            <div className="min-w-0">
+              <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white leading-tight font-mono break-all sm:break-normal">
                 {log.action}
               </h4>
-              <p className="text-xs text-slate-500 font-semibold mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-500 font-semibold mt-0.5">
                 Module: <span className="text-primary font-mono font-bold uppercase">{log.module}</span>
               </p>
             </div>
           </div>
 
-          <div className="text-right">
+          <div className="text-left sm:text-right pl-12 sm:pl-0 mt-1 sm:mt-0">
             <span className="text-[10px] font-mono text-slate-400 font-semibold block">
               {new Date(log.createdAt).toLocaleString()}
             </span>
