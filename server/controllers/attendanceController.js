@@ -47,24 +47,25 @@ const calculateEuclideanDistance = (desc1, desc2) => {
 };
 
 const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
-  // CEO is exempt from biometric face lock requirements
-  if (user?.role === 'CEO') {
-    return { valid: true, isExempt: true };
-  }
-  // If face is not registered, block check-in — face registration is mandatory
+  // SECURITY FIX: Removed CEO exemption - ALL users must use face verification
+  // Previous code allowed CEO bypass which is a security hole
+  
+  // If face is not registered, block check-in — face registration is mandatory for ALL users
   if (!user.isFaceRegistered || !user.faceDescriptor || user.faceDescriptor.length === 0) {
     return {
       valid: false,
       message: 'Face Lock not registered. Please contact your administrator to register your face before checking in/out.'
     };
   }
+  
   // Face is registered — submitted descriptor is required
   if (!submittedDescriptor || !Array.isArray(submittedDescriptor) || submittedDescriptor.length === 0) {
     return { valid: false, message: 'Face scan is required for Check-In/Out verification.' };
   }
+  
   // Compare submitted face against registered face descriptor
   const distance = calculateEuclideanDistance(user.faceDescriptor, submittedDescriptor);
-  console.log(`[Face Verification] User: ${user.email}, Distance: ${distance.toFixed(4)}`);
+  console.log(`[Face Verification] User: ${user.email}, Role: ${user.role}, Distance: ${distance.toFixed(4)}`);
   
   // STRICT threshold: 0.50 (lower is better match)
   // This prevents unauthorized users from using similar-looking faces
