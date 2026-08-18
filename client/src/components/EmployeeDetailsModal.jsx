@@ -35,6 +35,23 @@ export const EmployeeDetailsModal = ({
   const [managers, setManagers] = useState([]);
   const canManageFaceLock = ['CEO', 'HR', 'ADMIN'].includes(user?.role);
 
+  // Debug: Log props when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      console.log('[EmployeeModal] Props received:', {
+        employeeName: employee ? `${employee.firstName} ${employee.lastName}` : 'None',
+        departmentsCount: departments?.length || 0,
+        designationsCount: designations?.length || 0
+      });
+      if (!departments || departments.length === 0) {
+        console.warn('[EmployeeModal] ⚠️ Departments prop is empty! Parent should fetch departments first.');
+      }
+      if (!designations || designations.length === 0) {
+        console.warn('[EmployeeModal] ⚠️ Designations prop is empty! Parent should fetch designations first.');
+      }
+    }
+  }, [isOpen, departments, designations, employee]);
+
   const handlePhoneChange = (value) => {
     // Allow +, digits, spaces, hyphens — max 15 chars (international format)
     const cleaned = value.replace(/[^\d\s\+\-\(\)]/g, '').slice(0, 15);
@@ -60,14 +77,19 @@ export const EmployeeDetailsModal = ({
   // Load all potential managers (TEAM_LEAD role) when modal opens
   useEffect(() => {
     if (isOpen) {
+      // Fetch managers
       api.get('/employees?limit=200&status=ACTIVE')
         .then((res) => {
           const all = res.data?.data?.employees || [];
           // Show anyone who can be a reporting manager: TEAM_LEAD, HR, ADMIN, CEO
           const mgrs = all.filter((e) => ['TEAM_LEAD', 'HR', 'ADMIN', 'CEO'].includes(e.role));
           setManagers(mgrs);
+          console.log('[EmployeeModal] Managers loaded:', mgrs.length);
         })
-        .catch(() => setManagers([]));
+        .catch((err) => {
+          console.error('[EmployeeModal] Failed to load managers:', err);
+          setManagers([]);
+        });
     }
   }, [isOpen]);
 

@@ -93,4 +93,10 @@ const leaveRequestSchema = new mongoose.Schema(
   }
 );
 
+// Compound indexes for optimized queries
+leaveRequestSchema.index({ user: 1, status: 1, isDeleted: 1 });
+leaveRequestSchema.index({ user: 1, fromDate: -1, isDeleted: 1 });
+leaveRequestSchema.index({ status: 1, isEmergency: 1, escalationDeadline: 1 });
+leaveRequestSchema.index({ fromDate: 1, toDate: 1, status: 1 }); // For date range queries
+
 export const LeaveRequest = mongoose.model('LeaveRequest', leaveRequestSchema);

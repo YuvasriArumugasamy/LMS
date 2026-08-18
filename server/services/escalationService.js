@@ -6,6 +6,19 @@ import { sendPushNotification } from './pushNotificationService.js';
 export const checkEmergencyEscalations = async () => {
   try {
     const now = new Date();
+    
+    // Early exit optimization: Check if any emergency leaves exist first
+    const hasEmergencyLeaves = await LeaveRequest.exists({
+      isEmergency: true,
+      status: 'PENDING',
+      escalationDeadline: { $lte: now }
+    });
+    
+    if (!hasEmergencyLeaves) {
+      // No emergency leaves to escalate - skip processing
+      return;
+    }
+
     // Find pending emergency leave requests where escalationDeadline has passed
     const overdueLeaves = await LeaveRequest.find({
       isEmergency: true,

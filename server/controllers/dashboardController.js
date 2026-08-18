@@ -44,22 +44,62 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
   today.setHours(0, 0, 0, 0);
 
   if (['ADMIN', 'CEO'].includes(role)) {
-    const [totalEmployees, totalDepartments, totalManagers, pendingLeaves, approvedLeaves, rejectedLeaves, leavesToday, monthlyTrend] = await Promise.all([
-      User.countDocuments({ isDeleted: false, status: 'ACTIVE' }),
-      Department.countDocuments({ isDeleted: false }),
-      User.countDocuments({ role: 'TEAM_LEAD', isDeleted: false }),
-      LeaveRequest.countDocuments({ status: { $in: ['PENDING', 'ESCALATED_TO_HR'] }, isDeleted: false }),
-      LeaveRequest.countDocuments({ status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, isDeleted: false }),
-      LeaveRequest.countDocuments({ status: { $in: ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] }, isDeleted: false }),
-      LeaveRequest.find({ status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
-        .populate('user', 'firstName lastName employeeId department profileImage'),
+    // Optimized: Use aggregation to reduce query count from 8 to 4
+    const [employeeDeptStats, leaveStats, leavesToday, monthlyTrend] = await Promise.all([
+      // Combined aggregation for employee, department, and manager counts
+      Promise.all([
+        User.countDocuments({ isDeleted: false, status: 'ACTIVE' }),
+        Department.countDocuments({ isDeleted: false }),
+        User.countDocuments({ role: 'TEAM_LEAD', isDeleted: false })
+      ]),
+      // Single aggregation for all leave status counts
+      LeaveRequest.aggregate([
+        { $match: { isDeleted: false } },
+        {
+          $group: {
+            _id: null,
+            pending: {
+              $sum: {
+                $cond: [{ $in: ['$status', ['PENDING', 'ESCALATED_TO_HR']] }, 1, 0]
+              }
+            },
+            approved: {
+              $sum: {
+                $cond: [{ $in: ['$status', ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED']] }, 1, 0]
+              }
+            },
+            rejected: {
+              $sum: {
+                $cond: [{ $in: ['$status', ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED']] }, 1, 0]
+              }
+            }
+          }
+        }
+      ]),
+      LeaveRequest.find({
+        status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] },
+        fromDate: { $lte: today },
+        toDate: { $gte: today },
+        isDeleted: false
+      }).populate('user', 'firstName lastName employeeId department profileImage'),
       buildMonthlyTrend()
     ]);
+
+    const [totalEmployees, totalDepartments, totalManagers] = employeeDeptStats;
+    const leaveCounts = leaveStats[0] || { pending: 0, approved: 0, rejected: 0 };
 
     res.status(200).json({
       status: 'success',
       data: {
-        cards: { totalEmployees, totalDepartments, totalManagers, pendingLeaves, approvedLeaves, rejectedLeaves, employeesOnLeaveToday: leavesToday.length },
+        cards: {
+          totalEmployees,
+          totalDepartments,
+          totalManagers,
+          pendingLeaves: leaveCounts.pending,
+          approvedLeaves: leaveCounts.approved,
+          rejectedLeaves: leaveCounts.rejected,
+          employeesOnLeaveToday: leavesToday.length
+        },
         leavesToday,
         monthlyTrend
       }

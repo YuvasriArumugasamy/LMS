@@ -406,60 +406,116 @@ export const updateAttendance = asyncHandler(async (req, res, next) => {
 export const getLiveStatus = asyncHandler(async (req, res, next) => {
   const { start: todayStart, end: todayEnd } = getTodayDateRange();
 
-  // Exclude CEO users
-  const ceoUsers = await User.find({ role: 'CEO' }).select('_id');
-  const ceoIds = ceoUsers.map((u) => u._id);
-
-  let userQuery = { isDeleted: false, status: 'ACTIVE' };
-  if (ceoIds.length > 0) userQuery._id = { $nin: ceoIds };
-
+  // Build match query for users
+  let userMatch = { isDeleted: false, status: 'ACTIVE', role: { $ne: 'CEO' } };
+  
   // TEAM_LEAD: only show direct reports
   if (req.user.role === 'TEAM_LEAD') {
     const teamMembers = await User.find({ reportingManager: req.user._id, isDeleted: false }).select('_id');
     const teamIds = teamMembers.map((m) => m._id);
-    userQuery._id = { $in: teamIds };
+    userMatch._id = { $in: teamIds };
   }
 
-  const allEmployees = await User.find(userQuery)
-    .select('firstName lastName employeeId profileImage department designation role')
-    .populate('department', 'name')
-    .populate('designation', 'name');
-
-  // Get today's attendance for all these employees
-  const employeeIds = allEmployees.map((e) => e._id);
-  const todayLogs = await Attendance.find({
-    user: { $in: employeeIds },
-    date: { $gte: todayStart, $lte: todayEnd }
-  }).lean();
-
-  const logMap = {};
-  todayLogs.forEach((log) => { logMap[log.user.toString()] = log; });
-
-  const liveStatus = allEmployees.map((emp) => {
-    const log = logMap[emp._id.toString()] || null;
-    let statusLabel = 'NOT_CHECKED_IN';
-    if (log) {
-      if (log.clockOut) statusLabel = 'CHECKED_OUT';
-      else if (log.lunchOut && !log.lunchIn) statusLabel = 'ON_LUNCH';
-      else statusLabel = 'CHECKED_IN';
-    }
-
-    return {
-      employee: emp,
-      attendance: log,
-      statusLabel,
-      clockInTime: log?.clockIn || null,
-      clockOutTime: log?.clockOut || null,
-      lunchOutTime: log?.lunchOut || null,
-      lunchInTime: log?.lunchIn || null,
-      workLocation: log?.workLocation || null,
-      totalHours: log?.totalHours || null
-    };
-  });
-
-  // Sort: CHECKED_IN first, then ON_LUNCH, then NOT_CHECKED_IN, then CHECKED_OUT
-  const order = { CHECKED_IN: 0, ON_LUNCH: 1, NOT_CHECKED_IN: 2, CHECKED_OUT: 3 };
-  liveStatus.sort((a, b) => (order[a.statusLabel] ?? 4) - (order[b.statusLabel] ?? 4));
+  // Single optimized aggregation query instead of 2 separate queries
+  const liveStatus = await User.aggregate([
+    { $match: userMatch },
+    {
+      $lookup: {
+        from: 'attendances',
+        let: { userId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$user', '$$userId'] },
+                  { $gte: ['$date', todayStart] },
+                  { $lte: ['$date', todayEnd] }
+                ]
+              }
+            }
+          }
+        ],
+        as: 'attendanceArray'
+      }
+    },
+    { $unwind: { path: '$attendanceArray', preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: 'departments',
+        localField: 'department',
+        foreignField: '_id',
+        as: 'departmentInfo'
+      }
+    },
+    {
+      $lookup: {
+        from: 'designations',
+        localField: 'designation',
+        foreignField: '_id',
+        as: 'designationInfo'
+      }
+    },
+    {
+      $addFields: {
+        statusLabel: {
+          $cond: {
+            if: { $not: ['$attendanceArray'] },
+            then: 'NOT_CHECKED_IN',
+            else: {
+              $cond: {
+                if: '$attendanceArray.clockOut',
+                then: 'CHECKED_OUT',
+                else: {
+                  $cond: {
+                    if: { $and: ['$attendanceArray.lunchOut', { $not: ['$attendanceArray.lunchIn'] }] },
+                    then: 'ON_LUNCH',
+                    else: 'CHECKED_IN'
+                  }
+                }
+              }
+            }
+          }
+        },
+        sortOrder: {
+          $switch: {
+            branches: [
+              { case: { $eq: ['$attendanceArray.clockOut', null] }, then: 0 }, // CHECKED_IN
+              { case: { $and: ['$attendanceArray.lunchOut', { $not: ['$attendanceArray.lunchIn'] }] }, then: 1 }, // ON_LUNCH
+              { case: { $not: ['$attendanceArray'] }, then: 2 }, // NOT_CHECKED_IN
+              { case: { $ne: ['$attendanceArray.clockOut', null] }, then: 3 } // CHECKED_OUT
+            ],
+            default: 4
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        employee: {
+          _id: '$_id',
+          firstName: '$firstName',
+          lastName: '$lastName',
+          employeeId: '$employeeId',
+          profileImage: '$profileImage',
+          role: '$role',
+          department: { $arrayElemAt: ['$departmentInfo', 0] },
+          designation: { $arrayElemAt: ['$designationInfo', 0] }
+        },
+        attendance: '$attendanceArray',
+        statusLabel: 1,
+        clockInTime: '$attendanceArray.clockIn',
+        clockOutTime: '$attendanceArray.clockOut',
+        lunchOutTime: '$attendanceArray.lunchOut',
+        lunchInTime: '$attendanceArray.lunchIn',
+        workLocation: '$attendanceArray.workLocation',
+        totalHours: '$attendanceArray.totalHours',
+        sortOrder: 1
+      }
+    },
+    { $sort: { sortOrder: 1, 'employee.firstName': 1 } },
+    { $project: { sortOrder: 0 } }
+  ]);
 
   res.status(200).json({
     status: 'success',

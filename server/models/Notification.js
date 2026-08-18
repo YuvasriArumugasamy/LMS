@@ -36,6 +36,9 @@ const notificationSchema = new mongoose.Schema(
   }
 );
 
+// Compound index for optimized notification queries
+notificationSchema.index({ recipient: 1, isRead: 1, createdAt: -1 });
+
 // Pre-save hook: sanitize type to prevent invalid enum errors crashing the app
 notificationSchema.pre('save', function (next) {
   if (!VALID_NOTIFICATION_TYPES.includes(this.type)) {

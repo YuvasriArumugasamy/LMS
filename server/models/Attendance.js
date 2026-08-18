@@ -57,4 +57,8 @@ const attendanceSchema = new mongoose.Schema(
 // Prevent multiple attendance records for the same user on the same date
 attendanceSchema.index({ user: 1, date: 1 }, { unique: true });
 
+// Additional compound indexes for queries
+attendanceSchema.index({ date: 1, status: 1 }); // For monthly reports by status
+attendanceSchema.index({ user: 1, date: -1 }); // For user attendance history
+
 export const Attendance = mongoose.model('Attendance', attendanceSchema);

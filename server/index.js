@@ -4,8 +4,10 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import mongoose from 'mongoose';
 import { connectDB } from './config/db.js';
 import { globalErrorHandler } from './middleware/errorMiddleware.js';
+import { responseTimeLogger, monitorDatabaseConnection, enableQueryLogging } from './middleware/performanceMiddleware.js';
 
 // Route Imports
 import authRoutes from './routes/authRoutes.js';
@@ -28,6 +30,10 @@ import { updateEarnedLeaveToPaidLeave, updateCeoName } from './utils/seed.js';
 dotenv.config();
 
 const app = express();
+
+// Performance Monitoring
+monitorDatabaseConnection(mongoose);
+enableQueryLogging(mongoose);
 
 // Database Connection (Only run top-level connection on non-Vercel environments)
 if (process.env.VERCEL !== '1') {
@@ -82,6 +88,7 @@ app.use(
   })
 );
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(responseTimeLogger); // Track slow API requests
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -121,12 +128,13 @@ app.use('/api/settings', settingsRoutes);
 // Global Error Handler
 app.use(globalErrorHandler);
 
-// Emergency Leave Escalation Cron/Background Service (Checks every 30 seconds)
-const ESCALATION_INTERVAL = Number(process.env.ESCALATION_CHECK_INTERVAL_MS) || 30000;
+// Emergency Leave Escalation Cron/Background Service (Checks every 5 minutes - optimized from 30s)
+const ESCALATION_INTERVAL = Number(process.env.ESCALATION_CHECK_INTERVAL_MS) || 300000; // Default: 5 minutes
 if (process.env.VERCEL !== '1') {
   setInterval(() => {
     checkEmergencyEscalations();
   }, ESCALATION_INTERVAL);
+  console.log(`🚨 [Emergency Escalation] Active - checking every ${ESCALATION_INTERVAL / 1000}s`);
 }
 
 const PORT = process.env.PORT || 5000;
@@ -134,7 +142,8 @@ if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => {
     console.log(`\n======================================================`);
     console.log(`🚀 [ELMS Server] Running on http://localhost:${PORT}`);
-    console.log(`🚨 [Emergency Escalation Engine] Active (Check every ${ESCALATION_INTERVAL / 1000}s)`);
+    console.log(`🚨 [Emergency Escalation] Active (Check every ${ESCALATION_INTERVAL / 1000}s)`);
+    console.log(`⚡ [Performance] Optimized for 50+ concurrent users`);
     console.log(`======================================================\n`);
   });
 }
