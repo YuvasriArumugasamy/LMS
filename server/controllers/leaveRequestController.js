@@ -725,6 +725,10 @@ export const getLeaveBalances = asyncHandler(async (req, res, next) => {
     }));
 
     balance = await LeaveBalance.create({ user: targetUser, year, allocations });
+    balance = balance.toObject();
+  } else {
+    balance = balance.toObject();
+    balance.allocations = balance.allocations.filter(alloc => alloc.leaveType && alloc.leaveType.isDeleted !== true);
   }
 
   res.status(200).json({ status: 'success', data: { balance } });
