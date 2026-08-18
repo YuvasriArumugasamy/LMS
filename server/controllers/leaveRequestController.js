@@ -595,29 +595,32 @@ export const rejectLeave = asyncHandler(async (req, res, next) => {
 });
 
 export const cancelLeave = asyncHandler(async (req, res, next) => {
-  const leave = await LeaveRequest.findById(req.params.id).populate('user', 'role');
+  const { cancellationReason } = req.body;
+  const leave = await LeaveRequest.findById(req.params.id).populate('user', 'role firstName lastName employeeId');
   if (!leave || leave.isDeleted) return next(new AppError('Leave request not found.', 404));
 
   // Only the leave owner can cancel — managers/HR cannot cancel on behalf of employees
-  if (leave.user.toString() !== req.user._id.toString()) {
+  if (leave.user._id.toString() !== req.user._id.toString()) {
     return next(new AppError('You can only cancel your own leave requests.', 403));
   }
 
-  // Fix 3: Prevent cancellation of final approved leaves — check applicant's own role, not reviewer role
-  const applicantRole = leave.user?.role || req.user.role;
-  const isFinalApproved = (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || (applicantRole !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
-
-  if (isFinalApproved) {
-    return next(new AppError('Final approved leaves cannot be cancelled. Please contact HR.', 400));
+  // Check if already cancelled or rejected
+  if (['CANCELLED', 'TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'].includes(leave.status)) {
+    return next(new AppError('This leave request is already cancelled or rejected.', 400));
   }
 
+  // ✅ NEW: Allow cancellation even after approval, but notify HR
+  const applicantRole = leave.user?.role || req.user.role;
+  const isFinalApproved = (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || (applicantRole !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
+  const isPartiallyApproved = ['TEAM_LEAD_APPROVED', 'HR_APPROVED', 'ADMIN_APPROVED'].includes(leave.status);
   const previousStatus = leave.status;
+
   leave.status = 'CANCELLED';
   leave.approvalFlow.push({
     reviewer: req.user._id,
     reviewerRole: req.user.role,
     action: 'CANCELLED',
-    comments: 'Leave request cancelled by user',
+    comments: cancellationReason || 'Leave request cancelled by user',
     timestamp: new Date()
   });
 
@@ -625,13 +628,11 @@ export const cancelLeave = asyncHandler(async (req, res, next) => {
 
   // Restore balance based on previous status
   const currentYear = new Date(leave.fromDate).getFullYear();
-  const balance = await LeaveBalance.findOne({ user: leave.user, year: currentYear });
+  const balance = await LeaveBalance.findOne({ user: leave.user._id, year: currentYear });
   if (balance) {
     const alloc = balance.allocations.find((a) => a.leaveType.toString() === leave.leaveType.toString());
     if (alloc) {
-      const wasFinalApproved = previousStatus === 'CEO_APPROVED' || (req.user.role === 'EMPLOYEE' && previousStatus === 'ADMIN_APPROVED');
-
-      if (wasFinalApproved) {
+      if (isFinalApproved) {
         // Fully approved — restore from used
         alloc.used = Math.max(0, alloc.used - leave.daysCount);
         alloc.remaining += leave.daysCount;
@@ -644,7 +645,64 @@ export const cancelLeave = asyncHandler(async (req, res, next) => {
     }
   }
 
-  res.status(200).json({ status: 'success', data: { leave } });
+  // ✅ NEW: Notify HR/Admin if approved leave was cancelled
+  if (isFinalApproved || isPartiallyApproved) {
+    try {
+      const hrAdmins = await User.find({ role: { $in: ['HR', 'ADMIN', 'CEO'] }, status: 'ACTIVE' });
+      const title = `⚠️ Approved Leave Cancelled`;
+      const message = `${leave.user.firstName} ${leave.user.lastName} (${leave.user.employeeId}) cancelled their ${previousStatus.replace('_', ' ')} leave from ${new Date(leave.fromDate).toLocaleDateString()} to ${new Date(leave.toDate).toLocaleDateString()}. Reason: ${cancellationReason || 'Not specified'}`;
+      
+      const notifyIds = [];
+      for (const admin of hrAdmins) {
+        notifyIds.push(admin._id);
+        await Notification.safeCreate({
+          recipient: admin._id,
+          title,
+          message,
+          type: 'LEAVE_APPROVED', // Using existing type
+          targetUrl: '/leaves'
+        });
+      }
+      
+      if (notifyIds.length > 0) {
+        sendPushNotification(notifyIds, title, message, '/leaves');
+      }
+    } catch (err) {
+      console.error('[Cancellation Notification Error]', err);
+    }
+  }
+
+  // Notify reporting manager if assigned
+  if (req.user.reportingManager) {
+    try {
+      await Notification.safeCreate({
+        recipient: req.user.reportingManager,
+        title: '🚫 Leave Cancelled',
+        message: `${req.user.firstName} ${req.user.lastName} cancelled their leave request (${leave.daysCount} days).`,
+        type: 'LEAVE_APPLIED',
+        targetUrl: '/leaves'
+      });
+      sendPushNotification(req.user.reportingManager, '🚫 Leave Cancelled', `${req.user.firstName} ${req.user.lastName} cancelled their leave.`, '/leaves');
+    } catch (err) {
+      console.error('[Manager Notification Error]', err);
+    }
+  }
+
+  // Audit log
+  await AuditLog.create({
+    user: req.user._id,
+    userName: `${req.user.firstName} ${req.user.lastName}`,
+    userRole: req.user.role,
+    action: 'LEAVE_CANCEL',
+    module: 'LEAVE',
+    details: `Cancelled ${previousStatus.replace('_', ' ')} leave from ${new Date(leave.fromDate).toLocaleDateString()} to ${new Date(leave.toDate).toLocaleDateString()}`
+  });
+
+  res.status(200).json({ 
+    status: 'success', 
+    message: isFinalApproved ? 'Leave cancelled successfully. HR has been notified.' : 'Leave cancelled successfully.',
+    data: { leave } 
+  });
 });
 
 export const getLeaveBalances = asyncHandler(async (req, res, next) => {
