@@ -152,38 +152,49 @@ export const Notifications = () => {
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">In-app alerts, leave updates, and real-time push notifications</p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full sm:w-auto mt-3 sm:mt-0">
           {pushStatus === 'ENABLED' ? (
-            <span className="px-3.5 py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-2xl flex items-center gap-1.5 border border-emerald-500/20 shadow-2xs">
-              <CheckCircle className="w-4 h-4" /> Push Active
-            </span>
+            <button className="group relative flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-5 py-3 sm:py-2.5 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-700 border border-emerald-200/60 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-emerald-100 focus:outline-none focus:ring-4 focus:ring-emerald-50 overflow-hidden cursor-default">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-100/50 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out"></div>
+              <CheckCircle className="w-5 h-5 text-emerald-600 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" />
+              <span className="relative z-10 text-[14px] tracking-wide whitespace-nowrap">Push Active</span>
+            </button>
           ) : pushStatus === 'DENIED' ? (
-            <span className="px-3.5 py-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-2xl flex items-center gap-1.5 border border-rose-500/20 shadow-2xs">
-              <AlertCircle className="w-4 h-4" /> Push Blocked
-            </span>
+            <button className="group relative flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-5 py-3 sm:py-2.5 bg-rose-50 hover:bg-rose-100/80 text-rose-700 border border-rose-200/60 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-rose-100 focus:outline-none focus:ring-4 focus:ring-rose-50 overflow-hidden cursor-default">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-100/50 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out"></div>
+              <AlertCircle className="w-5 h-5 text-rose-600 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" />
+              <span className="relative z-10 text-[14px] tracking-wide whitespace-nowrap">Push Blocked</span>
+            </button>
           ) : (
             <button
               onClick={handleEnablePush}
               disabled={pushStatus === 'ENABLING'}
-              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-black rounded-2xl flex items-center gap-2 shadow-md shadow-purple-500/25 transition-all disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
+              className="group relative flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-5 py-3 sm:py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl sm:rounded-2xl font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-purple-500/25 focus:outline-none focus:ring-4 focus:ring-purple-500/30 overflow-hidden disabled:opacity-50"
             >
-              <BellRing className="w-4 h-4" />
-              {pushStatus === 'ENABLING' ? 'Enabling...' : 'Enable Push Notifications'}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out"></div>
+              <BellRing className="w-5 h-5 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" />
+              <span className="relative z-10 text-[14px] tracking-wide whitespace-nowrap">
+                {pushStatus === 'ENABLING' ? 'Enabling...' : 'Enable Push'}
+              </span>
             </button>
           )}
 
           <button
             onClick={handleTestNotification}
-            className="px-4 py-2.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-200/90 dark:border-blue-800 text-xs font-extrabold text-blue-600 dark:text-blue-400 rounded-2xl flex items-center gap-2 transition-all shadow-2xs hover:scale-[1.02]"
+            className="group relative flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-5 py-3 sm:py-2.5 bg-blue-50 hover:bg-blue-100/80 text-blue-700 border border-blue-200/60 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-blue-100 focus:outline-none focus:ring-4 focus:ring-blue-50 overflow-hidden"
           >
-            <Bell className="w-4 h-4" /> Test Alert
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/50 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out"></div>
+            <Bell className="w-5 h-5 text-blue-600 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
+            <span className="relative z-10 text-[14px] tracking-wide whitespace-nowrap">Test Alert</span>
           </button>
 
           <button
             onClick={handleClearAll}
-            className="px-4 py-2.5 bg-rose-50 dark:bg-rose-900/30 border border-rose-200/90 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-xs font-extrabold text-rose-600 dark:text-rose-400 rounded-2xl flex items-center gap-2 transition-all shadow-2xs hover:scale-[1.02]"
+            className="group relative flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-5 py-3 sm:py-2.5 bg-rose-50 hover:bg-rose-100/80 text-rose-700 border border-rose-200/60 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-rose-100 focus:outline-none focus:ring-4 focus:ring-rose-50 overflow-hidden"
           >
-            <Trash2 className="w-4 h-4" /> Clear All
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-100/50 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out"></div>
+            <Trash2 className="w-5 h-5 text-rose-600 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" />
+            <span className="relative z-10 text-[14px] tracking-wide whitespace-nowrap">Clear All</span>
           </button>
         </div>
       </div>
