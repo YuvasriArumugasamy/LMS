@@ -16,6 +16,7 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [globalToast, setGlobalToast] = useState(null);
 
   // Fetch unread notification count
   useEffect(() => {
@@ -43,10 +44,15 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
       console.log('Global foreground notification:', payload);
       setUnreadCount((prev) => prev + 1);
 
+      const title = payload?.notification?.title || 'LMS Update';
+      const body = payload?.notification?.body || 'You have a new notification.';
+
+      // Show In-App Toast
+      setGlobalToast({ title, body });
+      setTimeout(() => setGlobalToast(null), 5000);
+
       // Show native system notification like WhatsApp
       if ('Notification' in window && Notification.permission === 'granted') {
-        const title = payload?.notification?.title || 'LMS Update';
-        const body = payload?.notification?.body || 'You have a new notification.';
         new Notification(title, {
           body,
           icon: '/vite.svg'
@@ -187,6 +193,25 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={logout}
       />
+      {/* Global In-App Toast Notification (WhatsApp/Instagram style) */}
+      {globalToast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100000] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xl rounded-2xl p-4 flex items-start gap-3 w-[90%] max-w-sm animate-in slide-in-from-top-4 fade-in duration-300">
+          <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center shrink-0 text-indigo-600 dark:text-indigo-400">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight truncate">{globalToast.title}</h4>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{globalToast.body}</p>
+          </div>
+          <button onClick={() => setGlobalToast(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
     </header>
   );
 };
