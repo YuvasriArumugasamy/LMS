@@ -118,11 +118,11 @@ export const getDailyReports = asyncHandler(async (req, res, next) => {
   }
 
   // 1. Fetch relevant users to track
-  let userQuery = { role: { $ne: 'CEO' } };
+  let userQuery = { role: { $ne: 'CEO' }, isDeleted: false, status: 'ACTIVE' };
   if (role === 'EMPLOYEE') {
     userQuery._id = userId;
   } else if (role === 'TEAM_LEAD') {
-    const teamMembers = await User.find({ reportingManager: userId }).select('_id');
+    const teamMembers = await User.find({ reportingManager: userId, isDeleted: false, status: 'ACTIVE' }).select('_id');
     const teamIds = teamMembers.map((m) => m._id);
     teamIds.push(userId);
     userQuery._id = { $in: teamIds };
