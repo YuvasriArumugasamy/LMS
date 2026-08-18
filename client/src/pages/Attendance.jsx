@@ -836,18 +836,20 @@ export const Attendance = () => {
               </div>
             ) : (
               <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto">
-                <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
-                  <CheckCircle2 className="w-4 h-4" /> Logged Out
-                </div>
+                <div className="flex items-center gap-2 flex-nowrap">
+                  <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
+                    <CheckCircle2 className="w-4 h-4" /> Logged Out
+                  </div>
 
-                <UiverseDropdown
-                  options={[
-                    { value: "WFH", label: "🏡 Remote / WFH" },
-                    { value: "IN_OFFICE", label: "🏢 In-Office" },
-                  ]}
-                  value={workLocation}
-                  onChange={(val) => setWorkLocation(val)}
-                />
+                  <UiverseDropdown
+                    options={[
+                      { value: "WFH", label: "🏡 Remote / WFH" },
+                      { value: "IN_OFFICE", label: "🏢 In-Office" },
+                    ]}
+                    value={workLocation}
+                    onChange={(val) => setWorkLocation(val)}
+                  />
+                </div>
 
                 <UiverseStarButton
                   disabled={actionLoading}
