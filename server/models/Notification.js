@@ -58,7 +58,20 @@ notificationSchema.statics.safeCreate = async function (data) {
       console.warn(`[Notification] Invalid type "${data.type}" — defaulting to SYSTEM`);
       data.type = 'SYSTEM';
     }
-    return await this.create(data);
+    
+    // Save notification to database
+    const notification = await this.create(data);
+
+    // Trigger real-time FCM Push Notification
+    try {
+      // Dynamic import to avoid potential circular dependencies
+      const { sendPushNotification } = await import('../services/pushNotificationService.js');
+      await sendPushNotification(data.recipient, data.title, data.message, data.targetUrl);
+    } catch (pushErr) {
+      console.error('[Notification] Failed to trigger push notification:', pushErr.message);
+    }
+
+    return notification;
   } catch (err) {
     console.error('[Notification safeCreate Error]', err.message);
     return null;
