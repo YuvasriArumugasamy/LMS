@@ -39,8 +39,9 @@ const forgotPasswordLimiter = rateLimit({
 });
 
 router.post('/login', loginLimiter, login);
-router.post('/forgot-password', forgotPasswordLimiter, forgotPassword);
-router.post('/reset-password', resetPassword);
+// Forgot password routes disabled - Contact HR/Admin for password reset
+// router.post('/forgot-password', forgotPasswordLimiter, forgotPassword);
+// router.post('/reset-password', resetPassword);
 router.post('/refresh-token', refreshToken);
 router.post('/fcm-token', protect, saveFcmToken);
 router.get('/profile', protect, getProfile);

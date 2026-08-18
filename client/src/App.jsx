@@ -5,7 +5,8 @@ import { DashboardLayout } from './layouts/DashboardLayout';
 
 // Pages
 import { Login } from './pages/Login';
-import { ResetPassword } from './pages/ResetPassword';
+// ResetPassword page removed - Contact HR/Admin for password reset
+// import { ResetPassword } from './pages/ResetPassword';
 import { Dashboard } from './pages/Dashboard';
 import { Employees } from './pages/Employees';
 import { Departments } from './pages/Departments';
@@ -38,7 +39,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      {/* Reset password route removed - Contact HR/Admin for password reset */}
+      {/* <Route path="/reset-password" element={<ResetPassword />} /> */}
 
       <Route
         path="/"

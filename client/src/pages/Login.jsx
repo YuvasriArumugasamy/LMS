@@ -643,13 +643,7 @@ export const Login = () => {
                         <label className="block text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">
                           Password *
                         </label>
-                        <button
-                          type="button"
-                          onClick={handleOpenForgot}
-                          className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline transition-all"
-                        >
-                          Forgot Password?
-                        </button>
+                        {/* Forgot Password removed - Contact HR/Admin for password reset */}
                       </div>
                       <div className="flex items-center border border-blue-200/90 dark:border-slate-700 rounded-xl overflow-hidden shadow-2xs focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 bg-slate-50/50 dark:bg-slate-800/60 transition-all">
                         <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-600 text-white flex items-center justify-center shrink-0">
