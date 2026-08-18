@@ -92,15 +92,17 @@ export const Holidays = () => {
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
           {/* Year Filter */}
-          <select
-            value={yearFilter}
-            onChange={(e) => setYearFilter(Number(e.target.value))}
-            className="px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none"
-          >
-            {Array.from({ length: 4 }, (_, i) => new Date().getFullYear() - 1 + i).map((yr) => (
-              <option key={yr} value={yr}>{yr}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest hidden sm:block">Year</span>
+            <input
+              type="number"
+              value={yearFilter}
+              onChange={(e) => setYearFilter(Number(e.target.value))}
+              min="2000"
+              max="2100"
+              className="w-[85px] sm:w-[90px] px-3 py-1.5 bg-blue-50/50 dark:bg-slate-800 border border-blue-400/80 dark:border-blue-500 rounded-full text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm text-center transition-all"
+            />
+          </div>
 
           <div className="p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center">
             <button
