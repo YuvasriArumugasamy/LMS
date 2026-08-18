@@ -53,10 +53,10 @@ export const runAutoSeed = async () => {
     await updateCeoName();
 
     const userCount = await User.countDocuments();
-    if (userCount > 0) {
-      console.log('[Seed Engine] Database already populated. Skipping auto-seed.');
-      return;
-    }
+    // if (userCount > 0) {
+    //   console.log('[Seed Engine] Database already populated. Skipping auto-seed.');
+    //   return;
+    // }
 
     console.log('[Seed Engine] Empty database detected! Auto-seeding initial enterprise accounts...');
 
