@@ -266,3 +266,17 @@ export const runAutoSeed = async () => {
     console.error('[Seed Engine Error]', error);
   }
 };
+
+// Add this at the very bottom of server/utils/seed.js
+import mongoose from 'mongoose';
+if (process.argv[1].endsWith('seed.js')) {
+  mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/elms_enterprise')
+    .then(async () => {
+      console.log('Force Seeding...');
+      // Temporarily bypass userCount check to force create accounts
+      await runAutoSeed();
+      console.log('Seed Complete!');
+      process.exit(0);
+    })
+    .catch(err => console.error(err));
+}
