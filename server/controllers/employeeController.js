@@ -194,10 +194,16 @@ export const updateEmployee = asyncHandler(async (req, res, next) => {
     }
   }
 
-  // Remove empty string ObjectId fields to avoid validation errors
-  if (!updateData.department) delete updateData.department;
-  if (!updateData.designation) delete updateData.designation;
-  if (!updateData.reportingManager) delete updateData.reportingManager;
+  // IMPORTANT: Allow explicitly setting fields to null/undefined to clear them
+  // Empty string "" means "clear this field" - convert to null
+  if (updateData.department === '') updateData.department = null;
+  if (updateData.designation === '') updateData.designation = null;
+  if (updateData.reportingManager === '') updateData.reportingManager = null;
+
+  // Remove completely missing fields (undefined) but keep null (explicit clear)
+  if (updateData.department === undefined) delete updateData.department;
+  if (updateData.designation === undefined) delete updateData.designation;
+  if (updateData.reportingManager === undefined) delete updateData.reportingManager;
 
   // Remove empty required string fields to avoid overwriting with empty string
   ['firstName', 'lastName', 'email', 'employeeId'].forEach((field) => {

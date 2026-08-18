@@ -168,15 +168,27 @@ export const EmployeeDetailsModal = ({
     setLoading(true);
     try {
       const payload = { ...editForm };
-      if (!payload.department) delete payload.department;
-      if (!payload.designation) delete payload.designation;
-      if (!payload.reportingManager) delete payload.reportingManager;
-      await api.put(`/employees/${employee._id}`, payload);
+      
+      // Don't delete empty fields - send them as empty string to clear values
+      // Only delete if they're undefined
+      if (payload.department === undefined) delete payload.department;
+      if (payload.designation === undefined) delete payload.designation;
+      if (payload.reportingManager === undefined) delete payload.reportingManager;
+      
+      const response = await api.put(`/employees/${employee._id}`, payload);
+      
+      console.log('[EmployeeModal] Update response:', response.data);
+      
       alert('✅ Employee details updated successfully!');
       setIsEditing(false);
+      
+      // Trigger parent to refresh employee list
       if (onUpdateSuccess) onUpdateSuccess();
+      
+      // Close modal - parent will show updated data on next open
       onClose();
     } catch (err) {
+      console.error('[EmployeeModal] Update failed:', err.response?.data);
       alert(err.response?.data?.message || 'Failed to update employee details.');
     } finally {
       setLoading(false);
