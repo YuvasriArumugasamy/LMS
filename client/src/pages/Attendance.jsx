@@ -835,30 +835,34 @@ export const Attendance = () => {
                 </UiverseStarButton>
               </div>
             ) : (
-              <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto">
-                <div className="flex items-center gap-2 flex-nowrap">
-                  <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
-                    <CheckCircle2 className="w-4 h-4" /> Logged Out
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-start sm:justify-end gap-3 sm:gap-2 w-full sm:w-auto">
+                <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto flex-nowrap">
+                  <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-[11px] sm:text-xs font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Logged Out
                   </div>
 
-                  <UiverseDropdown
-                    options={[
-                      { value: "WFH", label: "🏡 Remote / WFH" },
-                      { value: "IN_OFFICE", label: "🏢 In-Office" },
-                    ]}
-                    value={workLocation}
-                    onChange={(val) => setWorkLocation(val)}
-                  />
+                  <div className="min-w-0 flex-1 sm:flex-initial flex justify-end">
+                    <UiverseDropdown
+                      options={[
+                        { value: "WFH", label: "🏡 Remote / WFH" },
+                        { value: "IN_OFFICE", label: "🏢 In-Office" },
+                      ]}
+                      value={workLocation}
+                      onChange={(val) => setWorkLocation(val)}
+                    />
+                  </div>
                 </div>
 
-                <UiverseStarButton
-                  disabled={actionLoading}
-                  onClick={handleInitiateClockIn}
-                  variant="emerald"
-                  icon={Play}
-                >
-                  Login Again
-                </UiverseStarButton>
+                <div className="w-full sm:w-auto flex justify-center sm:block mt-1 sm:mt-0">
+                  <UiverseStarButton
+                    disabled={actionLoading}
+                    onClick={handleInitiateClockIn}
+                    variant="emerald"
+                    icon={Play}
+                  >
+                    Login Again
+                  </UiverseStarButton>
+                </div>
               </div>
             )}
           </div>
