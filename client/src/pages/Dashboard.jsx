@@ -359,7 +359,7 @@ export const Dashboard = () => {
                 {user?.role !== 'CEO' && (
                   <div className="shrink-0 flex justify-center sm:justify-end w-full sm:w-auto">
                     {!todayAttendance?.clockIn ? (
-                      <div className="flex items-center justify-center sm:justify-end gap-2 flex-nowrap">
+                      <div className="flex items-center justify-center sm:justify-end gap-2 flex-wrap">
                         <UiverseDropdown
                           options={[
                             { value: "WFH", label: "🏡 WFH" },
@@ -377,7 +377,7 @@ export const Dashboard = () => {
                         </UiverseStarButton>
                       </div>
                     ) : !todayAttendance?.clockOut ? (
-                      <div className="flex flex-nowrap items-center justify-center sm:justify-end gap-2">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
                         {!todayAttendance?.lunchOut ? (
                           <>
                               <UiverseStarButton disabled={actionLoading} onClick={handleQuickLunchOut} variant="checkout">
@@ -398,7 +398,7 @@ export const Dashboard = () => {
                         )}
                       </div>
                     ) : (
-                      <div className="flex flex-nowrap items-center justify-center sm:justify-end gap-2">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
                         <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs font-black rounded-xl flex items-center gap-1 shrink-0 whitespace-nowrap">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Logged Out
                         </span>
