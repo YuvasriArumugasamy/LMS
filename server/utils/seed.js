@@ -268,8 +268,7 @@ export const runAutoSeed = async () => {
 };
 
 // Add this at the very bottom of server/utils/seed.js
-import mongoose from 'mongoose';
-if (process.argv[1].endsWith('seed.js')) {
+if (process.argv[1] && process.argv[1].endsWith('seed.js')) {
   mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/elms_enterprise')
     .then(async () => {
       console.log('Force Seeding...');
