@@ -53,9 +53,23 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
 
       // Show native system notification like WhatsApp
       if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(title, {
-          body,
-          icon: '/vite.svg'
+        navigator.serviceWorker.ready.then((registration) => {
+          if (registration) {
+            registration.showNotification(title, {
+              body,
+              icon: '/vite.svg'
+            });
+          } else {
+            new Notification(title, {
+              body,
+              icon: '/vite.svg'
+            });
+          }
+        }).catch(() => {
+          new Notification(title, {
+            body,
+            icon: '/vite.svg'
+          });
         });
       }
     });
