@@ -64,10 +64,16 @@ const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
   }
   // Compare submitted face against registered face descriptor
   const distance = calculateEuclideanDistance(user.faceDescriptor, submittedDescriptor);
-  console.log(`[Face Verification] User: ${user.email}, Distance: ${distance}`);
-  if (isNaN(distance) || distance > 0.60) {
+  console.log(`[Face Verification] User: ${user.email}, Distance: ${distance.toFixed(4)}`);
+  
+  // STRICT threshold: 0.50 (lower is better match)
+  // This prevents unauthorized users from using similar-looking faces
+  if (isNaN(distance) || distance > 0.50) {
+    console.log(`[Face Verification FAILED] Distance ${distance.toFixed(4)} exceeds threshold 0.50`);
     return { valid: false, message: 'Face verification failed! Face does not match the registered profile. Please use your own registered face.' };
   }
+  
+  console.log(`[Face Verification SUCCESS] Distance ${distance.toFixed(4)} within threshold 0.50`);
   return { valid: true, distance };
 };
 

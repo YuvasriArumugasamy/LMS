@@ -102,17 +102,17 @@ export const FaceCameraModal = ({
     detectionIntervalRef.current = setInterval(async () => {
       if (!videoRef.current || videoRef.current.readyState < 2) return;
       try {
-        // Fast detection with low threshold for responsive real-time indicator
+        // Strict detection with HIGHER threshold to avoid false positives
         let detection = await faceapi.detectSingleFace(
           videoRef.current,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.2 })
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })
         );
         
-        // Fallback to SSD Mobilenet if Tiny Detector did not find a face
+        // Fallback to SSD Mobilenet with STRICT confidence threshold
         if (!detection && faceapi.nets.ssdMobilenetv1.isLoaded) {
           detection = await faceapi.detectSingleFace(
             videoRef.current,
-            new faceapi.SsdMobilenetv1Options({ minConfidence: 0.25 })
+            new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })
           );
         }
 
@@ -160,25 +160,25 @@ export const FaceCameraModal = ({
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Multi-pass face detection for maximum detection accuracy & robustness
-      // Pass 1: TinyFaceDetector (inputSize 416, threshold 0.2)
+      // STRICT face detection - Only accept HIGH QUALITY faces to prevent unauthorized access
+      // Pass 1: TinyFaceDetector with STRICT threshold (0.5) to avoid false positives
       let detection = await faceapi
-        .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.2 }))
+        .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 }))
         .withFaceLandmarks()
         .withFaceDescriptor();
 
-      // Pass 2: SSD Mobilenet v1 fallback
+      // Pass 2: SSD Mobilenet v1 fallback with STRICT confidence (0.5)
       if (!detection && faceapi.nets.ssdMobilenetv1.isLoaded) {
         detection = await faceapi
-          .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.2 }))
+          .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
           .withFaceLandmarks()
           .withFaceDescriptor();
       }
 
-      // Pass 3: Ultra-sensitive TinyFaceDetector fallback (threshold 0.15)
+      // Pass 3: Medium-sensitivity fallback ONLY (threshold 0.4) - No ultra-low thresholds!
       if (!detection) {
         detection = await faceapi
-          .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.15 }))
+          .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.4 }))
           .withFaceLandmarks()
           .withFaceDescriptor();
       }
