@@ -40,8 +40,8 @@ export const getEmployees = asyncHandler(async (req, res, next) => {
   if (role) query.role = role;
   if (status) query.status = status;
 
-  // Filter for Manager role: show team members if requested
-  if (req.user.role === 'TEAM_LEAD' && req.query.teamOnly === 'true') {
+  // Filter for Manager role: always show only direct team members
+  if (req.user.role === 'TEAM_LEAD') {
     query.reportingManager = req.user._id;
   }
 
