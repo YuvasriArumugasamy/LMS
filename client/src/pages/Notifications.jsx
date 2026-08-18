@@ -110,12 +110,27 @@ export const Notifications = () => {
     }
   };
 
-  const handleTestNotification = () => {
+  const handleTestNotification = async () => {
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification("🚀 LMS Test Notification", {
-        body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
-        icon: "/vite.svg"
-      });
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        if (registration) {
+          registration.showNotification("🚀 LMS Test Notification", {
+            body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
+            icon: "/vite.svg"
+          });
+        } else {
+          new Notification("🚀 LMS Test Notification", {
+            body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
+            icon: "/vite.svg"
+          });
+        }
+      } catch (err) {
+        new Notification("🚀 LMS Test Notification", {
+          body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
+          icon: "/vite.svg"
+        });
+      }
     } else {
       alert("Please click 'Enable Push Notifications' first and allow permissions!");
     }
