@@ -233,19 +233,19 @@ Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="relative flex items-center">
+            <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+              <div className="relative flex items-center flex-1 sm:flex-initial min-w-[140px]">
                 <input
                   type="date"
                   value={new Date(currentReport.date).toISOString().split('T')[0]}
                   onChange={handleDateChange}
                   title="Filter Report by Date"
-                  className="relative pl-4 pr-9 py-1.5 rounded-full bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-extrabold border border-slate-200/80 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-8 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:z-20"
+                  className="relative w-full sm:w-auto pl-4 pr-9 py-1.5 rounded-full bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-extrabold border border-slate-200/80 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-8 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:z-20"
                 />
                 <CalendarDays className="absolute right-3.5 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
               </div>
 
-              <span className={`px-3.5 py-1.5 rounded-full text-xs font-black uppercase flex items-center gap-1 shadow-2xs ${
+              <span className={`px-3.5 py-1.5 rounded-full text-xs font-black uppercase flex items-center justify-center gap-1 shadow-2xs shrink-0 flex-1 sm:flex-initial ${
                 currentReport.status === 'APPROVED' ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
                 currentReport.status === 'REVIEWED' ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-800' :
                 'bg-emerald-100/90 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800'
