@@ -40,6 +40,10 @@ const attendanceSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    extraBreakMs: {
+      type: Number,
+      default: 0
+    },
     notes: {
       type: String,
       trim: true

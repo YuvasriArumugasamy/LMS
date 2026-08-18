@@ -107,11 +107,12 @@ export const clockIn = asyncHandler(async (req, res, next) => {
   const attendanceStatus = isSunday ? 'OVER_DUTY' : (isLate ? 'LATE' : 'PRESENT');
 
   if (isTodayDoc && existingAttendance) {
-    existingAttendance.clockIn = now;
+    if (existingAttendance.clockOut) {
+      const gapMs = now - new Date(existingAttendance.clockOut);
+      existingAttendance.extraBreakMs = (existingAttendance.extraBreakMs || 0) + gapMs;
+    }
     existingAttendance.clockOut = undefined;
-    existingAttendance.totalHours = 0;
     if (workLocation) existingAttendance.workLocation = workLocation;
-    existingAttendance.status = attendanceStatus;
 
     const timeLogStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
     const newNote = `Re-clocked in at ${timeLogStr} IST`;
@@ -145,11 +146,12 @@ export const clockIn = asyncHandler(async (req, res, next) => {
     if (err.code === 11000) {
       let duplicateDoc = await Attendance.findOne({ user: userId }).sort({ date: -1, createdAt: -1 });
       if (duplicateDoc) {
-        duplicateDoc.clockIn = now;
+        if (duplicateDoc.clockOut) {
+          const gapMs = now - new Date(duplicateDoc.clockOut);
+          duplicateDoc.extraBreakMs = (duplicateDoc.extraBreakMs || 0) + gapMs;
+        }
         duplicateDoc.clockOut = undefined;
-        duplicateDoc.totalHours = 0;
         if (workLocation) duplicateDoc.workLocation = workLocation;
-        duplicateDoc.status = attendanceStatus;
         await duplicateDoc.save();
         return res.status(200).json({
           status: 'success',
@@ -270,6 +272,10 @@ export const clockOut = asyncHandler(async (req, res, next) => {
   if (attendance.lunchOut && attendance.lunchIn) {
     const lunchBreakMs = new Date(attendance.lunchIn) - new Date(attendance.lunchOut);
     diffMs -= lunchBreakMs;
+  }
+
+  if (attendance.extraBreakMs) {
+    diffMs -= attendance.extraBreakMs;
   }
 
   const totalHours = Number((diffMs / (1000 * 60 * 60)).toFixed(2));
@@ -557,6 +563,9 @@ export const forceCheckOut = asyncHandler(async (req, res, next) => {
   let diffMs = now - new Date(attendance.clockIn);
   if (attendance.lunchOut && attendance.lunchIn) {
     diffMs -= new Date(attendance.lunchIn) - new Date(attendance.lunchOut);
+  }
+  if (attendance.extraBreakMs) {
+    diffMs -= attendance.extraBreakMs;
   }
   const totalHours = Number((diffMs / (1000 * 60 * 60)).toFixed(2));
 
