@@ -4,7 +4,7 @@ import { UserAvatar } from '../components/UserAvatar';
 import { AuditLogDetailsModal } from '../components/AuditLogDetailsModal';
 import { ShieldAlert, ChevronRight, Filter, Search, X, Calendar, ChevronLeft, ChevronRight as ChevronRightIcon, Trash2 } from 'lucide-react';
 
-const MODULE_OPTIONS = ['', 'AUTHENTICATION', 'EMPLOYEE', 'LEAVE', 'ATTENDANCE', 'HOLIDAY', 'DEPARTMENT', 'DESIGNATION', 'LEAVE_TYPE', 'WFH', 'SYSTEM'];
+const MODULE_OPTIONS = ['', 'AUTHENTICATION', 'EMPLOYEE', 'LEAVE', 'ATTENDANCE', 'HOLIDAY', 'DEPARTMENT', 'DESIGNATION', 'LEAVE_TYPE', 'SYSTEM'];
 
 export const AuditLogs = () => {
   const [logs, setLogs] = useState([]);
