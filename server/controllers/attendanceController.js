@@ -597,7 +597,7 @@ export const forceCheckOut = asyncHandler(async (req, res, next) => {
   const { AuditLog } = await import('../models/AuditLog.js');
   await AuditLog.create({
     user: req.user._id,
-    userName: `${req.user.firstName} ${req.user.lastName}`,
+    userName: `${targetEmployee.firstName} ${targetEmployee.lastName} (by ${req.user.firstName})`,
     userRole: req.user.role,
     action: 'FORCE_CHECKOUT',
     module: 'ATTENDANCE',
