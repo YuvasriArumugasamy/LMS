@@ -47,23 +47,14 @@ export const AuditLogDetailsModal = ({ isOpen, onClose, log }) => {
           </span>
         </div>
 
-        {/* Key Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 gap-3.5">
           <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80">
             <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <Globe className="w-3.5 h-3.5 text-blue-500" /> IP Address
             </p>
             <p className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-1">
               {log.ipAddress || '127.0.0.1 (Localhost)'}
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Hash className="w-3.5 h-3.5 text-purple-500" /> Audit Log ID
-            </p>
-            <p className="text-xs font-mono font-bold text-slate-900 dark:text-white mt-1 truncate">
-              {log._id}
             </p>
           </div>
         </div>
