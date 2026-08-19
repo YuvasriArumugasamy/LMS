@@ -243,7 +243,7 @@ export const AuditLogs = () => {
                 <div className="flex items-center gap-3 min-w-0">
                   <UserAvatar user={{ firstName: log.userName }} size="w-10 h-10 text-xs" />
                   <div className="min-w-0">
-                    <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors text-xs sm:text-sm md:text-base truncate">
+                    <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors text-xs sm:text-sm md:text-base whitespace-normal break-words leading-snug">
                       {log.userName || 'System Engine'}
                     </h3>
                     <p className="text-[10px] text-slate-400 font-mono font-semibold uppercase">
