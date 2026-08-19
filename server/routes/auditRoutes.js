@@ -5,7 +5,7 @@ import { protect, restrictTo } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.use(protect);
-router.get('/', restrictTo('ADMIN', 'HR', 'CEO'), getAuditLogs);
-router.delete('/', restrictTo('ADMIN', 'HR', 'CEO'), clearAuditLogs);
+router.get('/', restrictTo('ADMIN', 'HR', 'CEO', 'TEAM_LEAD'), getAuditLogs);
+router.delete('/', restrictTo('ADMIN', 'HR', 'CEO', 'TEAM_LEAD'), clearAuditLogs);
 
 export default router;

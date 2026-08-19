@@ -94,7 +94,7 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
       title: 'SYSTEM',
       items: [
         { label: 'Notifications', path: '/notifications', icon: Bell, roles: ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD', 'EMPLOYEE'], badge: unreadCount > 0 ? { text: String(unreadCount), color: 'bg-rose-500 text-white font-black' } : null },
-        { label: 'Audit Logs', path: '/audit-logs', icon: ShieldAlert, roles: ['ADMIN', 'CEO', 'HR'], badge: { text: 'LIVE', color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' } },
+        { label: 'Audit Logs', path: '/audit-logs', icon: ShieldAlert, roles: ['ADMIN', 'CEO', 'HR', 'TEAM_LEAD'], badge: { text: 'LIVE', color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' } },
         { label: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN', 'CEO', 'HR'] },
       ]
     }
