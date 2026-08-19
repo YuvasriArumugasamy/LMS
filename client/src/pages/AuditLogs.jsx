@@ -244,7 +244,14 @@ export const AuditLogs = () => {
                   <UserAvatar user={{ firstName: log.userName }} size="w-10 h-10 text-xs" />
                   <div className="min-w-0">
                     <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors text-xs sm:text-sm md:text-base whitespace-normal break-words leading-snug">
-                      {log.userName || 'System Engine'}
+                      {log.userName?.includes(' (by ') ? (
+                        <>
+                          <span>{log.userName.split(' (by ')[0]}</span>
+                          <span className="block sm:inline sm:ml-1 text-slate-500 dark:text-slate-400 sm:text-inherit dark:sm:text-inherit text-[11px] sm:text-inherit font-medium sm:font-bold">(by {log.userName.split(' (by ')[1]}</span>
+                        </>
+                      ) : (
+                        log.userName || 'System Engine'
+                      )}
                     </h3>
                     <p className="text-[10px] text-slate-400 font-mono font-semibold uppercase">
                       {log.userRole === 'TEAM_LEAD' ? 'Team Lead' : log.userRole === 'ADMIN' ? 'Admin' : log.userRole || 'SYSTEM'}
