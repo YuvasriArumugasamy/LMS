@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import { UserAvatar } from '../components/UserAvatar';
 import { AuditLogDetailsModal } from '../components/AuditLogDetailsModal';
-import { ShieldAlert, ChevronRight, Filter, Search, X, Calendar, ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
+import { ShieldAlert, ChevronRight, Filter, Search, X, Calendar, ChevronLeft, ChevronRight as ChevronRightIcon, Trash2 } from 'lucide-react';
 
 const MODULE_OPTIONS = ['', 'AUTHENTICATION', 'EMPLOYEE', 'LEAVE', 'ATTENDANCE', 'HOLIDAY', 'DEPARTMENT', 'DESIGNATION', 'LEAVE_TYPE', 'WFH', 'SYSTEM'];
 
@@ -76,6 +76,18 @@ export const AuditLogs = () => {
     setIsDetailsModalOpen(true);
   };
 
+  const handleClearAll = async () => {
+    if (window.confirm('Are you sure you want to clear all audit logs? This action cannot be undone.')) {
+      try {
+        await api.delete('/audit');
+        fetchLogs();
+      } catch (err) {
+        console.error(err);
+        setError('Failed to clear audit logs.');
+      }
+    }
+  };
+
   return (
     <div className="space-y-6 pb-28 sm:pb-8">
       {/* Header */}
@@ -87,6 +99,15 @@ export const AuditLogs = () => {
             {total > 0 && <span className="ml-2 font-bold text-primary">({total} total records)</span>}
           </p>
         </div>
+        {logs.length > 0 && (
+          <button
+            onClick={handleClearAll}
+            className="px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-sm font-bold flex items-center gap-1.5 transition-all hover:bg-rose-100 dark:hover:bg-rose-900/40 shrink-0 shadow-sm"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Clear All</span>
+          </button>
+        )}
       </div>
 
       {/* Filter Bar */}

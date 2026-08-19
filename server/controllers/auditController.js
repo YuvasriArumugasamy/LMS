@@ -38,3 +38,11 @@ export const getAuditLogs = asyncHandler(async (req, res, next) => {
     }
   });
 });
+
+export const clearAuditLogs = asyncHandler(async (req, res, next) => {
+  await AuditLog.deleteMany({});
+  res.status(200).json({
+    status: 'success',
+    message: 'All audit logs have been cleared'
+  });
+});
