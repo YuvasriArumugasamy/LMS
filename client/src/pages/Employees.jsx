@@ -631,18 +631,18 @@ export const Employees = () => {
                   Department
                 </label>
                 <div className="relative">
-                  <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-500 pointer-events-none" />
+                  <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-500 pointer-events-none z-10" />
                   <select
-                    value={formData.department}
+                    value={formData.department || ''}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
+                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
                   >
-                    <option value="" disabled hidden>Select Department</option>
+                    <option value="" className="text-slate-400">Select Department</option>
                     {departments.map((d) => (
-                      <option key={d._id} value={d._id}>{d.name}</option>
+                      <option key={d._id} value={d._id} className="text-slate-900 dark:text-white">{d.name}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                 </div>
               </div>
               <div>
@@ -650,18 +650,18 @@ export const Employees = () => {
                   Designation
                 </label>
                 <div className="relative">
-                  <Award className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-500 pointer-events-none" />
+                  <Award className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-500 pointer-events-none z-10" />
                   <select
-                    value={formData.designation}
+                    value={formData.designation || ''}
                     onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
+                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
                   >
-                    <option value="" disabled hidden>Select Designation</option>
+                    <option value="" className="text-slate-400">Select Designation</option>
                     {designations.map((des) => (
-                      <option key={des._id} value={des._id}>{des.name}</option>
+                      <option key={des._id} value={des._id} className="text-slate-900 dark:text-white">{des.name}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                 </div>
               </div>
             </div>
