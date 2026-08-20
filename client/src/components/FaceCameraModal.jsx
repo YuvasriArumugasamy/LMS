@@ -3,6 +3,14 @@ import { Modal } from './Modal';
 import { Camera, RefreshCw, CheckCircle2, ShieldAlert, X, Loader2, UserCheck } from 'lucide-react';
 import * as faceapi from '@vladmandic/face-api';
 
+const calculateEAR = (eyePoints) => {
+  const dist = (p1, p2) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+  const v1 = dist(eyePoints[1], eyePoints[5]);
+  const v2 = dist(eyePoints[2], eyePoints[4]);
+  const h1 = dist(eyePoints[0], eyePoints[3]);
+  return (v1 + v2) / (2.0 * h1);
+};
+
 // Track model loading state globally so we don't reload on every modal open
 let modelsLoaded = false;
 let modelsLoading = false;
@@ -39,6 +47,9 @@ export const FaceCameraModal = ({
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const detectionIntervalRef = useRef(null);
+  const captureFaceRef = useRef(null);
+  const isEyeClosedRef = useRef(false);
+  const livenessVerifiedRef = useRef(false);
 
   const [cameraError, setCameraError] = useState('');
   const [status, setStatus] = useState('loading_models'); // loading_models | initializing | scanning | face_detected | captured | error
@@ -46,9 +57,13 @@ export const FaceCameraModal = ({
   const [capturedPreview, setCapturedPreview] = useState(null);
   const [computedDescriptor, setComputedDescriptor] = useState(null);
   const [faceDetected, setFaceDetected] = useState(false);
+  const [livenessVerified, setLivenessVerified] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
+      isEyeClosedRef.current = false;
+      livenessVerifiedRef.current = false;
+      setLivenessVerified(false);
       setCameraError('');
       setStatus('loading_models');
       setStatusMsg('Loading face recognition models...');
@@ -99,6 +114,7 @@ export const FaceCameraModal = ({
   };
 
   const startFaceDetectionLoop = () => {
+    // 150ms interval to catch fast blinks
     detectionIntervalRef.current = setInterval(async () => {
       if (!videoRef.current || videoRef.current.readyState < 2) return;
       try {
@@ -106,25 +122,61 @@ export const FaceCameraModal = ({
         let detection = await faceapi.detectSingleFace(
           videoRef.current,
           new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })
-        );
+        ).withFaceLandmarks();
         
         // Fallback to SSD Mobilenet with STRICT confidence threshold
         if (!detection && faceapi.nets.ssdMobilenetv1.isLoaded) {
           detection = await faceapi.detectSingleFace(
             videoRef.current,
             new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })
-          );
+          ).withFaceLandmarks();
         }
 
         const hasFace = !!detection;
         setFaceDetected(hasFace);
+        
         if (hasFace) {
-          setStatusMsg('Face detected ✓ — click Capture');
+          if (!livenessVerifiedRef.current) {
+            const landmarks = detection.landmarks;
+            const leftEye = landmarks.getLeftEye();
+            const rightEye = landmarks.getRightEye();
+            
+            const leftEAR = calculateEAR(leftEye);
+            const rightEAR = calculateEAR(rightEye);
+            const avgEAR = (leftEAR + rightEAR) / 2;
+            
+            const BLINK_THRESHOLD = 0.25;
+            
+            if (avgEAR < BLINK_THRESHOLD) {
+              isEyeClosedRef.current = true;
+            } else if (isEyeClosedRef.current && avgEAR >= BLINK_THRESHOLD) {
+              // Blink detected
+              livenessVerifiedRef.current = true;
+              setLivenessVerified(true);
+              isEyeClosedRef.current = false;
+              setStatusMsg('Liveness verified ✓ Auto-capturing...');
+              
+              setTimeout(() => {
+                if (captureFaceRef.current) {
+                  captureFaceRef.current();
+                }
+              }, 500); // Short delay for user to open eyes fully before snap
+            }
+            
+            if (!livenessVerifiedRef.current) {
+              setStatusMsg('Please BLINK to verify liveness');
+            }
+          } else {
+            setStatusMsg('Face detected and Liveness verified ✓');
+          }
         } else {
           setStatusMsg('Align your face inside the frame');
+          livenessVerifiedRef.current = false;
+          setLivenessVerified(false);
+          isEyeClosedRef.current = false;
         }
       } catch (_) {}
-    }, 350);
+    }, 150);
   };
 
   const cleanup = () => {
@@ -137,6 +189,10 @@ export const FaceCameraModal = ({
       streamRef.current = null;
     }
   };
+
+  useEffect(() => {
+    captureFaceRef.current = handleCaptureFace;
+  });
 
   const handleCaptureFace = async () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -365,15 +421,15 @@ export const FaceCameraModal = ({
               <button
                 type="button"
                 onClick={handleCaptureFace}
-                disabled={isLoading || !!cameraError}
+                disabled={isLoading || !!cameraError || !livenessVerified}
                 className={`px-6 py-2.5 rounded-xl text-white font-extrabold text-xs shadow-lg flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 ${
-                  faceDetected
+                  livenessVerified
                     ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 shadow-emerald-500/25'
-                    : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 shadow-blue-500/25'
+                    : 'bg-gradient-to-r from-slate-500 via-slate-600 to-slate-500 shadow-slate-500/25'
                 }`}
               >
                 <Camera className="w-4 h-4 stroke-[2.5]" />
-                {isLoading ? 'Initializing...' : faceDetected ? 'Capture Face ✓' : 'Capture Face'}
+                {isLoading ? 'Initializing...' : livenessVerified ? 'Auto Capturing... ✓' : 'Blink to Capture'}
               </button>
             </>
           )}
