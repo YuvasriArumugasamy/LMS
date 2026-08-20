@@ -635,7 +635,7 @@ export const Employees = () => {
                   <select
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
+                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
                   >
                     <option value="" disabled hidden>Select Department</option>
                     {departments.map((d) => (
@@ -654,7 +654,7 @@ export const Employees = () => {
                   <select
                     value={formData.designation}
                     onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
+                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
                   >
                     <option value="" disabled hidden>Select Designation</option>
                     {designations.map((des) => (
@@ -677,7 +677,7 @@ export const Employees = () => {
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
+                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
                   >
                     <option value="" disabled hidden>Select Role</option>
                     <option value="EMPLOYEE">Employee</option>
