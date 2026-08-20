@@ -286,8 +286,17 @@ export const Attendance = () => {
       const isDirectReport = rMgr === currentUserId;
       return isSelf || isDirectReport;
     });
-    if (roleFilteredEmployees.length === 0 && user) {
-      roleFilteredEmployees = [user];
+    
+    // Ensure the Team Lead's own card is always included
+    const hasSelf = roleFilteredEmployees.some(emp => emp._id === currentUserId || emp.id === currentUserId);
+    if (!hasSelf && user) {
+      roleFilteredEmployees.unshift(user);
+    }
+  } else {
+    // For HR/ADMIN, if they are not in allEmployees, add them
+    const hasSelf = roleFilteredEmployees.some(emp => emp._id === currentUserId || emp.id === currentUserId);
+    if (!hasSelf && user && user.role !== 'CEO') {
+      roleFilteredEmployees.unshift(user);
     }
   }
 
