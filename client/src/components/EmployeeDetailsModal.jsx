@@ -25,6 +25,7 @@ export const EmployeeDetailsModal = ({
     firstName: '',
     lastName: '',
     phone: '',
+    employeeId: '',
     department: '',
     designation: '',
     role: 'EMPLOYEE',
@@ -64,6 +65,7 @@ export const EmployeeDetailsModal = ({
         firstName: employee.firstName || '',
         lastName: employee.lastName || '',
         phone: employee.phone || '',
+        employeeId: employee.employeeId || '',
         department: employee.department?._id || employee.department || '',
         designation: employee.designation?._id || employee.designation || '',
         role: employee.role || 'EMPLOYEE',
@@ -390,6 +392,18 @@ export const EmployeeDetailsModal = ({
         ) : (
           /* Mode 2: Edit Form */
           <form onSubmit={handleSaveEdit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Employee ID *</label>
+              <input
+                type="text"
+                value={editForm.employeeId}
+                onChange={(e) => setEditForm({ ...editForm, employeeId: e.target.value })}
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary uppercase"
+                placeholder="e.g. EMP-1234"
+                required
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-500 mb-1">First Name *</label>
