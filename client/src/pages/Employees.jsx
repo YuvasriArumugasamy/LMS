@@ -609,7 +609,7 @@ export const Employees = () => {
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                     className="w-full pl-10 pr-8 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
                   >
-                    <option value="">Select Department</option>
+                    <option value="" disabled hidden>Select Department</option>
                     {departments.map((d) => (
                       <option key={d._id} value={d._id}>{d.name}</option>
                     ))}
@@ -627,7 +627,7 @@ export const Employees = () => {
                     onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
                     className="w-full pl-10 pr-8 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
                   >
-                    <option value="">Select Designation</option>
+                    <option value="" disabled hidden>Select Designation</option>
                     {designations.map((des) => (
                       <option key={des._id} value={des._id}>{des.name}</option>
                     ))}
@@ -649,7 +649,7 @@ export const Employees = () => {
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     className="w-full pl-10 pr-8 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
                   >
-                    <option value="EMPLOYEE">Select Role</option>
+                    <option value="" disabled hidden>Select Role</option>
                     <option value="EMPLOYEE">Employee</option>
                     <option value="TEAM_LEAD">Team Lead</option>
                     <option value="HR">HR</option>
