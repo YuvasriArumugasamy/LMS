@@ -51,6 +51,7 @@ export const FaceCameraModal = ({
   const isEyeClosedRef = useRef(false);
   const livenessVerifiedRef = useRef(false);
   const isDetectingRef = useRef(false);
+  const maxEARRef = useRef(0);
 
   const [cameraError, setCameraError] = useState('');
   const [status, setStatus] = useState('loading_models'); // loading_models | initializing | scanning | face_detected | captured | error
@@ -64,6 +65,7 @@ export const FaceCameraModal = ({
     if (isOpen) {
       isEyeClosedRef.current = false;
       livenessVerifiedRef.current = false;
+      maxEARRef.current = 0;
       setLivenessVerified(false);
       setCameraError('');
       setStatus('loading_models');
@@ -149,11 +151,19 @@ export const FaceCameraModal = ({
             const rightEAR = calculateEAR(rightEye);
             const avgEAR = (leftEAR + rightEAR) / 2;
             
-            const BLINK_THRESHOLD = 0.22;
+            // Dynamic threshold: Track the max open eye EAR with a slow decay
+            if (avgEAR > maxEARRef.current) {
+              maxEARRef.current = avgEAR;
+            } else {
+              maxEARRef.current = Math.max(0.15, maxEARRef.current - 0.005);
+            }
             
-            if (avgEAR < BLINK_THRESHOLD) {
+            // A blink is a sudden drop of > 0.05 from their normal open state, OR a hard drop < 0.20
+            const isClosed = (maxEARRef.current - avgEAR > 0.05) || (avgEAR < 0.20);
+            
+            if (isClosed) {
               isEyeClosedRef.current = true;
-            } else if (isEyeClosedRef.current && avgEAR >= BLINK_THRESHOLD) {
+            } else if (isEyeClosedRef.current && !isClosed) {
               // Blink detected
               livenessVerifiedRef.current = true;
               setLivenessVerified(true);
