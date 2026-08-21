@@ -49,6 +49,7 @@ export const FaceCameraModal = ({
   const detectionIntervalRef = useRef(null);
   const captureFaceRef = useRef(null);
   const isEyeClosedRef = useRef(false);
+  const consecutiveOpenFramesRef = useRef(0);
   const livenessVerifiedRef = useRef(false);
 
   const [cameraError, setCameraError] = useState('');
@@ -62,6 +63,7 @@ export const FaceCameraModal = ({
   useEffect(() => {
     if (isOpen) {
       isEyeClosedRef.current = false;
+      consecutiveOpenFramesRef.current = 0;
       livenessVerifiedRef.current = false;
       setLivenessVerified(false);
       setCameraError('');
@@ -147,20 +149,28 @@ export const FaceCameraModal = ({
             
             const BLINK_THRESHOLD = 0.25;
             
-            if (avgEAR < BLINK_THRESHOLD) {
-              isEyeClosedRef.current = true;
-            } else if (isEyeClosedRef.current && avgEAR >= BLINK_THRESHOLD) {
-              // Blink detected
-              livenessVerifiedRef.current = true;
-              setLivenessVerified(true);
-              isEyeClosedRef.current = false;
-              setStatusMsg('Liveness verified ✓ Auto-capturing...');
-              
-              setTimeout(() => {
-                if (captureFaceRef.current) {
-                  captureFaceRef.current();
-                }
-              }, 500); // Short delay for user to open eyes fully before snap
+            if (avgEAR >= BLINK_THRESHOLD) {
+              if (isEyeClosedRef.current) {
+                // Blink completed!
+                livenessVerifiedRef.current = true;
+                setLivenessVerified(true);
+                isEyeClosedRef.current = false;
+                consecutiveOpenFramesRef.current = 0;
+                setStatusMsg('Liveness verified ✓ Auto-capturing...');
+                
+                setTimeout(() => {
+                  if (captureFaceRef.current) {
+                    captureFaceRef.current();
+                  }
+                }, 500); // Short delay for user to open eyes fully before snap
+              }
+              consecutiveOpenFramesRef.current += 1;
+            } else {
+              // Only consider closed if eyes were stably open before
+              if (consecutiveOpenFramesRef.current >= 4) {
+                isEyeClosedRef.current = true;
+              }
+              consecutiveOpenFramesRef.current = 0;
             }
             
             if (!livenessVerifiedRef.current) {
@@ -174,6 +184,7 @@ export const FaceCameraModal = ({
           livenessVerifiedRef.current = false;
           setLivenessVerified(false);
           isEyeClosedRef.current = false;
+          consecutiveOpenFramesRef.current = 0;
         }
       } catch (_) {}
     }, 150);
