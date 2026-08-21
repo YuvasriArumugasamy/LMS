@@ -145,7 +145,7 @@ export const FaceCameraModal = ({
             const rightEAR = calculateEAR(rightEye);
             const avgEAR = (leftEAR + rightEAR) / 2;
             
-            const BLINK_THRESHOLD = 0.25;
+            const BLINK_THRESHOLD = 0.28;
             
             if (avgEAR < BLINK_THRESHOLD) {
               isEyeClosedRef.current = true;
@@ -176,7 +176,7 @@ export const FaceCameraModal = ({
           isEyeClosedRef.current = false;
         }
       } catch (_) {}
-    }, 150);
+    }, 80);
   };
 
   const cleanup = () => {
