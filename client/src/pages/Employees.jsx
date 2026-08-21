@@ -34,7 +34,8 @@ import {
   X,
   Camera,
   CheckCircle,
-  Scan
+  Scan,
+  Hash
 } from 'lucide-react';
 
 const CARD_THEMES = [
@@ -132,6 +133,7 @@ export const Employees = () => {
     }
     if (actionParam === 'add') {
       setFormData({
+        employeeId: '',
         firstName: '',
         lastName: '',
         email: '',
@@ -148,6 +150,7 @@ export const Employees = () => {
   }, [searchParams]);
 
   const [formData, setFormData] = useState({
+    employeeId: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -227,6 +230,7 @@ export const Employees = () => {
       setCapturedFaceDescriptor(null);
       fetchEmployees();
       setFormData({
+        employeeId: '',
         firstName: '',
         lastName: '',
         email: '',
@@ -266,6 +270,7 @@ export const Employees = () => {
           <button
             onClick={() => {
               setFormData({
+                employeeId: '',
                 firstName: '',
                 lastName: '',
                 email: '',
@@ -569,6 +574,24 @@ export const Employees = () => {
 
           {/* Form */}
           <form onSubmit={handleCreateEmployee} className="space-y-3.5" autoComplete="off">
+            {/* Employee ID */}
+            <div>
+              <label className="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-1.5">
+                Employee ID <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-500 pointer-events-none" />
+                <input
+                  type="text"
+                  value={formData.employeeId}
+                  onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
+                  placeholder="e.g. EMP001"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all uppercase"
+                  required
+                />
+              </div>
+            </div>
+
             {/* First Name & Last Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
