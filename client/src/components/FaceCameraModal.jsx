@@ -50,6 +50,7 @@ export const FaceCameraModal = ({
   const captureFaceRef = useRef(null);
   const isEyeClosedRef = useRef(false);
   const livenessVerifiedRef = useRef(false);
+  const isDetectingRef = useRef(false);
 
   const [cameraError, setCameraError] = useState('');
   const [status, setStatus] = useState('loading_models'); // loading_models | initializing | scanning | face_detected | captured | error
@@ -117,6 +118,9 @@ export const FaceCameraModal = ({
     // 150ms interval to catch fast blinks
     detectionIntervalRef.current = setInterval(async () => {
       if (!videoRef.current || videoRef.current.readyState < 2) return;
+      if (isDetectingRef.current) return;
+      
+      isDetectingRef.current = true;
       try {
         // Strict detection with HIGHER threshold to avoid false positives
         let detection = await faceapi.detectSingleFace(
@@ -145,7 +149,7 @@ export const FaceCameraModal = ({
             const rightEAR = calculateEAR(rightEye);
             const avgEAR = (leftEAR + rightEAR) / 2;
             
-            const BLINK_THRESHOLD = 0.28;
+            const BLINK_THRESHOLD = 0.22;
             
             if (avgEAR < BLINK_THRESHOLD) {
               isEyeClosedRef.current = true;
@@ -175,7 +179,10 @@ export const FaceCameraModal = ({
           setLivenessVerified(false);
           isEyeClosedRef.current = false;
         }
-      } catch (_) {}
+      } catch (_) {
+      } finally {
+        isDetectingRef.current = false;
+      }
     }, 80);
   };
 
