@@ -37,10 +37,27 @@ const getISTTime = (date = new Date()) => {
 
 // Calculate Euclidean distance between two descriptor arrays
 const calculateEuclideanDistance = (desc1, desc2) => {
-  if (!desc1 || !desc2 || desc1.length !== desc2.length) return 1.0;
+  // Validate that both descriptors are valid arrays with 128 elements
+  if (!desc1 || !desc2 || !Array.isArray(desc1) || !Array.isArray(desc2) || desc1.length !== 128 || desc2.length !== 128) {
+    return 1.0;
+  }
+  
+  // Check if descriptors are empty (all zeros) which means invalid face scan
+  const isDesc1Empty = desc1.every(val => val === 0);
+  const isDesc2Empty = desc2.every(val => val === 0);
+  if (isDesc1Empty || isDesc2Empty) {
+    return 1.0;
+  }
+
   let sum = 0;
-  for (let i = 0; i < desc1.length; i++) {
-    const diff = desc1[i] - desc2[i];
+  for (let i = 0; i < 128; i++) {
+    const v1 = parseFloat(desc1[i]);
+    const v2 = parseFloat(desc2[i]);
+    
+    // If any value is not a valid number, fail the validation
+    if (isNaN(v1) || isNaN(v2)) return 1.0;
+    
+    const diff = v1 - v2;
     sum += diff * diff;
   }
   return Math.sqrt(sum);
@@ -48,33 +65,29 @@ const calculateEuclideanDistance = (desc1, desc2) => {
 
 const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
   // SECURITY FIX: Removed CEO exemption - ALL users must use face verification
-  // Previous code allowed CEO bypass which is a security hole
   
-  // If face is not registered, block check-in — face registration is mandatory for ALL users
-  if (!user.isFaceRegistered || !user.faceDescriptor || user.faceDescriptor.length === 0) {
+  if (!user.isFaceRegistered || !user.faceDescriptor || user.faceDescriptor.length !== 128) {
     return {
       valid: false,
-      message: 'Face Lock not registered. Please contact your administrator to register your face before checking in/out.'
+      message: 'Face Lock not registered or corrupted. Please contact your administrator to re-register your face.'
     };
   }
   
-  // Face is registered — submitted descriptor is required
-  if (!submittedDescriptor || !Array.isArray(submittedDescriptor) || submittedDescriptor.length === 0) {
-    return { valid: false, message: 'Face scan is required for Check-In/Out verification.' };
+  if (!submittedDescriptor || !Array.isArray(submittedDescriptor) || submittedDescriptor.length !== 128) {
+    return { valid: false, message: 'Invalid face scan detected. Please try again.' };
   }
   
-  // Compare submitted face against registered face descriptor
   const distance = calculateEuclideanDistance(user.faceDescriptor, submittedDescriptor);
   console.log(`[Face Verification] User: ${user.email}, Role: ${user.role}, Distance: ${distance.toFixed(4)}`);
   
-  // STRICT threshold: 0.50 (lower is better match)
+  // STRICT threshold: 0.40 (0.50 was allowing false positives)
   // This prevents unauthorized users from using similar-looking faces
-  if (isNaN(distance) || distance > 0.50) {
-    console.log(`[Face Verification FAILED] Distance ${distance.toFixed(4)} exceeds threshold 0.50`);
+  if (isNaN(distance) || distance > 0.40) {
+    console.log(`[Face Verification FAILED] Distance ${distance.toFixed(4)} exceeds threshold 0.40`);
     return { valid: false, message: 'Face verification failed! Face does not match the registered profile. Please use your own registered face.' };
   }
   
-  console.log(`[Face Verification SUCCESS] Distance ${distance.toFixed(4)} within threshold 0.50`);
+  console.log(`[Face Verification SUCCESS] Distance ${distance.toFixed(4)} within threshold 0.40`);
   return { valid: true, distance };
 };
 
