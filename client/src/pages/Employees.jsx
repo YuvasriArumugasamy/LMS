@@ -635,11 +635,11 @@ export const Employees = () => {
                   <select
                     value={formData.department || ''}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
+                    className="appearance-none w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-purple-200/80 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
                   >
-                    <option value="" className="text-slate-400">Select Department</option>
+                    <option value="" disabled>Select Department</option>
                     {departments.map((d) => (
-                      <option key={d._id} value={d._id} className="text-slate-900 dark:text-white">{d.name}</option>
+                      <option key={d._id} value={d._id}>{d.name}</option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
