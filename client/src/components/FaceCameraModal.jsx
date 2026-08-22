@@ -24,9 +24,9 @@ const loadFaceModels = async () => {
   }
   modelsLoading = true;
   const MODEL_URL = '/models';
+  // Optimized: Only load models we actually use for faster initialization
   await Promise.all([
     faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-    faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL).catch((err) => console.warn('SSD Mobilenet model load notice:', err)),
     faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
     faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
   ]);
@@ -116,23 +116,15 @@ export const FaceCameraModal = ({
   };
 
   const startFaceDetectionLoop = () => {
-    // 150ms interval to catch fast blinks
+    // Optimized: 250ms interval instead of 150ms for better performance
     detectionIntervalRef.current = setInterval(async () => {
       if (!videoRef.current || videoRef.current.readyState < 2) return;
       try {
-        // Strict detection with HIGHER threshold to avoid false positives
-        let detection = await faceapi.detectSingleFace(
+        // Optimized: Single detection pass with TinyFaceDetector (fastest model)
+        const detection = await faceapi.detectSingleFace(
           videoRef.current,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }) // Reduced input size for speed
         ).withFaceLandmarks();
-        
-        // Fallback to SSD Mobilenet with STRICT confidence threshold
-        if (!detection && faceapi.nets.ssdMobilenetv1.isLoaded) {
-          detection = await faceapi.detectSingleFace(
-            videoRef.current,
-            new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })
-          ).withFaceLandmarks();
-        }
 
         const hasFace = !!detection;
         setFaceDetected(hasFace);
@@ -187,7 +179,7 @@ export const FaceCameraModal = ({
           consecutiveOpenFramesRef.current = 0;
         }
       } catch (_) {}
-    }, 150);
+    }, 250); // Increased from 150ms to 250ms for better performance
   };
 
   const cleanup = () => {
@@ -227,27 +219,12 @@ export const FaceCameraModal = ({
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // STRICT face detection - Only accept HIGH QUALITY faces to prevent unauthorized access
-      // Pass 1: TinyFaceDetector with STRICT threshold (0.5) to avoid false positives
-      let detection = await faceapi
-        .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 }))
+      // OPTIMIZED face detection - Single pass with optimal settings for speed
+      // Using TinyFaceDetector (fastest) with medium input size for balance of speed and accuracy
+      const detection = await faceapi
+        .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 }))
         .withFaceLandmarks()
         .withFaceDescriptor();
-
-      // Pass 2: SSD Mobilenet v1 fallback with STRICT confidence (0.5)
-      if (!detection && faceapi.nets.ssdMobilenetv1.isLoaded) {
-        detection = await faceapi
-          .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
-          .withFaceLandmarks()
-          .withFaceDescriptor();
-      }
-
-      // Pass 3: Medium-sensitivity fallback ONLY (threshold 0.4) - No ultra-low thresholds!
-      if (!detection) {
-        detection = await faceapi
-          .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.4 }))
-          .withFaceLandmarks()
-          .withFaceDescriptor();
       }
 
       if (!detection) {
