@@ -66,11 +66,13 @@ app.use(async (req, res, next) => {
 // Essential Middleware
 app.use(helmet());
 
-// CORS — allow configured frontend URL + Vercel preview deployments
+// CORS — allow configured frontend URL + Vercel preview deployments + Local Network
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
   'http://localhost:5173',
-  'http://localhost:4173'
+  'http://localhost:4173',
+  'http://192.168.43.194:5173', // Local network access for mobile
+  'http://192.168.43.194:4173'
 ];
 
 app.use(
