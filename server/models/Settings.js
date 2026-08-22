@@ -4,7 +4,7 @@ const settingsSchema = new mongoose.Schema(
   {
     companyName: {
       type: String,
-      default: 'Life Changers LMS'
+      default: 'Life Changers Ind'
     },
     companyLogo: {
       type: String,

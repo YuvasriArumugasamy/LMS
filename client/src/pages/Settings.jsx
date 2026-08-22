@@ -3,7 +3,7 @@ import { Settings as SettingsIcon, Save, Zap, Building, Mail, Shield } from 'luc
 import api from '../services/api';
 
 export const Settings = () => {
-  const [companyName, setCompanyName] = useState('Life Changers LCM');
+  const [companyName, setCompanyName] = useState('Life Changers Ind');
   const [escalationMinutes, setEscalationMinutes] = useState(5);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -14,7 +14,7 @@ export const Settings = () => {
         const res = await api.get('/settings');
         const settings = res.data.data.settings;
         if (settings) {
-          setCompanyName(settings.companyName || 'Life Changers LCM');
+          setCompanyName(settings.companyName || 'Life Changers Ind');
           setEscalationMinutes(settings.emergencyEscalationMinutes || 5);
         }
       } catch (err) {

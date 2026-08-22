@@ -22,7 +22,7 @@ export const LogoutConfirmModal = ({ isOpen, onClose, onConfirm }) => {
             Confirm Logout
           </h3>
           <p className="text-[11px] sm:text-xs md:text-sm font-semibold text-slate-500 dark:text-slate-400">
-            You're about to sign out of <span className="text-rose-500 font-black">Life Changers LMS.</span>
+            You're about to sign out of <span className="text-rose-500 font-black">Life Changers Ind.</span>
           </p>
         </div>
 
