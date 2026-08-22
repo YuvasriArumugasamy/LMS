@@ -240,7 +240,7 @@ export const Login = () => {
                 <div className="w-10 h-1 bg-gradient-to-r from-blue-600 to-sky-400 rounded-full mx-auto my-1.5 shadow-xs" />
 
                 <p className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                  LEAVE MANAGEMENT SYSTEM
+                  LIFE CHANGERS MANAGEMENT
                 </p>
 
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 italic font-semibold max-w-xs mx-auto mt-1 flex items-center justify-center gap-1">
@@ -596,7 +596,7 @@ export const Login = () => {
                     </h2>
                     
                     <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                      LEAVE MANAGEMENT SYSTEM
+                      LIFE CHANGERS MANAGEMENT
                     </p>
 
                     {/* 3 Blue Dots Decorative Accent Line */}

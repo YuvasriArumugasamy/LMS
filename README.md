@@ -1,6 +1,6 @@
-# Enterprise Leave & Attendance Management System (LMS)
+# Enterprise Life Changers & Attendance Management System (LCM)
 
-A modern full-stack Enterprise Leave & Attendance Management System built with React, Node.js, Express, MongoDB, and Tailwind CSS.
+A modern full-stack Enterprise Life Changers & Attendance Management System built with React, Node.js, Express, MongoDB, and Tailwind CSS.
 
 ## 🚀 Key Features
 

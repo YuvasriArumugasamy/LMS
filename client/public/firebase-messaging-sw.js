@@ -18,9 +18,9 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message: ', payload);
   
-  const notificationTitle = payload.notification?.title || 'LMS Notification';
+  const notificationTitle = payload.notification?.title || 'LCM Notification';
   const notificationOptions = {
-    body: payload.notification?.body || payload.data?.message || 'New update in Leave Management System',
+    body: payload.notification?.body || payload.data?.message || 'New update in Life Changers Management',
     icon: '/logo.png',
     badge: '/favicon.ico',
     tag: payload.data?.notificationId || 'lms-notification',

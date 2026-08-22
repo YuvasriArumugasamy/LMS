@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 // Load environment variables FIRST before any other imports
 dotenv.config();
 
-// LMS Server Entry Point
+// LCM Server Entry Point
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -137,7 +137,7 @@ app.use(doubleCsrfProtection);
 app.get('/', (req, res) => {
   res.status(200).json({
     status: 'success',
-    service: 'Enterprise Leave Management System (ELMS) API Backend',
+    service: 'Enterprise Life Changers Management (ELCM) API Backend',
     version: '1.0.0'
   });
 });
@@ -145,7 +145,7 @@ app.get('/', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'success',
-    service: 'Enterprise Leave Management System (ELMS) API',
+    service: 'Enterprise Life Changers Management (ELCM) API',
     timestamp: new Date().toISOString()
   });
 });
@@ -182,7 +182,7 @@ const PORT = process.env.PORT || 5000;
 if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => {
     console.log(`\n======================================================`);
-    console.log(`🚀 [ELMS Server] Running on http://localhost:${PORT}`);
+    console.log(`🚀 [ELCM Server] Running on http://localhost:${PORT}`);
     console.log(`🚨 [Emergency Escalation] Active (Check every ${ESCALATION_INTERVAL / 1000}s)`);
     console.log(`⚡ [Performance] Optimized for 50+ concurrent users`);
     console.log(`======================================================\n`);

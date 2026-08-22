@@ -2033,7 +2033,7 @@ export const Attendance = () => {
             </div>
             {/* Footer */}
             <div className="p-4 sm:px-5 sm:py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 shrink-0 text-center sm:text-left">
-              <p className="text-[10px] sm:text-[11px] text-slate-400 font-semibold">Life Changers Ind LMS · Attendance Report · {new Date().toLocaleString()}</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-400 font-semibold">Life Changers Ind LCM · Attendance Report · {new Date().toLocaleString()}</p>
             </div>
           </div>
         </div>,
