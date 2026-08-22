@@ -167,12 +167,14 @@ export const FaceCameraModal = ({
             const rightEAR = calculateEAR(rightEye);
             const avgEAR = (leftEAR + rightEAR) / 2;
             
-            // More sensitive blink threshold for faster detection
-            const BLINK_THRESHOLD = 0.28; // Increased from 0.25 for easier detection
+            // Strict blink threshold to prevent photo-based attacks
+            const BLINK_THRESHOLD = 0.26; // Balanced threshold
+            const BLINK_CLOSED_THRESHOLD = 0.20; // Must close eyes below this
             
             if (avgEAR >= BLINK_THRESHOLD) {
+              // Eyes are open
               if (isEyeClosedRef.current) {
-                // Blink completed!
+                // Blink completed - eyes were closed and now open!
                 livenessVerifiedRef.current = true;
                 setLivenessVerified(true);
                 isEyeClosedRef.current = false;
@@ -186,11 +188,14 @@ export const FaceCameraModal = ({
                 }, 500); // Short delay for user to open eyes fully before snap
               }
               consecutiveOpenFramesRef.current += 1;
-            } else {
-              // Only consider closed if eyes were stably open before (reduced from 4 to 3)
+            } else if (avgEAR <= BLINK_CLOSED_THRESHOLD) {
+              // Eyes are definitely closed
               if (consecutiveOpenFramesRef.current >= 3) {
                 isEyeClosedRef.current = true;
               }
+              consecutiveOpenFramesRef.current = 0;
+            } else {
+              // Ambiguous state - neither fully open nor closed
               consecutiveOpenFramesRef.current = 0;
             }
             
@@ -448,18 +453,8 @@ export const FaceCameraModal = ({
               >
                 Cancel
               </button>
-              {/* Manual Capture Button - Available when face detected */}
-              {faceDetected && (
-                <button
-                  type="button"
-                  onClick={handleCaptureFace}
-                  disabled={isLoading}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-lg shadow-cyan-500/25 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-                >
-                  <Camera className="w-4 h-4 stroke-[2.5]" />
-                  {livenessVerified ? 'Capture Now' : 'Skip Blink & Capture'}
-                </button>
-              )}
+              {/* Auto-capture only - Manual button removed for security */}
+              {/* Blink detection is MANDATORY to prevent photo-based spoofing */}
             </>
           )}
         </div>
