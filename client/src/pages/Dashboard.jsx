@@ -92,6 +92,7 @@ export const Dashboard = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [selectedBalanceYear, setSelectedBalanceYear] = useState(new Date().getFullYear());
+  const [selectedTrendYear, setSelectedTrendYear] = useState(new Date().getFullYear());
 
   // Face Camera Verification Modal State for Dashboard Check-In / Check-Out
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
@@ -107,7 +108,7 @@ export const Dashboard = () => {
     try {
       const year = balanceYear || selectedBalanceYear;
       const [statsRes, leaveTypesRes, balanceRes, attendanceRes] = await Promise.all([
-        api.get('/dashboard/stats'),
+        api.get('/dashboard/stats', { params: { trendYear: selectedTrendYear } }),
         api.get('/leave-types'),
         api.get('/leaves/balance', { params: { year } }),
         api.get('/attendance/today')
@@ -125,7 +126,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [selectedTrendYear]);
 
   // Re-fetch balance when year changes
   const handleBalanceYearChange = async (year) => {
@@ -808,7 +809,16 @@ export const Dashboard = () => {
                 <div>
                   <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">Monthly Leave Trend</h3>
                 </div>
-                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">This Year ▾</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={selectedTrendYear}
+                    onChange={(e) => setSelectedTrendYear(Number(e.target.value))}
+                    min="2000"
+                    max="2050"
+                    className="px-3 py-1.5 w-24 rounded-full bg-white dark:bg-slate-800 border border-blue-400 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500/30 shadow-xs text-center"
+                  />
+                </div>
               </div>
 
               <div className="w-full h-52">

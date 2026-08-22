@@ -5,9 +5,9 @@ import { LeaveBalance } from '../models/LeaveBalance.js';
 import { Holiday } from '../models/Holiday.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
-// Build real monthly leave trend for current year
-const buildMonthlyTrend = async (matchQuery = {}) => {
-  const year = new Date().getFullYear();
+// Build real monthly leave trend for specified year
+const buildMonthlyTrend = async (matchQuery = {}, trendYear) => {
+  const year = trendYear || new Date().getFullYear();
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const results = await LeaveRequest.aggregate([
@@ -39,6 +39,7 @@ const buildMonthlyTrend = async (matchQuery = {}) => {
 export const getDashboardStats = asyncHandler(async (req, res, next) => {
   const role = req.user.role;
   const userId = req.user._id;
+  const trendYear = req.query.trendYear ? parseInt(req.query.trendYear) : new Date().getFullYear();
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -82,7 +83,7 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
         toDate: { $gte: today },
         isDeleted: false
       }).populate('user', 'firstName lastName employeeId department profileImage'),
-      buildMonthlyTrend()
+      buildMonthlyTrend({}, trendYear)
     ]);
 
     const [totalEmployees, totalDepartments, totalManagers] = employeeDeptStats;
@@ -115,7 +116,7 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
         .populate('leaveType', 'name colorBadge')
         .sort({ createdAt: -1 })
         .limit(5),
-      buildMonthlyTrend()
+      buildMonthlyTrend({}, trendYear)
     ]);
 
     res.status(200).json({
@@ -139,7 +140,7 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
       LeaveRequest.countDocuments({ ...teamQuery, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, isDeleted: false }),
       LeaveRequest.find({ ...teamQuery, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
         .populate('user', 'firstName lastName profileImage designation'),
-      teamIds.length > 0 ? buildMonthlyTrend({ user: { $in: teamIds } }) : buildMonthlyTrend({ user: userId })
+      teamIds.length > 0 ? buildMonthlyTrend({ user: { $in: teamIds } }, trendYear) : buildMonthlyTrend({ user: userId }, trendYear)
     ]);
 
     res.status(200).json({
@@ -159,7 +160,7 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
       LeaveRequest.countDocuments({ user: userId, status: { $in: ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] }, isDeleted: false }),
       Holiday.find({ date: { $gte: today }, isDeleted: false, status: 'ACTIVE' }).sort({ date: 1 }).limit(5),
       LeaveRequest.find({ user: userId, isDeleted: false }).populate('leaveType', 'name colorBadge').sort({ createdAt: -1 }).limit(5),
-      buildMonthlyTrend({ user: userId })
+      buildMonthlyTrend({ user: userId }, trendYear)
     ]);
 
     res.status(200).json({
