@@ -174,8 +174,8 @@ export const FaceCameraModal = ({
             const avgEAR = (leftEAR + rightEAR) / 2;
             
             // Relaxed blink threshold for easier detection
-            const BLINK_THRESHOLD = 0.27; // Eyes considered open
-            const BLINK_CLOSED_THRESHOLD = 0.22; // Eyes considered closed (easier than 0.20)
+            const BLINK_THRESHOLD = 0.25; // Lowered from 0.27 so partially open eyes are counted
+            const BLINK_CLOSED_THRESHOLD = 0.23; // Increased from 0.22 for easier closing detection
             
             if (avgEAR >= BLINK_THRESHOLD) {
               // Eyes are open
@@ -196,13 +196,12 @@ export const FaceCameraModal = ({
               consecutiveOpenFramesRef.current += 1;
             } else if (avgEAR <= BLINK_CLOSED_THRESHOLD) {
               // Eyes are definitely closed
-              // Reduced from 3 to 2 frames for faster detection
-              if (consecutiveOpenFramesRef.current >= 2) {
+              if (consecutiveOpenFramesRef.current >= 1) { // Reduced to 1 frame required
                 isEyeClosedRef.current = true;
               }
               consecutiveOpenFramesRef.current = 0;
             } else {
-              // Ambiguous state (0.22-0.27) - don't reset counter, just wait
+              // Ambiguous state (0.23-0.25) - don't reset counter, just wait
               // This allows smoother blink detection
             }
             
@@ -221,7 +220,7 @@ export const FaceCameraModal = ({
           consecutiveOpenFramesRef.current = 0;
         }
       } catch (_) {}
-    }, 250); // Increased from 150ms to 250ms for better performance
+    }, 100); // Decreased interval to 100ms to catch fast blinks
   };
 
   const cleanup = () => {
