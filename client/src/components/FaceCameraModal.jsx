@@ -26,7 +26,7 @@ const loadFaceModels = async () => {
   const MODEL_URL = '/models';
   // Optimized: Only load models we actually use for faster initialization
   await Promise.all([
-    faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL), // Using SSD Mobilenet for much more stable landmarks
+    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), // Back to TinyFaceDetector for speed, but will increase inputSize
     faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
     faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
   ]);
@@ -134,10 +134,10 @@ export const FaceCameraModal = ({
       
       isDetecting = true;
       try {
-        // SSD Mobilenet is slightly slower but gives highly stable landmarks for EAR calculation
+        // Using TinyFaceDetector with inputSize 320 (instead of 224) for a good balance of speed and stability
         const detection = await faceapi.detectSingleFace(
           videoRef.current,
-          new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }) 
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }) 
         ).withFaceLandmarks();
 
         const hasFace = !!detection;
@@ -275,9 +275,9 @@ export const FaceCameraModal = ({
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Use SsdMobilenetv1 for capture as well to match
+      // Use TinyFaceDetector for capture as well
       const detection = await faceapi
-        .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+        .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 }))
         .withFaceLandmarks()
         .withFaceDescriptor();
 
