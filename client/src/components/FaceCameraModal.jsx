@@ -61,6 +61,7 @@ export const FaceCameraModal = ({
   const [livenessVerified, setLivenessVerified] = useState(false);
   const [faceDistance, setFaceDistance] = useState('unknown'); // 'too_close' | 'perfect' | 'too_far' | 'unknown'
   const [blinkAttemptTime, setBlinkAttemptTime] = useState(0); // Track how long user is trying
+  const [showEmergencyButton, setShowEmergencyButton] = useState(false); // Force show button after timeout
 
   useEffect(() => {
     if (isOpen) {
@@ -76,11 +77,22 @@ export const FaceCameraModal = ({
       setFaceDetected(false);
       setFaceDistance('unknown');
       setBlinkAttemptTime(Date.now());
+      setShowEmergencyButton(false);
+      
+      // Emergency bypass button appears after 5 seconds
+      const emergencyTimer = setTimeout(() => {
+        setShowEmergencyButton(true);
+      }, 5000);
+      
       initModal();
+      
+      return () => {
+        clearTimeout(emergencyTimer);
+        cleanup();
+      };
     } else {
       cleanup();
     }
-    return () => cleanup();
   }, [isOpen]);
 
   const initModal = async () => {
@@ -456,8 +468,8 @@ export const FaceCameraModal = ({
               >
                 Cancel
               </button>
-              {/* Manual Capture Button - Shows if blink verified OR after 8 seconds of trying */}
-              {faceDetected && (livenessVerified || (Date.now() - blinkAttemptTime > 8000)) && (
+              {/* Manual Capture Button - Shows if blink verified OR after 5 seconds */}
+              {faceDetected && (livenessVerified || showEmergencyButton) && (
                 <button
                   type="button"
                   onClick={handleCaptureFace}
@@ -465,7 +477,7 @@ export const FaceCameraModal = ({
                   className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                 >
                   <Camera className="w-4 h-4 stroke-[2.5]" />
-                  {livenessVerified ? 'Capture Now' : 'Capture Without Blink'}
+                  {livenessVerified ? 'Capture Now' : 'Capture (Skip Blink)'}
                 </button>
               )}
             </>
