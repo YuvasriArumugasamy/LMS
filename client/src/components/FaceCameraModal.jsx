@@ -59,6 +59,7 @@ export const FaceCameraModal = ({
   const [computedDescriptor, setComputedDescriptor] = useState(null);
   const [faceDetected, setFaceDetected] = useState(false);
   const [livenessVerified, setLivenessVerified] = useState(false);
+  const [faceDistance, setFaceDistance] = useState('unknown'); // 'too_close' | 'perfect' | 'too_far' | 'unknown'
 
   useEffect(() => {
     if (isOpen) {
@@ -72,6 +73,7 @@ export const FaceCameraModal = ({
       setCapturedPreview(null);
       setComputedDescriptor(null);
       setFaceDetected(false);
+      setFaceDistance('unknown');
       initModal();
     } else {
       cleanup();
@@ -130,6 +132,32 @@ export const FaceCameraModal = ({
         setFaceDetected(hasFace);
         
         if (hasFace) {
+          // Calculate face size for distance guidance
+          const box = detection.detection.box;
+          const faceWidth = box.width;
+          const videoWidth = videoRef.current.videoWidth || 640;
+          const facePercentage = (faceWidth / videoWidth) * 100;
+          
+          // Distance guidance based on face size
+          // Perfect: 25-40% of frame width
+          // Too close: >40%
+          // Too far: <25%
+          let distanceStatus = 'unknown';
+          let distanceMsg = '';
+          
+          if (facePercentage > 45) {
+            distanceStatus = 'too_close';
+            distanceMsg = '📏 Move back a little';
+          } else if (facePercentage < 20) {
+            distanceStatus = 'too_far';
+            distanceMsg = '📏 Come closer to camera';
+          } else {
+            distanceStatus = 'perfect';
+            distanceMsg = '✓ Perfect distance';
+          }
+          
+          setFaceDistance(distanceStatus);
+          
           if (!livenessVerifiedRef.current) {
             const landmarks = detection.landmarks;
             const leftEye = landmarks.getLeftEye();
@@ -166,13 +194,14 @@ export const FaceCameraModal = ({
             }
             
             if (!livenessVerifiedRef.current) {
-              setStatusMsg('Please BLINK to verify liveness');
+              setStatusMsg(distanceStatus === 'perfect' ? 'Please BLINK to verify liveness' : distanceMsg);
             }
           } else {
-            setStatusMsg('Face detected and Liveness verified ✓');
+            setStatusMsg(distanceStatus === 'perfect' ? 'Face detected and Liveness verified ✓' : distanceMsg);
           }
         } else {
           setStatusMsg('Align your face inside the frame');
+          setFaceDistance('unknown');
           livenessVerifiedRef.current = false;
           setLivenessVerified(false);
           isEyeClosedRef.current = false;
@@ -360,6 +389,19 @@ export const FaceCameraModal = ({
                   <div className={`absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 rounded-br-2xl ${faceDetected ? 'border-emerald-400' : 'border-cyan-400'}`} />
                   {!faceDetected && <div className="animate-scan-line" />}
                 </div>
+
+                {/* Distance indicator - Top */}
+                {faceDetected && faceDistance !== 'unknown' && (
+                  <div className={`absolute top-6 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full backdrop-blur-md border text-[10px] font-extrabold ${
+                    faceDistance === 'perfect' 
+                      ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-400'
+                      : 'bg-amber-950/80 border-amber-500/30 text-amber-400 animate-pulse'
+                  }`}>
+                    {faceDistance === 'too_close' && '↔️ Move Back'}
+                    {faceDistance === 'too_far' && '↔️ Come Closer'}
+                    {faceDistance === 'perfect' && '✓ Perfect Distance'}
+                  </div>
+                )}
 
                 {/* Status badge */}
                 <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full backdrop-blur-md border text-[11px] font-extrabold flex items-center gap-2 ${
