@@ -124,9 +124,13 @@ export const FaceCameraModal = ({
   };
 
   const startFaceDetectionLoop = () => {
+    let isDetecting = false;
     // Optimized: 250ms interval instead of 150ms for better performance
     detectionIntervalRef.current = setInterval(async () => {
+      if (isDetecting) return;
       if (!videoRef.current || videoRef.current.readyState < 2) return;
+      
+      isDetecting = true;
       try {
         // Optimized: Single detection pass with TinyFaceDetector (fastest model)
         const detection = await faceapi.detectSingleFace(
@@ -218,7 +222,10 @@ export const FaceCameraModal = ({
           isEyeClosedRef.current = false;
           consecutiveOpenFramesRef.current = 0;
         }
-      } catch (_) {}
+      } catch (_) {
+      } finally {
+        isDetecting = false;
+      }
     }, 100); // Decreased interval to 100ms to catch fast blinks
   };
 
