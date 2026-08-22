@@ -7,6 +7,7 @@ import { Department } from '../models/Department.js';
 import { AppError } from '../utils/appError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AuditLog } from '../models/AuditLog.js';
+import { encryptFaceDescriptor, decryptFaceDescriptor } from '../utils/encryption.js';
 
 export const getEmployees = asyncHandler(async (req, res, next) => {
   const { search, department, role, status, page = 1, limit = 10 } = req.query;
@@ -267,9 +268,17 @@ export const registerFaceLock = asyncHandler(async (req, res, next) => {
     return next(new AppError('Employee not found.', 404));
   }
 
-  employee.faceDescriptor = faceDescriptor;
+  // Encrypt face descriptor before saving
+  const encryptedDescriptor = encryptFaceDescriptor(faceDescriptor);
+  if (!encryptedDescriptor) {
+    return next(new AppError('Failed to encrypt face descriptor. Please try again.', 500));
+  }
+
+  employee.faceDescriptor = encryptedDescriptor;
   employee.isFaceRegistered = true;
   await employee.save({ validateBeforeSave: false });
+
+  console.log(`✅ [Face Registration] Encrypted and saved face descriptor for ${employee.email}`);
 
   await AuditLog.create({
     user: req.user._id,
@@ -298,9 +307,11 @@ export const removeFaceLock = asyncHandler(async (req, res, next) => {
     return next(new AppError('Employee not found.', 404));
   }
 
-  employee.faceDescriptor = [];
+  employee.faceDescriptor = '';
   employee.isFaceRegistered = false;
   await employee.save({ validateBeforeSave: false });
+
+  console.log(`✅ [Face Removal] Cleared encrypted face descriptor for ${employee.email}`);
 
   await AuditLog.create({
     user: req.user._id,

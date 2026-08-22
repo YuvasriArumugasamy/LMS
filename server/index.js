@@ -1,10 +1,16 @@
 import dotenv from 'dotenv';
+
+// Load environment variables FIRST before any other imports
+dotenv.config();
+
 // LMS Server Entry Point
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
+import { doubleCsrf } from 'csrf-csrf';
 import { connectDB } from './config/db.js';
 import { globalErrorHandler } from './middleware/errorMiddleware.js';
 import { responseTimeLogger, monitorDatabaseConnection, enableQueryLogging } from './middleware/performanceMiddleware.js';
@@ -26,8 +32,6 @@ import dailyReportRoutes from './routes/dailyReportRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import { checkEmergencyEscalations } from './services/escalationService.js';
 import { updateEarnedLeaveToPaidLeave, updateCeoName } from './utils/seed.js';
-
-dotenv.config();
 
 const app = express();
 
@@ -91,6 +95,37 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(responseTimeLogger); // Track slow API requests
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+
+// CSRF Protection (Double Submit Cookie Pattern)
+const {
+  generateToken, // Used to provide a CSRF token to the client
+  doubleCsrfProtection, // Middleware to protect routes
+} = doubleCsrf({
+  getSecret: () => process.env.CSRF_SECRET || 'default-csrf-secret-change-in-production',
+  cookieName: '__Host-csrf.token',
+  cookieOptions: {
+    sameSite: 'strict',
+    path: '/',
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true
+  },
+  size: 64,
+  ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+  getTokenFromRequest: (req) => req.headers['x-csrf-token']
+});
+
+// CSRF Token Generation Endpoint (Frontend can call this to get token)
+app.get('/api/csrf-token', (req, res) => {
+  const token = generateToken(req, res);
+  res.status(200).json({
+    status: 'success',
+    data: { csrfToken: token }
+  });
+});
+
+// Apply CSRF protection to all POST, PUT, PATCH, DELETE requests
+app.use(doubleCsrfProtection);
 
 // Root & Health Check API
 app.get('/', (req, res) => {

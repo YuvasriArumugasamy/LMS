@@ -2,6 +2,7 @@ import { Attendance } from '../models/Attendance.js';
 import { User } from '../models/User.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/appError.js';
+import { decryptFaceDescriptor } from '../utils/encryption.js';
 
 // Get today's start and end date in IST (Asia/Kolkata timezone)
 const getTodayDateRange = () => {
@@ -66,7 +67,7 @@ const calculateEuclideanDistance = (desc1, desc2) => {
 const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
   // SECURITY FIX: Removed CEO exemption - ALL users must use face verification
   
-  if (!user.isFaceRegistered || !user.faceDescriptor || user.faceDescriptor.length !== 128) {
+  if (!user.isFaceRegistered || !user.faceDescriptor) {
     return {
       valid: false,
       message: 'Face Lock not registered or corrupted. Please contact your administrator to re-register your face.'
@@ -77,7 +78,26 @@ const verifyUserFaceDescriptor = (user, submittedDescriptor) => {
     return { valid: false, message: 'Invalid face scan detected. Please try again.' };
   }
   
-  const distance = calculateEuclideanDistance(user.faceDescriptor, submittedDescriptor);
+  // Decrypt the stored face descriptor
+  let storedDescriptor;
+  try {
+    storedDescriptor = decryptFaceDescriptor(user.faceDescriptor);
+    if (!storedDescriptor || !Array.isArray(storedDescriptor) || storedDescriptor.length !== 128) {
+      console.error(`❌ [Face Verification] Decryption failed or invalid descriptor for ${user.email}`);
+      return {
+        valid: false,
+        message: 'Face Lock data is corrupted. Please contact your administrator to re-register your face.'
+      };
+    }
+  } catch (error) {
+    console.error(`❌ [Face Verification] Decryption error for ${user.email}:`, error.message);
+    return {
+      valid: false,
+      message: 'Face verification system error. Please contact your administrator.'
+    };
+  }
+  
+  const distance = calculateEuclideanDistance(storedDescriptor, submittedDescriptor);
   console.log(`[Face Verification] User: ${user.email}, Role: ${user.role}, Distance: ${distance.toFixed(4)}`);
   
   // STRICT threshold: 0.40 (0.50 was allowing false positives)

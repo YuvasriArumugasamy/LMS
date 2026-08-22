@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { encryptFaceDescriptor, decryptFaceDescriptor } from '../utils/encryption.js';
 
 const userSchema = new mongoose.Schema(
   {
@@ -102,8 +103,8 @@ const userSchema = new mongoose.Schema(
       default: false
     },
     faceDescriptor: {
-      type: [Number],
-      default: [],
+      type: String, // Changed from [Number] to String to store encrypted data
+      default: '',
       select: false
     },
     isFaceRegistered: {
