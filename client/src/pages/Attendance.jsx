@@ -709,6 +709,16 @@ export const Attendance = () => {
     setIsFaceModalOpen(true);
   };
 
+  const handleInitiateLunchOut = () => {
+    setPendingClockAction('lunchOut');
+    setIsFaceModalOpen(true);
+  };
+
+  const handleInitiateLunchIn = () => {
+    setPendingClockAction('lunchIn');
+    setIsFaceModalOpen(true);
+  };
+
   const handleFaceVerificationSuccess = async (faceDescriptor) => {
     setActionLoading(true);
     try {
@@ -716,13 +726,17 @@ export const Attendance = () => {
         await api.post('/attendance/clock-in', { workLocation, faceDescriptor });
       } else if (pendingClockAction === 'clockOut') {
         await api.post('/attendance/clock-out', { faceDescriptor });
+      } else if (pendingClockAction === 'lunchOut') {
+        await api.post('/attendance/lunch-out', { faceDescriptor });
+      } else if (pendingClockAction === 'lunchIn') {
+        await api.post('/attendance/lunch-in', { faceDescriptor });
       }
       setIsFaceModalOpen(false);
       setPendingClockAction(null);
       await fetchTodayStatus();
       await fetchAttendanceLogs();
     } catch (err) {
-      alert(err.response?.data?.message || `Failed to ${pendingClockAction === 'clockIn' ? 'login' : 'logout'}.`);
+      alert(err.response?.data?.message || `Failed to perform action.`);
     } finally {
       setActionLoading(false);
     }
@@ -781,7 +795,8 @@ export const Attendance = () => {
       </div>
 
       {/* Daily Punch Widget Banner */}
-      <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-primary/20 bg-gradient-to-r from-blue-600/10 via-sky-500/5 to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs relative z-[60]">
+      {user?.role !== 'CEO' && (
+        <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-primary/20 bg-gradient-to-r from-blue-600/10 via-sky-500/5 to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs relative z-[60]">
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
             <div className="p-3 rounded-2xl bg-primary text-white shadow-md shadow-primary/20 shrink-0 flex items-center justify-center">
               <Clock className="w-5 h-5" />
@@ -834,14 +849,44 @@ export const Attendance = () => {
               </div>
             ) : !todayAttendance?.clockOut ? (
               <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto">
-                <UiverseStarButton
-                  disabled={actionLoading}
-                  onClick={handleInitiateClockOut}
-                  variant="checkout"
-                  icon={Square}
-                >
-                  Logout
-                </UiverseStarButton>
+                {!todayAttendance.lunchOut ? (
+                  <>
+                    <UiverseStarButton
+                      disabled={actionLoading}
+                      onClick={handleInitiateLunchOut}
+                      variant="amber"
+                      icon={Square}
+                    >
+                      Lunch Out
+                    </UiverseStarButton>
+                    <UiverseStarButton
+                      disabled={actionLoading}
+                      onClick={handleInitiateClockOut}
+                      variant="checkout"
+                      icon={Square}
+                    >
+                      Logout
+                    </UiverseStarButton>
+                  </>
+                ) : !todayAttendance.lunchIn ? (
+                  <UiverseStarButton
+                    disabled={actionLoading}
+                    onClick={handleInitiateLunchIn}
+                    variant="emerald"
+                    icon={Play}
+                  >
+                    Lunch In
+                  </UiverseStarButton>
+                ) : (
+                  <UiverseStarButton
+                    disabled={actionLoading}
+                    onClick={handleInitiateClockOut}
+                    variant="checkout"
+                    icon={Square}
+                  >
+                    Logout
+                  </UiverseStarButton>
+                )}
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-start sm:justify-end gap-3 sm:gap-2 w-full sm:w-auto">
@@ -876,6 +921,7 @@ export const Attendance = () => {
             )}
           </div>
         </div>
+      )}
 
       {/* ── LIVE STATUS TAB ── */}
       {activeTab === 'live' && ['CEO', 'ADMIN', 'HR', 'TEAM_LEAD'].includes(user?.role) && (
