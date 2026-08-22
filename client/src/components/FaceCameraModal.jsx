@@ -255,7 +255,6 @@ export const FaceCameraModal = ({
         .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 }))
         .withFaceLandmarks()
         .withFaceDescriptor();
-      }
 
       if (!detection) {
         setStatus('scanning');
@@ -461,21 +460,6 @@ export const FaceCameraModal = ({
                   {livenessVerified ? 'Capture Now' : 'Skip Blink & Capture'}
                 </button>
               )}
-            </>
-          )}
-              <button
-                type="button"
-                onClick={handleCaptureFace}
-                disabled={isLoading || !!cameraError || !livenessVerified}
-                className={`px-6 py-2.5 rounded-xl text-white font-extrabold text-xs shadow-lg flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 ${
-                  livenessVerified
-                    ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 shadow-emerald-500/25'
-                    : 'bg-gradient-to-r from-slate-500 via-slate-600 to-slate-500 shadow-slate-500/25'
-                }`}
-              >
-                <Camera className="w-4 h-4 stroke-[2.5]" />
-                {isLoading ? 'Initializing...' : livenessVerified ? 'Auto Capturing... ✓' : 'Blink to Capture'}
-              </button>
             </>
           )}
         </div>
