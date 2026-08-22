@@ -60,6 +60,7 @@ export const FaceCameraModal = ({
   const [faceDetected, setFaceDetected] = useState(false);
   const [livenessVerified, setLivenessVerified] = useState(false);
   const [faceDistance, setFaceDistance] = useState('unknown'); // 'too_close' | 'perfect' | 'too_far' | 'unknown'
+  const [blinkAttemptTime, setBlinkAttemptTime] = useState(0); // Track how long user is trying
 
   useEffect(() => {
     if (isOpen) {
@@ -74,6 +75,7 @@ export const FaceCameraModal = ({
       setComputedDescriptor(null);
       setFaceDetected(false);
       setFaceDistance('unknown');
+      setBlinkAttemptTime(Date.now());
       initModal();
     } else {
       cleanup();
@@ -454,8 +456,8 @@ export const FaceCameraModal = ({
               >
                 Cancel
               </button>
-              {/* Backup Manual Capture - Only shows if blink verified OR after 10 seconds of trying */}
-              {faceDetected && livenessVerified && (
+              {/* Manual Capture Button - Shows if blink verified OR after 8 seconds of trying */}
+              {faceDetected && (livenessVerified || (Date.now() - blinkAttemptTime > 8000)) && (
                 <button
                   type="button"
                   onClick={handleCaptureFace}
@@ -463,7 +465,7 @@ export const FaceCameraModal = ({
                   className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                 >
                   <Camera className="w-4 h-4 stroke-[2.5]" />
-                  Capture Now
+                  {livenessVerified ? 'Capture Now' : 'Capture Without Blink'}
                 </button>
               )}
             </>
