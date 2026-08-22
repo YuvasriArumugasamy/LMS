@@ -27,7 +27,7 @@ const ProtectedRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white text-sm font-bold">
-        Loading Enterprise LMS...
+        Loading Enterprise LCM...
       </div>
     );
   }
