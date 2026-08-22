@@ -453,8 +453,18 @@ export const FaceCameraModal = ({
               >
                 Cancel
               </button>
-              {/* Auto-capture only - Manual button removed for security */}
-              {/* Blink detection is MANDATORY to prevent photo-based spoofing */}
+              {/* Backup Manual Capture - Only shows if blink verified OR after 10 seconds of trying */}
+              {faceDetected && livenessVerified && (
+                <button
+                  type="button"
+                  onClick={handleCaptureFace}
+                  disabled={isLoading}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                >
+                  <Camera className="w-4 h-4 stroke-[2.5]" />
+                  Capture Now
+                </button>
+              )}
             </>
           )}
         </div>
