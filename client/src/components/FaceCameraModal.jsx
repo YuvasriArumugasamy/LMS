@@ -51,6 +51,7 @@ export const FaceCameraModal = ({
   const isEyeClosedRef = useRef(false);
   const consecutiveOpenFramesRef = useRef(0);
   const livenessVerifiedRef = useRef(false);
+  const maxEARRef = useRef(0.15);
 
   const [cameraError, setCameraError] = useState('');
   const [status, setStatus] = useState('loading_models'); // loading_models | initializing | scanning | face_detected | captured | error
@@ -67,6 +68,7 @@ export const FaceCameraModal = ({
       isEyeClosedRef.current = false;
       consecutiveOpenFramesRef.current = 0;
       livenessVerifiedRef.current = false;
+      maxEARRef.current = 0.15;
       setLivenessVerified(false);
       setCameraError('');
       setStatus('loading_models');
@@ -177,9 +179,17 @@ export const FaceCameraModal = ({
             const rightEAR = calculateEAR(rightEye);
             const avgEAR = (leftEAR + rightEAR) / 2;
             
-            // Highly relaxed blink thresholds for all eye shapes
-            const BLINK_THRESHOLD = 0.20; // Lowered to 0.20 so partially open eyes are definitely counted as open
-            const BLINK_CLOSED_THRESHOLD = 0.17; // Lowered to 0.17 to ensure a clear blink
+            // Dynamic thresholding: adapt to the user's specific eye shape and distance
+            if (avgEAR > maxEARRef.current) {
+              maxEARRef.current = avgEAR; // Instantly adapt to wider open eyes
+            } else if (avgEAR > 0.15) {
+              // Slowly decay maxEAR to account for distance changes, but don't decay during a blink
+              maxEARRef.current = maxEARRef.current * 0.99 + avgEAR * 0.01;
+            }
+            
+            // A blink is a rapid relative drop from the user's normal open eye state
+            const BLINK_THRESHOLD = maxEARRef.current * 0.85; // 15% drop or less is considered open
+            const BLINK_CLOSED_THRESHOLD = maxEARRef.current * 0.70; // 30% drop is considered clearly closed
             
             if (avgEAR >= BLINK_THRESHOLD) {
               // Eyes are open
@@ -200,11 +210,10 @@ export const FaceCameraModal = ({
               consecutiveOpenFramesRef.current += 1;
             } else if (avgEAR <= BLINK_CLOSED_THRESHOLD) {
               // Eyes are definitely closed
-              // We don't even need to require consecutive open frames, just if it closes, it closes.
               isEyeClosedRef.current = true;
               consecutiveOpenFramesRef.current = 0;
             } else {
-              // Ambiguous state (0.17-0.20) - don't reset counter, just wait
+              // Ambiguous state (between 15% and 30% drop) - don't reset counter, just wait
               // This allows smoother blink detection
             }
             
