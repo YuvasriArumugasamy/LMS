@@ -181,7 +181,7 @@ REVIEWER FEEDBACK:
 ${currentReport.feedback ? `"${currentReport.feedback}"` : 'No reviewer feedback yet.'}
 
 ========================================================================
-Generated via Life Changers Ind LMS Portal on ${new Date().toLocaleString()}
+Generated via Life Changers Ind LCM Portal on ${new Date().toLocaleString()}
 ========================================================================
 `;
 

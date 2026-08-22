@@ -129,7 +129,7 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
                 <h1 className="font-extrabold text-base text-slate-900 dark:text-white tracking-tight leading-none">
                   Life Changers <span className="text-primary">Ind</span>
                 </h1>
-                <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">LMS Portal</p>
+                <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">LCM Portal</p>
               </div>
             </div>
 
