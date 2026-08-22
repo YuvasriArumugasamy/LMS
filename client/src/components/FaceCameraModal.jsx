@@ -167,9 +167,9 @@ export const FaceCameraModal = ({
             const rightEAR = calculateEAR(rightEye);
             const avgEAR = (leftEAR + rightEAR) / 2;
             
-            // Strict blink threshold to prevent photo-based attacks
-            const BLINK_THRESHOLD = 0.26; // Balanced threshold
-            const BLINK_CLOSED_THRESHOLD = 0.20; // Must close eyes below this
+            // Relaxed blink threshold for easier detection
+            const BLINK_THRESHOLD = 0.27; // Eyes considered open
+            const BLINK_CLOSED_THRESHOLD = 0.22; // Eyes considered closed (easier than 0.20)
             
             if (avgEAR >= BLINK_THRESHOLD) {
               // Eyes are open
@@ -190,13 +190,14 @@ export const FaceCameraModal = ({
               consecutiveOpenFramesRef.current += 1;
             } else if (avgEAR <= BLINK_CLOSED_THRESHOLD) {
               // Eyes are definitely closed
-              if (consecutiveOpenFramesRef.current >= 3) {
+              // Reduced from 3 to 2 frames for faster detection
+              if (consecutiveOpenFramesRef.current >= 2) {
                 isEyeClosedRef.current = true;
               }
               consecutiveOpenFramesRef.current = 0;
             } else {
-              // Ambiguous state - neither fully open nor closed
-              consecutiveOpenFramesRef.current = 0;
+              // Ambiguous state (0.22-0.27) - don't reset counter, just wait
+              // This allows smoother blink detection
             }
             
             if (!livenessVerifiedRef.current) {
