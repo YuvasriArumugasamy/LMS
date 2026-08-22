@@ -2,7 +2,13 @@ import crypto from 'crypto';
 
 // Encryption key from environment variable
 // Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-const ENCRYPTION_KEY = process.env.FACE_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
+const ENCRYPTION_KEY = process.env.FACE_ENCRYPTION_KEY || (() => {
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('⚠️ [Security] FACE_ENCRYPTION_KEY not set in production!');
+    console.warn('⚠️ [Security] Using auto-generated key. Set FACE_ENCRYPTION_KEY environment variable.');
+  }
+  return crypto.randomBytes(32).toString('hex');
+})();
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
 const AUTH_TAG_LENGTH = 16;
@@ -83,6 +89,6 @@ export const decryptFaceDescriptor = (encryptedData) => {
 
 // Log warning if using auto-generated key (not recommended for production)
 if (!process.env.FACE_ENCRYPTION_KEY && process.env.NODE_ENV === 'production') {
-  console.error('❌ [Security] FACE_ENCRYPTION_KEY not set in production environment!');
-  console.error('❌ [Security] Biometric encryption will not work correctly. Set FACE_ENCRYPTION_KEY immediately.');
+  console.warn('⚠️ [Security] Using auto-generated encryption key in production.');
+  console.warn('⚠️ [Security] This key will change on restart. Add FACE_ENCRYPTION_KEY to environment variables.');
 }
