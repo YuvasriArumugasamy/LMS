@@ -337,13 +337,13 @@ export const Dashboard = () => {
         <div className="lg:col-span-8 relative rounded-3xl bg-[#EEF4FF] dark:bg-slate-900/90 border-2 border-blue-200 dark:border-slate-700 p-6 sm:p-7 flex flex-col justify-between overflow-hidden shadow-md shadow-blue-500/10 min-h-[220px]">
           
           {/* Seamless Original Background Image (Always Visible on Phone Size & Desktop) */}
-          <div className="absolute right-0 top-0 bottom-0 w-full sm:w-2/3 md:w-1/2 pointer-events-none overflow-hidden z-0">
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-3xl">
             <img
               src={ASSETS.bannerIllustration}
               alt="Workspace Illustration"
-              className="w-full h-full object-cover object-right mix-blend-multiply dark:mix-blend-normal opacity-40 sm:opacity-70 md:opacity-90"
+              className="w-full h-full object-cover object-center mix-blend-multiply dark:mix-blend-normal opacity-40 sm:opacity-70 md:opacity-90"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#EEF4FF] via-[#EEF4FF]/60 to-transparent dark:from-slate-900/90 dark:via-slate-900/60" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#EEF4FF] via-[#EEF4FF]/80 to-transparent dark:from-slate-900 dark:via-slate-900/80" />
           </div>
 
           {/* Left Content */}
