@@ -30,7 +30,8 @@ export const EmployeeDetailsModal = ({
     designation: '',
     role: 'EMPLOYEE',
     employmentType: 'Full Time',
-    reportingManager: ''
+    reportingManager: '',
+    password: ''
   });
 
   const [managers, setManagers] = useState([]);
@@ -70,7 +71,8 @@ export const EmployeeDetailsModal = ({
         designation: employee.designation?._id || employee.designation || '',
         role: employee.role || 'EMPLOYEE',
         employmentType: employee.employmentType || 'Full Time',
-        reportingManager: employee.reportingManager?._id || employee.reportingManager || ''
+        reportingManager: employee.reportingManager?._id || employee.reportingManager || '',
+        password: ''
       });
       setIsEditing(false);
     }
@@ -508,21 +510,34 @@ export const EmployeeDetailsModal = ({
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Reporting Manager (TL)</label>
-              <select
-                value={editForm.reportingManager}
-                onChange={(e) => setEditForm({ ...editForm, reportingManager: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
-              >
-                <option value="">-- No Reporting Manager --</option>
-                {managers.map((m) => (
-                  <option key={m._id} value={m._id}>
-                    {m.firstName} {m.lastName} ({m.employeeId})
-                  </option>
-                ))}
-              </select>
-              <p className="text-[10px] text-slate-400 mt-1">Assign a TL/Manager — leave requests will route to them first.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Reporting Manager (TL)</label>
+                <select
+                  value={editForm.reportingManager}
+                  onChange={(e) => setEditForm({ ...editForm, reportingManager: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                >
+                  <option value="">-- No Reporting Manager --</option>
+                  {managers.map((m) => (
+                    <option key={m._id} value={m._id}>
+                      {m.firstName} {m.lastName} ({m.employeeId})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-slate-400 mt-1">Assign a TL/Manager — leave requests will route to them first.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Set New Password</label>
+                <input
+                  type="text"
+                  value={editForm.password}
+                  onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                  placeholder="Leave empty to keep current"
+                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                />
+              </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
