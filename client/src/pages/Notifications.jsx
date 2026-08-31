@@ -113,13 +113,15 @@ export const Notifications = () => {
   const handleTestNotification = async () => {
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
-        const registration = await navigator.serviceWorker.ready;
-        if (registration) {
+        // Fix: Use getRegistration() instead of ready to avoid hanging if SW is not fully installed
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration && registration.active) {
           registration.showNotification("🚀 LCM Test Notification", {
             body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
             icon: "/vite.svg"
           });
         } else {
+          // Fallback immediately to standard Notification
           new Notification("🚀 LCM Test Notification", {
             body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
             icon: "/vite.svg"

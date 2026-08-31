@@ -3,21 +3,15 @@
   "name": "Life Changers Ind — LCM Portal",
   "icons": [
     {
-      "src": "/logo.webp",
-      "type": "image/webp",
-      "sizes": "192x192 512x512",
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
       "src": "/logo.png",
       "type": "image/png",
-      "sizes": "192x192 512x512",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/apple-touch-icon.png",
-      "type": "image/png",
-      "sizes": "180x180",
+      "sizes": "512x512",
       "purpose": "any maskable"
     }
   ],

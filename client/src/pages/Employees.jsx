@@ -241,7 +241,11 @@ export const Employees = () => {
         role: 'EMPLOYEE',
         employmentType: 'Full Time'
       });
-      alert('✅ Employee account created successfully!');
+      if (user?.role === 'CEO') {
+        alert(`✅ Employee account created successfully!\n\nEmail: ${payload.email}\nPassword: ${payload.password}`);
+      } else {
+        alert('✅ Employee account created successfully!');
+      }
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to create employee');
     }

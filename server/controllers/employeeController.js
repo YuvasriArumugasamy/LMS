@@ -136,6 +136,15 @@ export const createEmployee = asyncHandler(async (req, res, next) => {
     req.body.password = 'Welcome@123';
   }
 
+  // Encrypt face descriptor if provided during employee creation
+  if (req.body.faceDescriptor && Array.isArray(req.body.faceDescriptor)) {
+    const encryptedDescriptor = encryptFaceDescriptor(req.body.faceDescriptor);
+    if (!encryptedDescriptor) {
+      return next(new AppError('Failed to encrypt face descriptor. Please try again.', 500));
+    }
+    req.body.faceDescriptor = encryptedDescriptor;
+  }
+
   const newEmployee = await User.create(req.body);
 
   // Initialize Leave Balances for all active Leave Types
