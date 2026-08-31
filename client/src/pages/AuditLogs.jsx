@@ -267,7 +267,7 @@ export const AuditLogs = () => {
 
               {/* Action: 3 cols */}
               <div className="hidden md:flex md:col-span-3 items-center">
-                <span className="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 truncate max-w-full">
+                <span className={`px-2.5 py-1 rounded-md text-xs font-mono font-bold border truncate max-w-full ${log.action === 'CONCURRENT_LOGIN_WARNING' ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-700/50' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'}`}>
                   {log.action}
                 </span>
               </div>

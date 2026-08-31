@@ -49,6 +49,26 @@ export const login = asyncHandler(async (req, res, next) => {
   const { accessToken, refreshToken } = generateTokens(user);
 
   try {
+    // Check for concurrent logins from different IP in the last 12 hours
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    const recentLogin = await AuditLog.findOne({
+      user: user._id,
+      action: 'USER_LOGIN',
+      createdAt: { $gte: twelveHoursAgo }
+    }).sort({ createdAt: -1 });
+
+    if (recentLogin && recentLogin.ipAddress && recentLogin.ipAddress !== req.ip) {
+      await AuditLog.create({
+        user: user._id,
+        userName: `${user.firstName} ${user.lastName}`,
+        userRole: user.role,
+        action: 'CONCURRENT_LOGIN_WARNING',
+        module: 'AUTHENTICATION',
+        details: `⚠️ Multiple active sessions detected. Login from new IP (${req.ip}) while recent session exists from ${recentLogin.ipAddress}.`,
+        ipAddress: req.ip
+      });
+    }
+
     await AuditLog.create({
       user: user._id,
       userName: `${user.firstName} ${user.lastName}`,
