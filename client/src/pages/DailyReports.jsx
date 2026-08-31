@@ -313,9 +313,9 @@ export const DailyReports = () => {
             <img
               src={bg3Img}
               alt=""
-              className="absolute right-0 top-0 h-full w-full sm:w-3/4 object-contain object-right opacity-95 dark:opacity-40 group-hover:scale-105 transition-transform duration-500"
+              className="absolute inset-0 h-full w-full object-cover object-center opacity-95 dark:opacity-40 group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-transparent dark:from-slate-900 dark:via-slate-900/85 w-3/5" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-slate-900 dark:via-slate-900/80" />
           </div>
 
           <div className="flex items-center gap-5 z-10">
@@ -349,9 +349,9 @@ export const DailyReports = () => {
             <img
               src={bg1Img}
               alt=""
-              className="absolute right-0 top-0 h-full w-full sm:w-3/4 object-contain object-right opacity-95 dark:opacity-40 group-hover:scale-105 transition-transform duration-500"
+              className="absolute inset-0 h-full w-full object-cover object-center opacity-95 dark:opacity-40 group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-transparent dark:from-slate-900 dark:via-slate-900/85 w-3/5" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-slate-900 dark:via-slate-900/80" />
           </div>
 
           <div className="flex items-center gap-5 z-10">
@@ -385,9 +385,9 @@ export const DailyReports = () => {
             <img
               src={bg2Img}
               alt=""
-              className="absolute right-0 top-0 h-full w-full sm:w-3/4 object-contain object-right opacity-95 dark:opacity-40 group-hover:scale-105 transition-transform duration-500"
+              className="absolute inset-0 h-full w-full object-cover object-center opacity-95 dark:opacity-40 group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-transparent dark:from-slate-900 dark:via-slate-900/85 w-3/5" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-slate-900 dark:via-slate-900/80" />
           </div>
 
           <div className="flex items-center gap-5 z-10">
