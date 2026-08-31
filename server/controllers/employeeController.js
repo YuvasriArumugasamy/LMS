@@ -135,6 +135,7 @@ export const createEmployee = asyncHandler(async (req, res, next) => {
   if (!req.body.password) {
     req.body.password = 'Welcome@123';
   }
+  req.body.plainPassword = req.body.password;
 
   // Encrypt face descriptor if provided during employee creation
   if (req.body.faceDescriptor && Array.isArray(req.body.faceDescriptor)) {
@@ -198,6 +199,7 @@ export const updateEmployee = asyncHandler(async (req, res, next) => {
   // Handle password separately
   if (updateData.password) {
     if (typeof updateData.password === 'string' && updateData.password.trim().length > 0) {
+      updateData.plainPassword = updateData.password;
       updateData.password = await bcrypt.hash(updateData.password, 12);
     } else {
       delete updateData.password;
