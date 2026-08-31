@@ -698,18 +698,18 @@ export const DailyReports = () => {
       )}
 
       {/* Bottom Motivation Banner */}
-      <div className="glass-card p-4 sm:p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-r from-slate-50/90 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:to-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs overflow-hidden relative">
+      <div className="glass-card p-4 sm:p-5 rounded-3xl border border-slate-200/80 dark:border-indigo-200/30 bg-gradient-to-r from-slate-50/90 via-blue-50/30 to-indigo-50/40 dark:from-slate-100 dark:via-blue-50 dark:to-indigo-50 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs overflow-hidden relative">
         <div className="flex items-center gap-4 z-10">
           <img
             src={winImg}
             alt="Achievement Trophy"
-            className="w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0 drop-shadow-md"
+            className="w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0 drop-shadow-md mix-blend-multiply"
           />
           <div>
-            <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-              Great job, {user?.firstName || 'Alexander'}! ??
+            <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-900 flex items-center gap-2">
+              Great job, {user?.firstName || 'Alexander'}! 🏆
             </h4>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-600 font-medium mt-0.5">
               Keep up the consistency and keep achieving your goals.
             </p>
           </div>
@@ -719,7 +719,7 @@ export const DailyReports = () => {
           <img
             src={growthImg}
             alt="Growth Progress"
-            className="w-52 sm:w-72 h-auto object-contain shrink-0"
+            className="w-52 sm:w-72 h-auto object-contain shrink-0 mix-blend-multiply"
           />
         </div>
       </div>
