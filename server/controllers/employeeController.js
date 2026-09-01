@@ -197,13 +197,16 @@ export const updateEmployee = asyncHandler(async (req, res, next) => {
   const updateData = { ...req.body };
 
   // Handle password separately
-  if (updateData.password) {
-    if (typeof updateData.password === 'string' && updateData.password.trim().length > 0) {
-      updateData.plainPassword = updateData.password;
-      updateData.password = await bcrypt.hash(updateData.password, 12);
-    } else {
-      delete updateData.password;
+  if (updateData.password && typeof updateData.password === 'string' && updateData.password.trim().length > 0) {
+    const trimmedPass = updateData.password.trim();
+    if (trimmedPass.length < 6) {
+      return next(new AppError('Password must be at least 6 characters long.', 400));
     }
+    updateData.plainPassword = trimmedPass;
+    updateData.password = await bcrypt.hash(trimmedPass, 12);
+  } else {
+    delete updateData.password;
+    delete updateData.plainPassword;
   }
 
   // IMPORTANT: Allow explicitly setting fields to null/undefined to clear them
@@ -232,6 +235,20 @@ export const updateEmployee = asyncHandler(async (req, res, next) => {
     .populate('department', 'name code')
     .populate('designation', 'name code')
     .populate('reportingManager', 'firstName lastName email');
+
+  // Audit log for employee profile update
+  try {
+    await AuditLog.create({
+      user: req.user._id,
+      userName: `${req.user.firstName} ${req.user.lastName}`,
+      userRole: req.user.role,
+      action: 'EMPLOYEE_UPDATE',
+      module: 'EMPLOYEE',
+      details: `Updated details for employee: ${updatedEmployee.firstName} ${updatedEmployee.lastName} (${updatedEmployee.employeeId})`
+    });
+  } catch (err) {
+    // Ignore audit log error
+  }
 
   res.status(200).json({
     status: 'success',

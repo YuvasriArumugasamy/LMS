@@ -162,7 +162,7 @@ export const Employees = () => {
     employmentType: 'Full Time'
   });
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (updatedEmp = null) => {
     try {
       const params = {};
       if (search) params.search = search;
@@ -181,6 +181,15 @@ export const Employees = () => {
       setEmployees(loadedEmps);
       setDepartments(loadedDepts);
       setDesignations(loadedDesigs);
+
+      if (updatedEmp) {
+        setSelectedEmployee(updatedEmp);
+      } else if (selectedEmployee) {
+        const refreshed = loadedEmps.find((e) => e._id === selectedEmployee._id);
+        if (refreshed) {
+          setSelectedEmployee(refreshed);
+        }
+      }
 
       if (selectedDept) {
         const matchedDept = loadedDepts.find(

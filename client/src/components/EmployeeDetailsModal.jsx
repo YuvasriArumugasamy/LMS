@@ -169,6 +169,15 @@ export const EmployeeDetailsModal = ({
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
+    
+    // If a new password is typed, ensure it meets minimum length
+    if (editForm.password && editForm.password.trim()) {
+      if (editForm.password.trim().length < 6) {
+        alert('Password must be at least 6 characters long.');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const payload = { ...editForm };
@@ -179,15 +188,22 @@ export const EmployeeDetailsModal = ({
       if (payload.designation === undefined) delete payload.designation;
       if (payload.reportingManager === undefined) delete payload.reportingManager;
       
+      // If password field is empty, remove it completely so existing password is untouched
+      if (!payload.password || !payload.password.trim()) {
+        delete payload.password;
+      } else {
+        payload.password = payload.password.trim();
+      }
+      
       const response = await api.put(`/employees/${employee._id}`, payload);
       
       console.log('[EmployeeModal] Update response:', response.data);
       
-      alert('✅ Employee details updated successfully!');
+      alert('✅ Employee details and password updated successfully!');
       setIsEditing(false);
       
       // Trigger parent to refresh employee list
-      if (onUpdateSuccess) onUpdateSuccess();
+      if (onUpdateSuccess) onUpdateSuccess(response.data?.data?.employee);
       
       // Close modal - parent will show updated data on next open
       onClose();
@@ -409,20 +425,20 @@ export const EmployeeDetailsModal = ({
                 type="text"
                 value={editForm.employeeId}
                 onChange={(e) => setEditForm({ ...editForm, employeeId: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary uppercase"
+                className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary uppercase"
                 placeholder="e.g. EMP-1234"
                 required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-500 mb-1">First Name *</label>
                 <input
                   type="text"
                   value={editForm.firstName}
                   onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                  className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                   required
                 />
               </div>
@@ -432,7 +448,7 @@ export const EmployeeDetailsModal = ({
                   type="text"
                   value={editForm.lastName}
                   onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                  className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                   required
                 />
               </div>
@@ -446,17 +462,17 @@ export const EmployeeDetailsModal = ({
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 maxLength={15}
                 placeholder="+91 9876543210"
-                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Department</label>
                 <select
                   value={editForm.department}
                   onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                  className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 >
                   <option value="">Select Dept</option>
                   {departments.map((d) => (
@@ -470,7 +486,7 @@ export const EmployeeDetailsModal = ({
                 <select
                   value={editForm.designation}
                   onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                  className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 >
                   <option value="">Select Designation</option>
                   {designations.map((des) => (
@@ -480,13 +496,13 @@ export const EmployeeDetailsModal = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Role</label>
                 <select
                   value={editForm.role}
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                  className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 >
                   <option value="EMPLOYEE">Employee</option>
                   <option value="TEAM_LEAD">Team Lead</option>
@@ -500,7 +516,7 @@ export const EmployeeDetailsModal = ({
                 <select
                   value={editForm.employmentType}
                   onChange={(e) => setEditForm({ ...editForm, employmentType: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                  className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 >
                   <option value="Full Time">Full Time</option>
                   <option value="Part Time">Part Time</option>
@@ -510,13 +526,13 @@ export const EmployeeDetailsModal = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Reporting Manager (TL)</label>
                 <select
                   value={editForm.reportingManager}
                   onChange={(e) => setEditForm({ ...editForm, reportingManager: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                  className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 >
                   <option value="">-- No Reporting Manager --</option>
                   {managers.map((m) => (
@@ -535,23 +551,23 @@ export const EmployeeDetailsModal = ({
                   value={editForm.password}
                   onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                   placeholder="Leave empty to keep current"
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
+                  className="w-full p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-primary"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1"
+                className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center justify-center gap-1.5 transition-all"
               >
                 <X className="w-4 h-4" /> Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-5 py-2 text-xs font-bold text-white bg-primary hover:bg-blue-700 rounded-xl shadow-lg shadow-primary/25 flex items-center gap-1.5 transition-all disabled:opacity-50"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-primary hover:bg-blue-700 rounded-xl shadow-lg shadow-primary/25 flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
               >
                 <Save className="w-4 h-4" /> {loading ? 'Saving...' : 'Save Changes'}
               </button>
