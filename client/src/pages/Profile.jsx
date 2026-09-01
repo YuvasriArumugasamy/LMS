@@ -11,6 +11,7 @@ import {
 
 // ── Password Change Section Component ──────────────────────────────────────
 const ChangePasswordSection = () => {
+  const { logout } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,14 +36,10 @@ const ChangePasswordSection = () => {
     setSaving(true);
     try {
       await api.put('/auth/change-password', { currentPassword, newPassword });
-      setSuccess(true);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setTimeout(() => setSuccess(false), 4000);
+      alert('✅ Password changed successfully! Application will now log out. Please sign in using your new password.');
+      logout();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to change password.');
-    } finally {
       setSaving(false);
     }
   };

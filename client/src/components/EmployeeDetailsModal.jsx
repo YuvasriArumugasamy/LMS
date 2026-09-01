@@ -16,7 +16,7 @@ export const EmployeeDetailsModal = ({
   onToggleStatus,
   onUpdateSuccess
 }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
@@ -170,8 +170,10 @@ export const EmployeeDetailsModal = ({
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     
+    const isPasswordChanged = Boolean(editForm.password && editForm.password.trim());
+
     // If a new password is typed, ensure it meets minimum length
-    if (editForm.password && editForm.password.trim()) {
+    if (isPasswordChanged) {
       if (editForm.password.trim().length < 6) {
         alert('Password must be at least 6 characters long.');
         return;
@@ -198,15 +200,28 @@ export const EmployeeDetailsModal = ({
       const response = await api.put(`/employees/${employee._id}`, payload);
       
       console.log('[EmployeeModal] Update response:', response.data);
-      
-      alert('✅ Employee details and password updated successfully!');
+
+      const currentUserId = user?._id || user?.id;
+      const targetEmployeeId = employee._id || employee.id;
+      const isSelf = currentUserId && targetEmployeeId && String(currentUserId) === String(targetEmployeeId);
+
       setIsEditing(false);
+      onClose();
+
+      if (isPasswordChanged) {
+        if (isSelf) {
+          alert('✅ Password updated successfully! Application will now log out. Please log in using your new password.');
+          logout();
+          return;
+        } else {
+          alert(`✅ Password updated successfully for ${employee.firstName}! They will now need to log in using the new password.`);
+        }
+      } else {
+        alert('✅ Employee details updated successfully!');
+      }
       
       // Trigger parent to refresh employee list
       if (onUpdateSuccess) onUpdateSuccess(response.data?.data?.employee);
-      
-      // Close modal - parent will show updated data on next open
-      onClose();
     } catch (err) {
       console.error('[EmployeeModal] Update failed:', err.response?.data);
       alert(err.response?.data?.message || 'Failed to update employee details.');

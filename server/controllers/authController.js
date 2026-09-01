@@ -261,6 +261,7 @@ export const changePassword = asyncHandler(async (req, res, next) => {
   }
 
   user.password = newPassword;
+  user.plainPassword = newPassword;
   await user.save();
 
   res.status(200).json({
