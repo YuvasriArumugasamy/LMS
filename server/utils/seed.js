@@ -52,11 +52,7 @@ export const runAutoSeed = async () => {
     await updateEarnedLeaveToPaidLeave();
     await updateCeoName();
 
-    const userCount = await User.countDocuments();
-    if (userCount > 0) {
-      console.log('[Seed Engine] Database already populated. Skipping auto-seed.');
-      return;
-    }
+    // userCount check removed to allow forced seeding
 
     console.log('[Seed Engine] Empty database detected! Auto-seeding initial enterprise accounts...');
 
