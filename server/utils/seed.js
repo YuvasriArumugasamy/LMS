@@ -59,8 +59,8 @@ export const runAutoSeed = async () => {
     const ceoDept = await Department.findOne({ code: 'ENG' }) || { _id: null };
     const ceoDesig = await Designation.findOne({ code: 'STL' }) || { _id: null };
     
-    // Remove existing CEO to clean up any plaintext passwords from previous bugs
-    await User.deleteOne({ email: 'ceo@enterprise.com' });
+    // Remove existing CEO by both email and employeeId to clean up any old data/conflicts
+    await User.deleteMany({ $or: [{ email: 'ceo@enterprise.com' }, { employeeId: 'EMP001' }] });
     
     const ceo = new User({
         employeeId: 'EMP001',
