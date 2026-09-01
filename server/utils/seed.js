@@ -56,8 +56,8 @@ export const runAutoSeed = async () => {
 
     // Force create or update CEO first to guarantee it exists
     // Force create CEO safely with password hashing
-    const engineering = await Department.findOne({ code: 'ENG' }) || { _id: null };
-    const techLead = await Designation.findOne({ code: 'STL' }) || { _id: null };
+    const ceoDept = await Department.findOne({ code: 'ENG' }) || { _id: null };
+    const ceoDesig = await Designation.findOne({ code: 'STL' }) || { _id: null };
     
     // Remove existing CEO to clean up any plaintext passwords from previous bugs
     await User.deleteOne({ email: 'ceo@enterprise.com' });
@@ -69,8 +69,8 @@ export const runAutoSeed = async () => {
         email: 'ceo@enterprise.com',
         password: 'CEO@123',
         role: 'CEO',
-        department: engineering._id,
-        designation: techLead._id,
+        department: ceoDept._id,
+        designation: ceoDesig._id,
         status: 'ACTIVE'
       });
       await ceo.save();
