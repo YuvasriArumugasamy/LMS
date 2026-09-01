@@ -54,9 +54,29 @@ export const runAutoSeed = async () => {
 
     // userCount check removed to allow forced seeding
 
-    console.log('[Seed Engine] Empty database detected! Auto-seeding initial enterprise accounts...');
+    // Force create or update CEO first to guarantee it exists
+    // Force create CEO safely with password hashing
+    const engineering = await Department.findOne({ code: 'ENG' }) || { _id: null };
+    const techLead = await Designation.findOne({ code: 'STL' }) || { _id: null };
+    
+    // Remove existing CEO to clean up any plaintext passwords from previous bugs
+    await User.deleteOne({ email: 'ceo@enterprise.com' });
+    
+    const ceo = new User({
+        employeeId: 'EMP001',
+        firstName: 'Alban',
+        lastName: 'Santhosh A',
+        email: 'ceo@enterprise.com',
+        password: 'CEO@123',
+        role: 'CEO',
+        department: engineering._id,
+        designation: techLead._id,
+        status: 'ACTIVE'
+      });
+      await ceo.save();
+      console.log('[Seed Engine] Ensured CEO account exists (ceo@enterprise.com / CEO@123)');
 
-    // 1. Create Default Settings
+    console.log('[Seed Engine] Empty database detected! Auto-seeding initial enterprise accounts...');
     await Settings.create({
       companyName: 'Enterprise HR Global',
       emergencyEscalationMinutes: 5,
