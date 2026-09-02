@@ -291,3 +291,27 @@ export const saveFcmToken = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ status: 'success', message: 'FCM token saved successfully.' });
 });
+
+export const logout = asyncHandler(async (req, res, next) => {
+  try {
+    if (req.user) {
+      await AuditLog.create({
+        user: req.user._id,
+        userName: `${req.user.firstName} ${req.user.lastName}`,
+        userRole: req.user.role,
+        action: 'USER_LOGOUT',
+        module: 'AUTHENTICATION',
+        details: `User logged out successfully via web portal`,
+        ipAddress: req.ip
+      });
+    }
+  } catch (err) {
+    // Ignore audit log error silently
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Logged out successfully'
+  });
+});
+

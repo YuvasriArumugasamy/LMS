@@ -8,7 +8,8 @@ import {
   forgotPassword,
   resetPassword,
   saveFcmToken,
-  changePassword
+  changePassword,
+  logout
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -39,6 +40,7 @@ const forgotPasswordLimiter = rateLimit({
 });
 
 router.post('/login', loginLimiter, login);
+router.post('/logout', protect, logout);
 // Forgot password routes disabled - Contact HR/Admin for password reset
 // router.post('/forgot-password', forgotPasswordLimiter, forgotPassword);
 // router.post('/reset-password', resetPassword);

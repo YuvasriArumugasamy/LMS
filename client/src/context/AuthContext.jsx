@@ -38,11 +38,17 @@ export const AuthProvider = ({ children }) => {
     return user;
   };
 
-  const logout = () => {
-    localStorage.removeItem('elms_access_token');
-    localStorage.removeItem('elms_refresh_token');
-    localStorage.removeItem('elms_user');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error('[Logout API error]', error);
+    } finally {
+      localStorage.removeItem('elms_access_token');
+      localStorage.removeItem('elms_refresh_token');
+      localStorage.removeItem('elms_user');
+      setUser(null);
+    }
   };
 
   return (
