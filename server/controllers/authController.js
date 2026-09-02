@@ -295,18 +295,19 @@ export const saveFcmToken = asyncHandler(async (req, res, next) => {
 export const logout = asyncHandler(async (req, res, next) => {
   try {
     if (req.user) {
+      const name = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.email || 'User';
       await AuditLog.create({
         user: req.user._id,
-        userName: `${req.user.firstName} ${req.user.lastName}`,
+        userName: name,
         userRole: req.user.role,
         action: 'USER_LOGOUT',
         module: 'AUTHENTICATION',
         details: `User logged out successfully via web portal`,
-        ipAddress: req.ip
+        ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress
       });
     }
   } catch (err) {
-    // Ignore audit log error silently
+    console.error('AuditLog create error on logout:', err);
   }
 
   res.status(200).json({
@@ -314,4 +315,5 @@ export const logout = asyncHandler(async (req, res, next) => {
     message: 'Logged out successfully'
   });
 });
+
 
