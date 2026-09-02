@@ -57,35 +57,16 @@ export const runAutoSeed = async () => {
       return;
     }
 
-    // Force create or update CEO first to guarantee it exists
-    // Force create CEO safely with password hashing
-    const ceoDept = await Department.findOne({ code: 'ENG' }) || { _id: null };
-    const ceoDesig = await Designation.findOne({ code: 'STL' }) || { _id: null };
-    
-    // Remove existing CEO by both email and employeeId to clean up any old data/conflicts
-    await User.deleteMany({ $or: [{ email: 'ceo@enterprise.com' }, { employeeId: 'EMP001' }] });
-    
-    const ceo = new User({
-        employeeId: 'EMP001',
-        firstName: 'Alban',
-        lastName: 'Santhosh A',
-        email: 'ceo@enterprise.com',
-        password: 'CEO@123',
-        role: 'CEO',
-        department: ceoDept._id,
-        designation: ceoDesig._id,
-        status: 'ACTIVE'
-      });
-      await ceo.save();
-      console.log('[Seed Engine] Ensured CEO account exists (ceo@enterprise.com / CEO@123)');
-
     console.log('[Seed Engine] Empty database detected! Auto-seeding initial enterprise accounts...');
-    await Settings.create({
-      companyName: 'Enterprise HR Global',
-      emergencyEscalationMinutes: 5,
-      workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      weekendDays: ['Saturday', 'Sunday']
-    });
+    const settingsCount = await Settings.countDocuments();
+    if (settingsCount === 0) {
+      await Settings.create({
+        companyName: 'Enterprise HR Global',
+        emergencyEscalationMinutes: 5,
+        workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        weekendDays: ['Saturday', 'Sunday']
+      });
+    }
 
     // 2. Create Departments
     const engineering = await Department.create({
@@ -142,94 +123,117 @@ export const runAutoSeed = async () => {
       grade: 'L3'
     });
 
-    // 4. Create Production Demo Accounts
-    const ceoUser = await User.create({
-      employeeId: 'EMP001',
-      firstName: 'Alban',
-      lastName: 'Santhosh A',
-      email: 'ceo@enterprise.com',
-      password: 'CEO@123',
-      role: 'CEO',
-      department: engineering._id,
-      designation: techLead._id,
-      status: 'ACTIVE'
-    });
+    // 4. Create Production Demo Accounts safely (never overwrite existing passwords)
+    const existingCeo = await User.findOne({ $or: [{ email: 'ceo@enterprise.com' }, { employeeId: 'EMP001' }] });
+    if (!existingCeo) {
+      await User.create({
+        employeeId: 'EMP001',
+        firstName: 'Alban',
+        lastName: 'Santhosh A',
+        email: 'ceo@enterprise.com',
+        password: 'CEO@123',
+        role: 'CEO',
+        department: engineering._id,
+        designation: techLead._id,
+        status: 'ACTIVE'
+      });
+    }
 
-    const hrUser = await User.create({
-      employeeId: 'EMP002',
-      firstName: 'Sarah',
-      lastName: 'Jenkins',
-      email: 'hr@enterprise.com',
-      password: 'Password@123',
-      role: 'HR',
-      department: hrDept._id,
-      designation: hrManagerDesig._id,
-      status: 'ACTIVE'
-    });
+    const existingHr = await User.findOne({ $or: [{ email: 'hr@enterprise.com' }, { employeeId: 'EMP002' }] });
+    if (!existingHr) {
+      await User.create({
+        employeeId: 'EMP002',
+        firstName: 'Sarah',
+        lastName: 'Jenkins',
+        email: 'hr@enterprise.com',
+        password: 'Password@123',
+        role: 'HR',
+        department: hrDept._id,
+        designation: hrManagerDesig._id,
+        status: 'ACTIVE'
+      });
+    }
 
-    const managerUser = await User.create({
-      employeeId: 'EMP003',
-      firstName: 'David',
-      lastName: 'Miller',
-      email: 'teamlead@enterprise.com',
-      password: 'Password@123',
-      role: 'TEAM_LEAD',
-      department: engineering._id,
-      designation: techLead._id,
-      status: 'ACTIVE'
-    });
+    const existingManager = await User.findOne({ $or: [{ email: 'teamlead@enterprise.com' }, { employeeId: 'EMP003' }] });
+    let managerUser = existingManager;
+    if (!existingManager) {
+      managerUser = await User.create({
+        employeeId: 'EMP003',
+        firstName: 'David',
+        lastName: 'Miller',
+        email: 'teamlead@enterprise.com',
+        password: 'Password@123',
+        role: 'TEAM_LEAD',
+        department: engineering._id,
+        designation: techLead._id,
+        status: 'ACTIVE'
+      });
+    }
 
-    const employeeUser = await User.create({
-      employeeId: 'EMP004',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'employee@enterprise.com',
-      password: 'Password@123',
-      role: 'EMPLOYEE',
-      department: engineering._id,
-      designation: dev._id,
-      reportingManager: managerUser._id,
-      status: 'ACTIVE'
-    });
+    const existingEmp = await User.findOne({ $or: [{ email: 'employee@enterprise.com' }, { employeeId: 'EMP004' }] });
+    if (!existingEmp) {
+      await User.create({
+        employeeId: 'EMP004',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'employee@enterprise.com',
+        password: 'Password@123',
+        role: 'EMPLOYEE',
+        department: engineering._id,
+        designation: dev._id,
+        reportingManager: managerUser?._id,
+        status: 'ACTIVE'
+      });
+    }
 
     // Create Sales & Business Demo Employees
-    const salesManager = await User.create({
-      employeeId: 'EMP005',
-      firstName: 'Robert',
-      lastName: 'Vance',
-      email: 'sales.lead@enterprise.com',
-      password: 'Password@123',
-      role: 'TEAM_LEAD',
-      department: salesDept._id,
-      designation: salesManagerDesig._id,
-      status: 'ACTIVE'
-    });
+    const existingSalesManager = await User.findOne({ $or: [{ email: 'sales.lead@enterprise.com' }, { employeeId: 'EMP005' }] });
+    let salesManager = existingSalesManager;
+    if (!existingSalesManager) {
+      salesManager = await User.create({
+        employeeId: 'EMP005',
+        firstName: 'Robert',
+        lastName: 'Vance',
+        email: 'sales.lead@enterprise.com',
+        password: 'Password@123',
+        role: 'TEAM_LEAD',
+        department: salesDept._id,
+        designation: salesManagerDesig._id,
+        status: 'ACTIVE'
+      });
+    }
 
-    await User.create({
-      employeeId: 'EMP006',
-      firstName: 'Emily',
-      lastName: 'Watson',
-      email: 'emily.watson@enterprise.com',
-      password: 'Password@123',
-      role: 'EMPLOYEE',
-      department: salesDept._id,
-      designation: accountExecDesig._id,
-      reportingManager: salesManager._id,
-      status: 'ACTIVE'
-    });
+    const existingEmp6 = await User.findOne({ $or: [{ email: 'emily.watson@enterprise.com' }, { employeeId: 'EMP006' }] });
+    if (!existingEmp6) {
+      await User.create({
+        employeeId: 'EMP006',
+        firstName: 'Emily',
+        lastName: 'Watson',
+        email: 'emily.watson@enterprise.com',
+        password: 'Password@123',
+        role: 'EMPLOYEE',
+        department: salesDept._id,
+        designation: accountExecDesig._id,
+        reportingManager: salesManager?._id,
+        status: 'ACTIVE'
+      });
+    }
 
-    await User.create({
-      employeeId: 'EMP007',
-      firstName: 'Michael',
-      lastName: 'Chang',
-      email: 'michael.chang@enterprise.com',
-      password: 'Password@123',
-      role: 'EMPLOYEE',
-      department: salesDept._id,
-      designation: accountExecDesig._id,
-      reportingManager: salesManager._id,
-      status: 'ACTIVE'
-    });
+    const existingEmp7 = await User.findOne({ $or: [{ email: 'michael.chang@enterprise.com' }, { employeeId: 'EMP007' }] });
+    if (!existingEmp7) {
+      await User.create({
+        employeeId: 'EMP007',
+        firstName: 'Michael',
+        lastName: 'Chang',
+        email: 'michael.chang@enterprise.com',
+        password: 'Password@123',
+        role: 'EMPLOYEE',
+        department: salesDept._id,
+        designation: accountExecDesig._id,
+        reportingManager: salesManager?._id,
+        status: 'ACTIVE'
+      });
+    }
 
     console.log('[Seed Engine] Created default accounts: ceo@enterprise.com (CEO@123), hr@enterprise.com (Password@123)');
 
