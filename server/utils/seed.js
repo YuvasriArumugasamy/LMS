@@ -52,7 +52,10 @@ export const runAutoSeed = async () => {
     await updateEarnedLeaveToPaidLeave();
     await updateCeoName();
 
-    // userCount check removed to allow forced seeding
+    const deptCount = await Department.countDocuments();
+    if (deptCount > 0) {
+      return;
+    }
 
     // Force create or update CEO first to guarantee it exists
     // Force create CEO safely with password hashing
