@@ -686,55 +686,72 @@ export const Dashboard = () => {
         <div className={`${user?.role === 'CEO' ? 'lg:col-span-12' : 'lg:col-span-4'} bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between`}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Recent Activity</h3>
-            <button className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline">View all</button>
+            <button
+              onClick={() => navigate(user?.role === 'EMPLOYEE' ? '/notifications' : '/audit-logs')}
+              className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+            >
+              View all
+            </button>
           </div>
 
           <div className="space-y-4">
             {user?.role === 'EMPLOYEE' ? (
               <>
                 {/* Employee Activity 1 */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div
+                  onClick={() => navigate('/leaves?status=APPROVED')}
+                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <CheckCircle2 className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">Your Leave Approved</p>
+                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Your Leave Approved</p>
                     <p className="text-[11px] font-medium text-slate-400 truncate">Casual Leave Request (Approved)</p>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 shrink-0">Today</span>
                 </div>
 
                 {/* Employee Activity 2 */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div
+                  onClick={() => navigate('/attendance')}
+                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <Clock className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">Attendance Punched</p>
+                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Attendance Punched</p>
                     <p className="text-[11px] font-medium text-slate-400 truncate">Check In Marked Successfully</p>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 shrink-0">Today</span>
                 </div>
 
                 {/* Employee Activity 3 */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div
+                  onClick={() => navigate('/holidays')}
+                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <CalendarIcon className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">Upcoming Holiday</p>
+                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Upcoming Holiday</p>
                     <p className="text-[11px] font-medium text-slate-400 truncate">Independence Day (Aug 15)</p>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 shrink-0">2 days ago</span>
                 </div>
 
                 {/* Employee Activity 4 */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div
+                  onClick={() => navigate('/leaves')}
+                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <FileText className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">Leave Quotas Allocated</p>
+                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Leave Quotas Allocated</p>
                     <p className="text-[11px] font-medium text-slate-400 truncate">Annual Quotas (Year {selectedBalanceYear})</p>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 shrink-0">Jan 1</span>
@@ -743,48 +760,60 @@ export const Dashboard = () => {
             ) : (
               <>
                 {/* Management Activity 1 */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div
+                  onClick={() => navigate('/leaves?status=APPROVED')}
+                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <CheckCircle2 className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">Leave Request Approved</p>
+                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Leave Request Approved</p>
                     <p className="text-[11px] font-medium text-slate-400 truncate">John Doe - Casual Leave</p>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 shrink-0">10:30 AM</span>
                 </div>
 
                 {/* Management Activity 2 */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div
+                  onClick={() => navigate('/employees')}
+                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <Users className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">New Employee Added</p>
+                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">New Employee Added</p>
                     <p className="text-[11px] font-medium text-slate-400 truncate">Sarah Wilson - Developer</p>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 shrink-0">Yesterday</span>
                 </div>
 
                 {/* Management Activity 3 */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div
+                  onClick={() => navigate('/holidays')}
+                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <CalendarIcon className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">Holiday Added</p>
+                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Holiday Added</p>
                     <p className="text-[11px] font-medium text-slate-400 truncate">Independence Day</p>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 shrink-0">2 days ago</span>
                 </div>
 
                 {/* Management Activity 4 */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <div
+                  onClick={() => navigate('/reports')}
+                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <FileText className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">Report Generated</p>
+                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Report Generated</p>
                     <p className="text-[11px] font-medium text-slate-400 truncate">Monthly Leave Report</p>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 shrink-0">3 days ago</span>
