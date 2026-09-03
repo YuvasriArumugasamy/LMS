@@ -48,6 +48,21 @@ const attendanceSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    timeline: [
+      {
+        type: {
+          type: String,
+          enum: ['CLOCK_IN', 'CLOCK_OUT', 'LUNCH_OUT', 'LUNCH_IN', 'FORCE_CHECKOUT'],
+          required: true
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now
+        },
+        workLocation: String,
+        note: String
+      }
+    ],
     role: {
       type: String,
       enum: ['ADMIN', 'HR', 'TEAM_LEAD', 'EMPLOYEE', 'CEO']

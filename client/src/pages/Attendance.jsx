@@ -7,6 +7,7 @@ import { UserAvatar } from '../components/UserAvatar';
 import { UiverseStarButton } from '../components/UiverseStarButton';
 import { Modal } from '../components/Modal';
 import { FaceCameraModal } from '../components/FaceCameraModal';
+import { AttendanceTimelineModal } from '../components/AttendanceTimelineModal';
 import blueBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_49 PM.webp';
 import greenBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_43 PM.webp';
 import purpleBgCard from '../assets/ChatGPT Image Aug 4, 2026, 04_51_54 PM.webp';
@@ -152,6 +153,9 @@ export const Attendance = () => {
   // Face Verification Camera Modal State
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
   const [pendingClockAction, setPendingClockAction] = useState(null); // 'clockIn' | 'clockOut'
+
+  // Daily Activity Timeline Modal State
+  const [timelineModalItem, setTimelineModalItem] = useState(null);
 
   // Modal State for Image 2 Design
   const [historyModalEmp, setHistoryModalEmp] = useState(null);
@@ -1019,10 +1023,21 @@ export const Attendance = () => {
                         </div>
                       </div>
 
-                      <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black shrink-0 shadow-2xs tracking-wide ${badgeStyle}`}>
-                        {(!isCheckedOut) && <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />}
-                        <span>{badgeText}</span>
-                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setTimelineModalItem(item)}
+                          className="px-2 py-1 rounded-full text-[10px] font-black bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-200 dark:hover:bg-purple-900 transition-all flex items-center gap-1 shadow-2xs hover:scale-105"
+                          title="View Full Daily Activity Log Timeline"
+                        >
+                          <Clock className="w-3 h-3 text-purple-600 dark:text-purple-400 stroke-[2.5]" />
+                          <span>Timeline</span>
+                        </button>
+                        <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black shrink-0 shadow-2xs tracking-wide ${badgeStyle}`}>
+                          {(!isCheckedOut) && <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />}
+                          <span>{badgeText}</span>
+                        </span>
+                      </div>
                     </div>
 
                     {/* 4 Metric Widget Tiles (Clock In, Clock Out, Location, Hours) */}
@@ -2041,6 +2056,12 @@ export const Attendance = () => {
       )}
     </>
     )}
+      {/* Attendance Activity Timeline Modal */}
+      <AttendanceTimelineModal
+        isOpen={!!timelineModalItem}
+        onClose={() => setTimelineModalItem(null)}
+        liveItem={timelineModalItem}
+      />
     </div>
   );
 };

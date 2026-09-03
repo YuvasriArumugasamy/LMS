@@ -159,6 +159,14 @@ export const clockIn = asyncHandler(async (req, res, next) => {
     const newNote = `Re-clocked in at ${timeLogStr} IST`;
     existingAttendance.notes = existingAttendance.notes ? `${existingAttendance.notes} | ${newNote}` : newNote;
 
+    if (!existingAttendance.timeline) existingAttendance.timeline = [];
+    existingAttendance.timeline.push({
+      type: 'CLOCK_IN',
+      timestamp: now,
+      workLocation: workLocation || existingAttendance.workLocation,
+      note: newNote
+    });
+
     await existingAttendance.save();
     return res.status(200).json({
       status: 'success',
@@ -169,13 +177,22 @@ export const clockIn = asyncHandler(async (req, res, next) => {
 
   // 3. First check-in of the day for this user
   try {
+    const initialNote = notes || (isSunday ? 'Sunday Special Over Duty (OD)' : '');
     const attendance = await Attendance.create({
       user: userId,
       date: start,
       clockIn: now,
       workLocation: workLocation || 'IN_OFFICE',
       status: attendanceStatus,
-      notes: notes || (isSunday ? 'Sunday Special Over Duty (OD)' : '')
+      notes: initialNote,
+      timeline: [
+        {
+          type: 'CLOCK_IN',
+          timestamp: now,
+          workLocation: workLocation || 'IN_OFFICE',
+          note: initialNote
+        }
+      ]
     });
 
     return res.status(201).json({
@@ -193,6 +210,19 @@ export const clockIn = asyncHandler(async (req, res, next) => {
         }
         duplicateDoc.clockOut = undefined;
         if (workLocation) duplicateDoc.workLocation = workLocation;
+
+        const timeLogStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
+        const newNote = `Re-clocked in at ${timeLogStr} IST`;
+        duplicateDoc.notes = duplicateDoc.notes ? `${duplicateDoc.notes} | ${newNote}` : newNote;
+
+        if (!duplicateDoc.timeline) duplicateDoc.timeline = [];
+        duplicateDoc.timeline.push({
+          type: 'CLOCK_IN',
+          timestamp: now,
+          workLocation: workLocation || duplicateDoc.workLocation,
+          note: newNote
+        });
+
         await duplicateDoc.save();
         return res.status(200).json({
           status: 'success',
@@ -233,6 +263,12 @@ export const lunchOut = asyncHandler(async (req, res, next) => {
 
   const now = new Date();
   attendance.lunchOut = now;
+  if (!attendance.timeline) attendance.timeline = [];
+  attendance.timeline.push({
+    type: 'LUNCH_OUT',
+    timestamp: now,
+    workLocation: attendance.workLocation
+  });
   await attendance.save();
 
   res.status(200).json({
@@ -273,6 +309,12 @@ export const lunchIn = asyncHandler(async (req, res, next) => {
 
   const now = new Date();
   attendance.lunchIn = now;
+  if (!attendance.timeline) attendance.timeline = [];
+  attendance.timeline.push({
+    type: 'LUNCH_IN',
+    timestamp: now,
+    workLocation: attendance.workLocation
+  });
   await attendance.save();
 
   res.status(200).json({
@@ -327,6 +369,13 @@ export const clockOut = asyncHandler(async (req, res, next) => {
   if (totalHours < 4 && attendance.status !== 'LATE') {
     attendance.status = 'HALF_DAY';
   }
+
+  if (!attendance.timeline) attendance.timeline = [];
+  attendance.timeline.push({
+    type: 'CLOCK_OUT',
+    timestamp: now,
+    workLocation: attendance.workLocation
+  });
 
   await attendance.save();
 
@@ -557,6 +606,8 @@ export const getLiveStatus = asyncHandler(async (req, res, next) => {
         lunchInTime: '$attendanceArray.lunchIn',
         workLocation: '$attendanceArray.workLocation',
         totalHours: '$attendanceArray.totalHours',
+        timeline: '$attendanceArray.timeline',
+        notes: '$attendanceArray.notes',
         sortOrder: 1
       }
     },
@@ -612,8 +663,18 @@ export const forceCheckOut = asyncHandler(async (req, res, next) => {
 
   attendance.clockOut = now;
   attendance.totalHours = totalHours;
-  attendance.notes = `Force checked out by ${req.user.firstName} ${req.user.lastName} (${req.user.role})${reason ? ': ' + reason : ''}`;
+  const forceNote = `Force checked out by ${req.user.firstName} ${req.user.lastName} (${req.user.role})${reason ? ': ' + reason : ''}`;
+  attendance.notes = attendance.notes ? `${attendance.notes} | ${forceNote}` : forceNote;
   if (totalHours < 4 && attendance.status !== 'LATE') attendance.status = 'HALF_DAY';
+
+  if (!attendance.timeline) attendance.timeline = [];
+  attendance.timeline.push({
+    type: 'FORCE_CHECKOUT',
+    timestamp: now,
+    workLocation: attendance.workLocation,
+    note: forceNote
+  });
+
   await attendance.save();
 
   // Notify the employee
