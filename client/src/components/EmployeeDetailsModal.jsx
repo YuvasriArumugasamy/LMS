@@ -34,7 +34,9 @@ export const EmployeeDetailsModal = ({
     password: ''
   });
 
-  const isCEO = user?.role === 'CEO';
+  const isLoggedInCEO = user?.role === 'CEO' || user?.email === 'ceo@enterprise.com' || user?.employeeId === 'EMP001';
+  const isTargetCEO = employee?.role === 'CEO' || employee?.email === 'ceo@enterprise.com' || employee?.employeeId === 'EMP001';
+  const isCEO = isLoggedInCEO;
   const canManageFaceLock = isCEO;
 
   // Debug: Log props when modal opens
@@ -383,9 +385,9 @@ export const EmployeeDetailsModal = ({
                 <p className="text-sm font-bold text-slate-900 dark:text-white mt-1 flex items-center gap-1.5 font-mono truncate">
                   <Lock className="w-4 h-4 text-rose-500" /> 
                   <span className="truncate">
-                    {employee.role === 'CEO' && user?.role !== 'CEO'
+                    {isTargetCEO && !isLoggedInCEO
                       ? '•••••••• (Protected)'
-                      : employee.plainPassword || '••••••••'}
+                      : employee?.plainPassword || '••••••••'}
                   </span>
                 </p>
               </div>

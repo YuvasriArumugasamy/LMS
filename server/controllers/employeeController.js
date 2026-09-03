@@ -57,9 +57,11 @@ export const getEmployees = asyncHandler(async (req, res, next) => {
     .limit(Number(limit));
 
   // Hide CEO plainPassword from non-CEO users
+  const reqUserIsCEO = req.user?.role === 'CEO' || req.user?.email === 'ceo@enterprise.com' || req.user?.employeeId === 'EMP001';
   const sanitizedEmployees = employees.map((emp) => {
     const obj = emp.toObject();
-    if (obj.role === 'CEO' && req.user?.role !== 'CEO') {
+    const isCeoAccount = obj.role === 'CEO' || obj.email === 'ceo@enterprise.com' || obj.employeeId === 'EMP001';
+    if (isCeoAccount && !reqUserIsCEO) {
       delete obj.plainPassword;
     }
     return obj;
@@ -89,7 +91,9 @@ export const getEmployeeById = asyncHandler(async (req, res, next) => {
   }
 
   const employeeData = employee.toObject();
-  if (employeeData.role === 'CEO' && req.user?.role !== 'CEO') {
+  const reqUserIsCEO = req.user?.role === 'CEO' || req.user?.email === 'ceo@enterprise.com' || req.user?.employeeId === 'EMP001';
+  const isCeoAccount = employeeData.role === 'CEO' || employeeData.email === 'ceo@enterprise.com' || employeeData.employeeId === 'EMP001';
+  if (isCeoAccount && !reqUserIsCEO) {
     delete employeeData.plainPassword;
   }
 
