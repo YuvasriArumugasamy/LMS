@@ -571,10 +571,10 @@ export const Dashboard = () => {
             <button onClick={() => navigate('/reports')} className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline">View all</button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <MetricCard title="TOTAL EMPLOYEES" value={stats?.cards?.totalEmployees ?? 0} icon={Users} color="primary" trend="+8.2% This Month" bgImage={blueBgCard} />
-            <MetricCard title="DEPARTMENTS" value={stats?.cards?.totalDepartments ?? 0} icon={Building2} color="secondary" trend="+2 New This Month" bgImage={purpleBgCard} />
-            <MetricCard title="PENDING APPROVALS" value={stats?.cards?.pendingLeaves ?? stats?.cards?.pendingHrApprovals ?? stats?.cards?.pendingRequests ?? 0} icon={Clock} color="warning" trend="+2 Since Yesterday" bgImage={orangeBgCard} />
-            <MetricCard title="EMPLOYEES ON LEAVE" value={stats?.cards?.employeesOnLeaveToday ?? stats?.cards?.teamOnLeaveTodayCount ?? 0} icon={CalendarCheck} color="success" trend="+5.4% This Month" bgImage={greenBgCard} />
+            <MetricCard title="TOTAL EMPLOYEES" value={stats?.cards?.totalEmployees ?? 0} icon={Users} color="primary" trend="+8.2% This Month" bgImage={blueBgCard} onClick={() => navigate('/employees')} />
+            <MetricCard title="DEPARTMENTS" value={stats?.cards?.totalDepartments ?? 0} icon={Building2} color="secondary" trend="+2 New This Month" bgImage={purpleBgCard} onClick={() => navigate('/departments')} />
+            <MetricCard title="PENDING APPROVALS" value={stats?.cards?.pendingLeaves ?? stats?.cards?.pendingHrApprovals ?? stats?.cards?.pendingRequests ?? 0} icon={Clock} color="warning" trend="+2 Since Yesterday" bgImage={orangeBgCard} onClick={() => navigate('/leaves?status=PENDING')} />
+            <MetricCard title="EMPLOYEES ON LEAVE" value={stats?.cards?.employeesOnLeaveToday ?? stats?.cards?.teamOnLeaveTodayCount ?? 0} icon={CalendarCheck} color="success" trend="+5.4% This Month" bgImage={greenBgCard} onClick={() => navigate('/leaves?status=APPROVED')} />
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { StatusBadge } from '../components/Badge';
@@ -12,11 +13,26 @@ const LIMIT = 10;
 
 export const LeaveRequests = () => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlStatus = searchParams.get('status') || '';
   const [leaves, setLeaves] = useState([]);
   const [leaveTypes, setLeaveTypes] = useState([]);
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilterState] = useState(urlStatus);
+
+  useEffect(() => {
+    setStatusFilterState(urlStatus);
+  }, [urlStatus]);
+
+  const handleStatusFilterChange = (val) => {
+    setStatusFilterState(val);
+    if (val) {
+      setSearchParams({ status: val });
+    } else {
+      setSearchParams({});
+    }
+  };
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -131,7 +147,7 @@ export const LeaveRequests = () => {
             { value: "REJECTED", label: "Rejected" },
           ]}
           value={statusFilter}
-          onChange={(val) => setStatusFilter(val)}
+          onChange={handleStatusFilterChange}
         />
       </div>
 

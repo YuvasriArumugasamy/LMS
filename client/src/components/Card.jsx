@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export const MetricCard = ({ title, value, icon: Icon, trend, color = 'primary', description, bgImage }) => {
+export const MetricCard = ({ title, value, icon: Icon, trend, color = 'primary', description, bgImage, onClick }) => {
   const colorMap = {
     primary: 'text-blue-600 dark:text-blue-400 bg-blue-50/80 dark:bg-blue-950/60 border-blue-200/80 dark:border-blue-800/80',
     secondary: 'text-purple-600 dark:text-purple-400 bg-purple-50/80 dark:bg-purple-950/60 border-purple-200/80 dark:border-purple-800/80',
@@ -22,10 +22,16 @@ export const MetricCard = ({ title, value, icon: Icon, trend, color = 'primary',
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -2 }}
+      whileHover={onClick ? { y: -4, scale: 1.01 } : { y: -2 }}
+      whileTap={onClick ? { scale: 0.98 } : undefined}
       transition={{ duration: 0.2 }}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       style={bgImage ? { '--bg-card-img': `url(${bgImage})` } : undefined}
       className={`bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-5 sm:p-6 min-h-[135px] sm:min-h-[145px] relative overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between ${
+        onClick ? 'cursor-pointer select-none hover:border-slate-300 dark:hover:border-slate-700' : ''
+      } ${
         bgImage ? 'bg-[image:var(--bg-card-img)] dark:!bg-none bg-[length:100%_100%] bg-center bg-no-repeat' : ''
       }`}
     >

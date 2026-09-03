@@ -69,6 +69,7 @@ app.use(helmet());
 // CORS — allow configured frontend URL + Vercel preview deployments + Local Network
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
+  'https://lcattendancesystem.onrender.com',
   'http://localhost:5173',
   'http://localhost:4173',
   'http://192.168.43.194:5173', // Local network access for mobile
