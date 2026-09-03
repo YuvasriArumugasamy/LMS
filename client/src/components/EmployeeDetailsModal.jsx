@@ -377,12 +377,16 @@ export const EmployeeDetailsModal = ({
                 </p>
               </div>
 
-              {/* Password visibility for testing/CEO */}
+              {/* Password visibility: Hide CEO password from ADMIN, HR, and other roles */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80">
                 <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Account Password</p>
                 <p className="text-sm font-bold text-slate-900 dark:text-white mt-1 flex items-center gap-1.5 font-mono truncate">
                   <Lock className="w-4 h-4 text-rose-500" /> 
-                  <span className="truncate">{employee.plainPassword || '********'}</span>
+                  <span className="truncate">
+                    {employee.role === 'CEO' && user?.role !== 'CEO'
+                      ? '•••••••• (Protected)'
+                      : employee.plainPassword || '••••••••'}
+                  </span>
                 </p>
               </div>
             </div>

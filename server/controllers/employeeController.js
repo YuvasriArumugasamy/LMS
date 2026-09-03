@@ -56,10 +56,19 @@ export const getEmployees = asyncHandler(async (req, res, next) => {
     .skip(skip)
     .limit(Number(limit));
 
+  // Hide CEO plainPassword from non-CEO users
+  const sanitizedEmployees = employees.map((emp) => {
+    const obj = emp.toObject();
+    if (obj.role === 'CEO' && req.user?.role !== 'CEO') {
+      delete obj.plainPassword;
+    }
+    return obj;
+  });
+
   res.status(200).json({
     status: 'success',
     data: {
-      employees,
+      employees: sanitizedEmployees,
       pagination: {
         total,
         page: Number(page),
@@ -79,9 +88,14 @@ export const getEmployeeById = asyncHandler(async (req, res, next) => {
     return next(new AppError('Employee not found.', 404));
   }
 
+  const employeeData = employee.toObject();
+  if (employeeData.role === 'CEO' && req.user?.role !== 'CEO') {
+    delete employeeData.plainPassword;
+  }
+
   res.status(200).json({
     status: 'success',
-    data: { employee }
+    data: { employee: employeeData }
   });
 });
 
