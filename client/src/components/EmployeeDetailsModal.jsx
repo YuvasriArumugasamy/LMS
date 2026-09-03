@@ -34,8 +34,8 @@ export const EmployeeDetailsModal = ({
     password: ''
   });
 
-  const [managers, setManagers] = useState([]);
-  const canManageFaceLock = ['CEO', 'HR', 'ADMIN'].includes(user?.role);
+  const isCEO = user?.role === 'CEO';
+  const canManageFaceLock = isCEO;
 
   // Debug: Log props when modal opens
   useEffect(() => {
@@ -387,49 +387,51 @@ export const EmployeeDetailsModal = ({
               </div>
             </div>
 
-            {/* Bottom Actions Row: Edit Button + Status Toggle + Delete */}
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2.5 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-400 text-xs font-black rounded-xl flex items-center gap-2 transition-all shadow-2xs"
-              >
-                <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Edit Employee Details
-              </button>
-
-              <div className="flex items-center gap-2">
+            {/* Bottom Actions Row: Edit Button + Status Toggle + Delete (CEO Only) */}
+            {isCEO && (
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
                 <button
                   type="button"
-                  disabled={loading}
-                  onClick={handleStatusClick}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-black text-white shadow-md transition-all flex items-center gap-2 ${
-                    employee.status === 'ACTIVE'
-                      ? 'bg-amber-500 hover:bg-amber-600'
-                      : 'bg-emerald-600 hover:bg-emerald-700'
-                  }`}
+                  onClick={() => setIsEditing(true)}
+                  className="px-4 py-2.5 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-400 text-xs font-black rounded-xl flex items-center gap-2 transition-all shadow-2xs cursor-pointer"
                 >
-                  {employee.status === 'ACTIVE' ? (
-                    <>
-                      <XCircle className="w-4 h-4" /> Deactivate Account
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-4 h-4" /> Activate Account
-                    </>
-                  )}
+                  <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Edit Employee Details
                 </button>
 
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={handleDeleteClick}
-                  className="px-4 py-2.5 rounded-xl text-xs font-black text-white bg-rose-600 hover:bg-rose-700 shadow-md transition-all flex items-center gap-2"
-                  title="Delete Account"
-                >
-                  <Trash2 className="w-4 h-4" /> Delete
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={handleStatusClick}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-black text-white shadow-md transition-all flex items-center gap-2 cursor-pointer ${
+                      employee.status === 'ACTIVE'
+                        ? 'bg-amber-500 hover:bg-amber-600'
+                        : 'bg-emerald-600 hover:bg-emerald-700'
+                    }`}
+                  >
+                    {employee.status === 'ACTIVE' ? (
+                      <>
+                        <XCircle className="w-4 h-4" /> Deactivate Account
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4" /> Activate Account
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={handleDeleteClick}
+                    className="px-4 py-2.5 rounded-xl text-xs font-black text-white bg-rose-600 hover:bg-rose-700 shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                    title="Delete Account"
+                  >
+                    <Trash2 className="w-4 h-4" /> Delete
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </>
         ) : (
           /* Mode 2: Edit Form */
