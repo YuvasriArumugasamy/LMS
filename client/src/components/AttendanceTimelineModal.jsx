@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal } from './Modal';
-import UserAvatar from './UserAvatar';
+import { UserAvatar } from './UserAvatar';
 import { LogIn, LogOut, Coffee, UtensilsCrossed, Clock, MapPin, AlertCircle, ShieldAlert, Sparkles } from 'lucide-react';
 
 const formatISTTime = (isoString) => {
