@@ -240,17 +240,62 @@ export const Attendance = () => {
     return '—';
   };
 
+  const getDetailLogTimeline = (log) => {
+    if (!log) return [];
+    if (Array.isArray(log.timeline) && log.timeline.length > 0) {
+      return [...log.timeline].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    }
+    const events = [];
+    if (log.clockIn) {
+      events.push({ type: 'CLOCK_IN', timestamp: log.clockIn, note: 'First Clock In of the day' });
+    }
+    if (log.lunchOut) {
+      events.push({ type: 'LUNCH_OUT', timestamp: log.lunchOut });
+    }
+    if (log.lunchIn) {
+      events.push({ type: 'LUNCH_IN', timestamp: log.lunchIn });
+    }
+    if (log.notes && typeof log.notes === 'string') {
+      const parts = log.notes.split('|');
+      parts.forEach((part) => {
+        const trimmed = part.trim();
+        if (trimmed.includes('Force checked out')) {
+          events.push({ type: 'FORCE_CHECKOUT', timestamp: log.clockOut || log.updatedAt || new Date().toISOString(), note: trimmed });
+        } else if (trimmed.includes('Re-clocked in')) {
+          events.push({ type: 'CLOCK_IN', timestamp: log.updatedAt || new Date().toISOString(), note: trimmed });
+        }
+      });
+    }
+    if (log.clockOut && !events.some((e) => e.type === 'CLOCK_OUT' || e.type === 'FORCE_CHECKOUT')) {
+      events.push({ type: 'CLOCK_OUT', timestamp: log.clockOut });
+    }
+    return events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  };
+
+  const getEffectiveLogoutTime = (log) => {
+    if (!log) return null;
+    const timeline = getDetailLogTimeline(log);
+    const lastCheckout = [...timeline].reverse().find((e) => e.type === 'CLOCK_OUT' || e.type === 'FORCE_CHECKOUT');
+    return lastCheckout?.timestamp || log.clockOut || null;
+  };
+
   const formatWorkDuration = (log) => {
     if (!log || !log.clockIn) return '--';
-    if (!log.clockOut) return 'In Progress ⏱️';
+    const effectiveLogout = getEffectiveLogoutTime(log);
+    if (!effectiveLogout && !log.clockOut) return 'In Progress ⏱️';
 
     const start = new Date(log.clockIn);
-    const end = new Date(log.clockOut);
+    const end = new Date(effectiveLogout || log.clockOut);
     let totalMins = Math.max(0, Math.round((end - start) / (1000 * 60)));
 
     if (log.lunchOut && log.lunchIn) {
       const lunchMins = Math.max(0, Math.round((new Date(log.lunchIn) - new Date(log.lunchOut)) / (1000 * 60)));
       totalMins = Math.max(0, totalMins - lunchMins);
+    }
+
+    if (log.extraBreakMs) {
+      const extraMins = Math.max(0, Math.round(log.extraBreakMs / (1000 * 60)));
+      totalMins = Math.max(0, totalMins - extraMins);
     }
 
     if (totalMins < 1) return '00h 00m';
@@ -1806,7 +1851,7 @@ export const Attendance = () => {
                   </span>
                 </div>
                 <span className="text-xs font-black text-slate-900 dark:text-white font-mono">
-                  {selectedDetailLog.clockOut ? formatClockTime(selectedDetailLog.clockOut) : '--'}
+                  {getEffectiveLogoutTime(selectedDetailLog) ? formatClockTime(getEffectiveLogoutTime(selectedDetailLog)) : '--'}
                 </span>
               </div>
 
@@ -1821,9 +1866,7 @@ export const Attendance = () => {
                   </span>
                 </div>
                 <span className="text-xs font-black text-blue-600 dark:text-blue-400 font-mono">
-                  {selectedDetailLog.clockIn && selectedDetailLog.clockOut
-                    ? formatWorkDuration(selectedDetailLog)
-                    : '--'}
+                  {formatWorkDuration(selectedDetailLog)}
                 </span>
               </div>
 
@@ -1841,6 +1884,69 @@ export const Attendance = () => {
                   {selectedDetailLog.workLocation === 'WFH' ? '🏡 Home / WFH' : '🏢 In-Office'}
                 </span>
               </div>
+            </div>
+
+            {/* Daily Activity Timeline Section for Selected Record */}
+            <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-3 shadow-2xs">
+              <h5 className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                <span>Daily Activity Log</span>
+                <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full">
+                  {getDetailLogTimeline(selectedDetailLog).length} Event{getDetailLogTimeline(selectedDetailLog).length !== 1 ? 's' : ''}
+                </span>
+              </h5>
+
+              {getDetailLogTimeline(selectedDetailLog).length === 0 ? (
+                <div className="text-center py-3 text-slate-400 text-xs font-medium bg-slate-50 dark:bg-slate-800/40 rounded-xl">
+                  No activity log entries recorded for this date.
+                </div>
+              ) : (
+                <div className="relative pl-4 border-l-2 border-slate-200 dark:border-slate-800 space-y-2.5 my-1">
+                  {getDetailLogTimeline(selectedDetailLog).map((item, idx) => {
+                    let badgeBg = 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300';
+                    let dotBg = 'border-purple-600 bg-purple-500';
+                    let label = 'Clock In';
+
+                    if (item.type === 'CLOCK_OUT') {
+                      badgeBg = 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300';
+                      dotBg = 'border-orange-500 bg-orange-500';
+                      label = 'Clock Out';
+                    } else if (item.type === 'LUNCH_OUT') {
+                      badgeBg = 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300';
+                      dotBg = 'border-amber-500 bg-amber-500';
+                      label = 'Lunch Out';
+                    } else if (item.type === 'LUNCH_IN') {
+                      badgeBg = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300';
+                      dotBg = 'border-emerald-500 bg-emerald-500';
+                      label = 'Lunch In';
+                    } else if (item.type === 'FORCE_CHECKOUT') {
+                      badgeBg = 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300';
+                      dotBg = 'border-rose-600 bg-rose-600';
+                      label = 'Force Checkout';
+                    }
+
+                    return (
+                      <div key={idx} className="relative">
+                        <div className={`absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full border-2 bg-white dark:bg-slate-900 ${dotBg}`} />
+                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-black shrink-0 ${badgeBg}`}>
+                              {label}
+                            </span>
+                            {item.note && (
+                              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">
+                                {item.note}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-xs font-black text-slate-900 dark:text-white font-mono shrink-0">
+                            {formatClockTime(item.timestamp)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
