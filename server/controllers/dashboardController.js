@@ -4,6 +4,7 @@ import { LeaveRequest } from '../models/LeaveRequest.js';
 import { LeaveBalance } from '../models/LeaveBalance.js';
 import { Holiday } from '../models/Holiday.js';
 import { AuditLog } from '../models/AuditLog.js';
+import { Attendance } from '../models/Attendance.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 // Build real monthly leave trend for specified year
@@ -38,10 +39,64 @@ const buildMonthlyTrend = async (matchQuery = {}, trendYear) => {
 };
 
 const fetchRecentActivities = async (query = {}, limit = 5) => {
-  const auditLogs = await AuditLog.find(query)
+  let auditLogs = await AuditLog.find(query)
     .sort({ createdAt: -1 })
     .limit(limit)
     .lean();
+
+  // If no user-filtered logs found, fallback to all recent AuditLog entries
+  if ((!auditLogs || auditLogs.length === 0) && query.user) {
+    auditLogs = await AuditLog.find({})
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+  }
+
+  // If still empty, synthesize recent activity from Attendance and LeaveRequest records
+  if (!auditLogs || auditLogs.length === 0) {
+    const [recentAttendance, recentLeaves] = await Promise.all([
+      Attendance.find({})
+        .populate('user', 'firstName lastName employeeId')
+        .sort({ updatedAt: -1, clockIn: -1 })
+        .limit(limit)
+        .lean(),
+      LeaveRequest.find({})
+        .populate('user', 'firstName lastName employeeId')
+        .sort({ updatedAt: -1, createdAt: -1 })
+        .limit(limit)
+        .lean()
+    ]);
+
+    const combined = [];
+    (recentAttendance || []).forEach((att) => {
+      const name = att.user ? `${att.user.firstName || ''} ${att.user.lastName || ''}`.trim() : 'Employee';
+      const actionStr = att.clockOut ? 'Clock Out' : (att.notes?.includes('Force checked out') ? 'Force Checkout' : 'Clock In');
+      combined.push({
+        id: att._id,
+        title: actionStr,
+        subtitle: `${name || 'User'} • ${att.workLocation === 'WFH' ? 'WFH' : 'Office'}`,
+        module: 'ATTENDANCE',
+        action: actionStr.toUpperCase().replace(' ', '_'),
+        createdAt: att.updatedAt || att.clockIn || new Date()
+      });
+    });
+
+    (recentLeaves || []).forEach((l) => {
+      const name = l.user ? `${l.user.firstName || ''} ${l.user.lastName || ''}`.trim() : 'Employee';
+      combined.push({
+        id: l._id,
+        title: `Leave Request (${l.status || 'Submitted'})`,
+        subtitle: `${name || 'User'} • Leave Application`,
+        module: 'LEAVE',
+        action: (l.status || 'SUBMITTED').toUpperCase(),
+        createdAt: l.updatedAt || l.createdAt || new Date()
+      });
+    });
+
+    return combined
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, limit);
+  }
 
   return auditLogs.map((log) => ({
     id: log._id,
