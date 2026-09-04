@@ -1199,7 +1199,7 @@ export const Attendance = () => {
                         <div className="min-w-0">
                           <span className="text-[9px] font-extrabold text-emerald-600/80 dark:text-emerald-300/80 uppercase tracking-wider block leading-none">Hours</span>
                           <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
-                            {isCheckedIn ? '⏱ Active' : (item.totalHours ? (
+                            {(isCheckedIn || isOnLunch) ? '⏱ Active' : (item.totalHours ? (
                               (() => {
                                 const h = Math.floor(item.totalHours);
                                 const m = Math.round((item.totalHours - h) * 60);

@@ -166,7 +166,17 @@ export const clockIn = asyncHandler(async (req, res, next) => {
           note: isForce ? existingAttendance.notes : undefined
         });
       }
+    if (existingAttendance.lunchOut && !existingAttendance.lunchIn) {
+      existingAttendance.lunchIn = now;
+      if (!existingAttendance.timeline) existingAttendance.timeline = [];
+      existingAttendance.timeline.push({
+        type: 'LUNCH_IN',
+        timestamp: now,
+        workLocation: existingAttendance.workLocation,
+        note: 'Auto lunch-in on re-clocking in'
+      });
     }
+
     existingAttendance.clockOut = undefined;
     existingAttendance.totalHours = undefined;
     if (workLocation) existingAttendance.workLocation = workLocation;
@@ -237,7 +247,17 @@ export const clockIn = asyncHandler(async (req, res, next) => {
               note: isForce ? duplicateDoc.notes : undefined
             });
           }
+        if (duplicateDoc.lunchOut && !duplicateDoc.lunchIn) {
+          duplicateDoc.lunchIn = now;
+          if (!duplicateDoc.timeline) duplicateDoc.timeline = [];
+          duplicateDoc.timeline.push({
+            type: 'LUNCH_IN',
+            timestamp: now,
+            workLocation: duplicateDoc.workLocation,
+            note: 'Auto lunch-in on re-clocking in'
+          });
         }
+
         duplicateDoc.clockOut = undefined;
         duplicateDoc.totalHours = undefined;
         if (workLocation) duplicateDoc.workLocation = workLocation;
@@ -585,19 +605,45 @@ export const getLiveStatus = asyncHandler(async (req, res, next) => {
     },
     {
       $addFields: {
+        lastTimelineEvent: {
+          $cond: {
+            if: { $and: [{ $isArray: '$attendanceArray.timeline' }, { $gt: [{ $size: '$attendanceArray.timeline' }, 0] }] },
+            then: { $arrayElemAt: ['$attendanceArray.timeline', -1] },
+            else: null
+          }
+        }
+      }
+    },
+    {
+      $addFields: {
         statusLabel: {
           $cond: {
             if: { $not: ['$attendanceArray'] },
             then: 'NOT_CHECKED_IN',
             else: {
               $cond: {
-                if: '$attendanceArray.clockOut',
-                then: 'CHECKED_OUT',
+                if: '$lastTimelineEvent',
+                then: {
+                  $switch: {
+                    branches: [
+                      { case: { $in: ['$lastTimelineEvent.type', ['CLOCK_OUT', 'FORCE_CHECKOUT']] }, then: 'CHECKED_OUT' },
+                      { case: { $eq: ['$lastTimelineEvent.type', 'LUNCH_OUT'] }, then: 'ON_LUNCH' },
+                      { case: { $in: ['$lastTimelineEvent.type', ['CLOCK_IN', 'LUNCH_IN']] }, then: 'CHECKED_IN' }
+                    ],
+                    default: 'CHECKED_IN'
+                  }
+                },
                 else: {
                   $cond: {
-                    if: { $and: ['$attendanceArray.lunchOut', { $not: ['$attendanceArray.lunchIn'] }] },
-                    then: 'ON_LUNCH',
-                    else: 'CHECKED_IN'
+                    if: '$attendanceArray.clockOut',
+                    then: 'CHECKED_OUT',
+                    else: {
+                      $cond: {
+                        if: { $and: ['$attendanceArray.lunchOut', { $not: ['$attendanceArray.lunchIn'] }] },
+                        then: 'ON_LUNCH',
+                        else: 'CHECKED_IN'
+                      }
+                    }
                   }
                 }
               }
@@ -607,10 +653,10 @@ export const getLiveStatus = asyncHandler(async (req, res, next) => {
         sortOrder: {
           $switch: {
             branches: [
-              { case: { $eq: ['$attendanceArray.clockOut', null] }, then: 0 }, // CHECKED_IN
-              { case: { $and: ['$attendanceArray.lunchOut', { $not: ['$attendanceArray.lunchIn'] }] }, then: 1 }, // ON_LUNCH
-              { case: { $not: ['$attendanceArray'] }, then: 2 }, // NOT_CHECKED_IN
-              { case: { $ne: ['$attendanceArray.clockOut', null] }, then: 3 } // CHECKED_OUT
+              { case: { $eq: ['$statusLabel', 'CHECKED_IN'] }, then: 0 },
+              { case: { $eq: ['$statusLabel', 'ON_LUNCH'] }, then: 1 },
+              { case: { $eq: ['$statusLabel', 'NOT_CHECKED_IN'] }, then: 2 },
+              { case: { $eq: ['$statusLabel', 'CHECKED_OUT'] }, then: 3 }
             ],
             default: 4
           }
