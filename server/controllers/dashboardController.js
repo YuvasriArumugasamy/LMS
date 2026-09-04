@@ -3,6 +3,7 @@ import { Department } from '../models/Department.js';
 import { LeaveRequest } from '../models/LeaveRequest.js';
 import { LeaveBalance } from '../models/LeaveBalance.js';
 import { Holiday } from '../models/Holiday.js';
+import { AuditLog } from '../models/AuditLog.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 // Build real monthly leave trend for specified year
@@ -36,6 +37,22 @@ const buildMonthlyTrend = async (matchQuery = {}, trendYear) => {
   }));
 };
 
+const fetchRecentActivities = async (query = {}, limit = 5) => {
+  const auditLogs = await AuditLog.find(query)
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+
+  return auditLogs.map((log) => ({
+    id: log._id,
+    title: log.action ? log.action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Activity Logged',
+    subtitle: log.userName ? `${log.userName} • ${log.details || log.module}` : log.details || log.module,
+    module: log.module,
+    action: log.action,
+    createdAt: log.createdAt
+  }));
+};
+
 export const getDashboardStats = asyncHandler(async (req, res, next) => {
   const role = req.user.role;
   const userId = req.user._id;
@@ -45,15 +62,12 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
   today.setHours(0, 0, 0, 0);
 
   if (['ADMIN', 'CEO'].includes(role)) {
-    // Optimized: Use aggregation to reduce query count from 8 to 4
-    const [employeeDeptStats, leaveStats, leavesToday, monthlyTrend] = await Promise.all([
-      // Combined aggregation for employee, department, and manager counts
+    const [employeeDeptStats, leaveStats, leavesToday, monthlyTrend, recentActivities] = await Promise.all([
       Promise.all([
         User.countDocuments({ isDeleted: false, status: 'ACTIVE' }),
         Department.countDocuments({ isDeleted: false }),
         User.countDocuments({ role: 'TEAM_LEAD', isDeleted: false })
       ]),
-      // Single aggregation for all leave status counts
       LeaveRequest.aggregate([
         { $match: { isDeleted: false } },
         {
@@ -83,7 +97,8 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
         toDate: { $gte: today },
         isDeleted: false
       }).populate('user', 'firstName lastName employeeId department profileImage'),
-      buildMonthlyTrend({}, trendYear)
+      buildMonthlyTrend({}, trendYear),
+      fetchRecentActivities({}, 5)
     ]);
 
     const [totalEmployees, totalDepartments, totalManagers] = employeeDeptStats;
@@ -102,11 +117,12 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
           employeesOnLeaveToday: leavesToday.length
         },
         leavesToday,
-        monthlyTrend
+        monthlyTrend,
+        recentActivities
       }
     });
   } else if (role === 'HR') {
-    const [totalEmployees, pendingHrApprovals, holidayCount, newEmployees, recentRequests, monthlyTrend] = await Promise.all([
+    const [totalEmployees, pendingHrApprovals, holidayCount, newEmployees, recentRequests, monthlyTrend, recentActivities] = await Promise.all([
       User.countDocuments({ isDeleted: false }),
       LeaveRequest.countDocuments({ status: { $in: ['TEAM_LEAD_APPROVED', 'ESCALATED_TO_HR', 'PENDING'] }, isDeleted: false }),
       Holiday.countDocuments({ isDeleted: false, status: 'ACTIVE' }),
@@ -116,7 +132,8 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
         .populate('leaveType', 'name colorBadge')
         .sort({ createdAt: -1 })
         .limit(5),
-      buildMonthlyTrend({}, trendYear)
+      buildMonthlyTrend({}, trendYear),
+      fetchRecentActivities({}, 5)
     ]);
 
     res.status(200).json({
@@ -124,23 +141,24 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
       data: {
         cards: { totalEmployees, pendingHrApprovals, holidayCount, newEmployees },
         recentRequests,
-        monthlyTrend
+        monthlyTrend,
+        recentActivities
       }
     });
   } else if (role === 'TEAM_LEAD') {
     const teamMembers = await User.find({ reportingManager: userId, isDeleted: false }).select('_id');
     const teamIds = teamMembers.map((m) => m._id);
 
-    // Edge case: if no team members, return empty stats
     const teamQuery = teamIds.length > 0 ? { user: { $in: teamIds } } : { user: { $in: [userId] } };
 
-    const [teamCount, pendingRequests, approvedRequests, teamOnLeaveToday, monthlyTrend] = await Promise.all([
+    const [teamCount, pendingRequests, approvedRequests, teamOnLeaveToday, monthlyTrend, recentActivities] = await Promise.all([
       Promise.resolve(teamIds.length),
       LeaveRequest.countDocuments({ ...teamQuery, status: 'PENDING', isDeleted: false }),
       LeaveRequest.countDocuments({ ...teamQuery, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, isDeleted: false }),
       LeaveRequest.find({ ...teamQuery, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, fromDate: { $lte: today }, toDate: { $gte: today }, isDeleted: false })
         .populate('user', 'firstName lastName profileImage designation'),
-      teamIds.length > 0 ? buildMonthlyTrend({ user: { $in: teamIds } }, trendYear) : buildMonthlyTrend({ user: userId }, trendYear)
+      teamIds.length > 0 ? buildMonthlyTrend({ user: { $in: teamIds } }, trendYear) : buildMonthlyTrend({ user: userId }, trendYear),
+      fetchRecentActivities({ $or: [{ user: userId }, { user: { $in: teamIds } }] }, 5)
     ]);
 
     res.status(200).json({
@@ -148,19 +166,21 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
       data: {
         cards: { teamCount, pendingRequests, approvedRequests, teamOnLeaveTodayCount: teamOnLeaveToday.length },
         teamOnLeaveToday,
-        monthlyTrend
+        monthlyTrend,
+        recentActivities
       }
     });
   } else {
     // EMPLOYEE DASHBOARD
-    const [balance, pendingRequests, approvedLeaves, rejectedLeaves, upcomingHolidays, recentLeaves, monthlyTrend] = await Promise.all([
+    const [balance, pendingRequests, approvedLeaves, rejectedLeaves, upcomingHolidays, recentLeaves, monthlyTrend, recentActivities] = await Promise.all([
       LeaveBalance.findOne({ user: userId, year: new Date().getFullYear() }).populate('allocations.leaveType'),
       LeaveRequest.countDocuments({ user: userId, status: { $in: ['PENDING', 'TEAM_LEAD_APPROVED', 'ESCALATED_TO_HR'] }, isDeleted: false }),
       LeaveRequest.countDocuments({ user: userId, status: { $in: ['HR_APPROVED', 'ADMIN_APPROVED', 'CEO_APPROVED'] }, isDeleted: false }),
       LeaveRequest.countDocuments({ user: userId, status: { $in: ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'] }, isDeleted: false }),
       Holiday.find({ date: { $gte: today }, isDeleted: false, status: 'ACTIVE' }).sort({ date: 1 }).limit(5),
       LeaveRequest.find({ user: userId, isDeleted: false }).populate('leaveType', 'name colorBadge').sort({ createdAt: -1 }).limit(5),
-      buildMonthlyTrend({ user: userId }, trendYear)
+      buildMonthlyTrend({ user: userId }, trendYear),
+      fetchRecentActivities({ user: userId }, 5)
     ]);
 
     res.status(200).json({
@@ -170,7 +190,8 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
         balance,
         upcomingHolidays,
         recentLeaves,
-        monthlyTrend
+        monthlyTrend,
+        recentActivities
       }
     });
   }

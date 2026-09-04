@@ -35,7 +35,9 @@ import {
   PieChart as PieChartIcon,
   Search,
   SlidersHorizontal,
-  Edit3
+  Edit3,
+  Activity,
+  AlertCircle
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -65,6 +67,56 @@ const CircularProgress = ({ value, max, color }) => {
       <span className="absolute text-[9px] sm:text-[10px] font-black tracking-tight text-slate-800 dark:text-white">{percentage}%</span>
     </div>
   );
+};
+
+const getActivityIcon = (module, action) => {
+  const modUpper = (module || '').toUpperCase();
+  const actUpper = (action || '').toUpperCase();
+
+  if (modUpper.includes('AUTH') || actUpper.includes('LOGIN')) {
+    return { icon: Clock, bg: 'bg-blue-600' };
+  }
+  if (modUpper.includes('LEAVE') || actUpper.includes('LEAVE')) {
+    if (actUpper.includes('APPROV')) return { icon: CheckCircle2, bg: 'bg-emerald-500' };
+    if (actUpper.includes('REJECT')) return { icon: AlertCircle, bg: 'bg-rose-500' };
+    return { icon: CalendarPlus, bg: 'bg-blue-600' };
+  }
+  if (modUpper.includes('EMPLOYEE') || actUpper.includes('EMPLOYEE') || actUpper.includes('USER')) {
+    return { icon: Users, bg: 'bg-purple-600' };
+  }
+  if (modUpper.includes('HOLIDAY') || actUpper.includes('HOLIDAY')) {
+    return { icon: CalendarIcon, bg: 'bg-amber-500' };
+  }
+  if (modUpper.includes('REPORT') || actUpper.includes('REPORT')) {
+    return { icon: FileText, bg: 'bg-indigo-600' };
+  }
+  return { icon: Activity, bg: 'bg-slate-600' };
+};
+
+const formatRelativeTime = (dateInput) => {
+  if (!dateInput) return '';
+  const date = new Date(dateInput);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+
+  const isToday = date.toDateString() === now.toDateString();
+  if (isToday) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (date.toDateString() === yesterday.toDateString()) {
+    return 'Yesterday';
+  }
+
+  const diffInDays = Math.floor(diffInSeconds / 86400);
+  if (diffInDays < 7) return `${diffInDays} days ago`;
+
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 };
 
 export const Dashboard = () => {
@@ -695,130 +747,36 @@ export const Dashboard = () => {
           </div>
 
           <div className="space-y-4">
-            {user?.role === 'EMPLOYEE' ? (
-              <>
-                {/* Employee Activity 1 */}
-                <div
-                  onClick={() => navigate('/leaves?status=APPROVED')}
-                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                    <CheckCircle2 className="w-4 h-4 text-white" />
+            {stats?.recentActivities && stats.recentActivities.length > 0 ? (
+              stats.recentActivities.map((act) => {
+                const { icon: IconComp, bg } = getActivityIcon(act.module, act.action);
+                return (
+                  <div
+                    key={act.id}
+                    onClick={() => navigate(user?.role === 'EMPLOYEE' ? '/notifications' : '/audit-logs')}
+                    className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                  >
+                    <div className={`w-8 h-8 rounded-full ${bg} text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs`}>
+                      <IconComp className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                        {act.title}
+                      </p>
+                      <p className="text-[11px] font-medium text-slate-400 truncate">
+                        {act.subtitle}
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 shrink-0">
+                      {formatRelativeTime(act.createdAt)}
+                    </span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Your Leave Approved</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">Casual Leave Request (Approved)</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 shrink-0">Today</span>
-                </div>
-
-                {/* Employee Activity 2 */}
-                <div
-                  onClick={() => navigate('/attendance')}
-                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                    <Clock className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Attendance Punched</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">Check In Marked Successfully</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 shrink-0">Today</span>
-                </div>
-
-                {/* Employee Activity 3 */}
-                <div
-                  onClick={() => navigate('/holidays')}
-                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                    <CalendarIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Upcoming Holiday</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">Independence Day (Aug 15)</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 shrink-0">2 days ago</span>
-                </div>
-
-                {/* Employee Activity 4 */}
-                <div
-                  onClick={() => navigate('/leaves')}
-                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                    <FileText className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Leave Quotas Allocated</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">Annual Quotas (Year {selectedBalanceYear})</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 shrink-0">Jan 1</span>
-                </div>
-              </>
+                );
+              })
             ) : (
-              <>
-                {/* Management Activity 1 */}
-                <div
-                  onClick={() => navigate('/leaves?status=APPROVED')}
-                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                    <CheckCircle2 className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Leave Request Approved</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">John Doe - Casual Leave</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 shrink-0">10:30 AM</span>
-                </div>
-
-                {/* Management Activity 2 */}
-                <div
-                  onClick={() => navigate('/employees')}
-                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                    <Users className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">New Employee Added</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">Sarah Wilson - Developer</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 shrink-0">Yesterday</span>
-                </div>
-
-                {/* Management Activity 3 */}
-                <div
-                  onClick={() => navigate('/holidays')}
-                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                    <CalendarIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Holiday Added</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">Independence Day</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 shrink-0">2 days ago</span>
-                </div>
-
-                {/* Management Activity 4 */}
-                <div
-                  onClick={() => navigate('/reports')}
-                  className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                    <FileText className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">Report Generated</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">Monthly Leave Report</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 shrink-0">3 days ago</span>
-                </div>
-              </>
+              <div className="py-6 text-center text-slate-400 text-xs font-semibold">
+                No recent activity recorded yet.
+              </div>
             )}
           </div>
         </div>
