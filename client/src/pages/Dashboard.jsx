@@ -631,157 +631,105 @@ export const Dashboard = () => {
         </div>
       )}
 
-      {/* ================= ROW 3: LEAVE ENTITLEMENTS (NON-CEO ONLY) + RECENT ACTIVITY ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Your Leave Entitlements Cards (Hidden for CEO as CEO does not apply for leave quotas) */}
-        {user?.role !== 'CEO' && (
-          <div className="lg:col-span-8 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Your Leave Entitlements</h3>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-extrabold uppercase text-slate-500 tracking-wider hidden sm:block">Year</span>
-                <input
-                  type="number"
-                  value={selectedBalanceYear}
-                  onChange={(e) => handleBalanceYearChange(Number(e.target.value))}
-                  min="2000"
-                  max="2050"
-                  className="px-3 py-1.5 w-24 rounded-full bg-white dark:bg-slate-800 border border-blue-400 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500/30 shadow-xs text-center"
-                />
-              </div>
+      {/* ================= ROW 3: LEAVE ENTITLEMENTS (NON-CEO ONLY) ================= */}
+      {user?.role !== 'CEO' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Your Leave Entitlements</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-extrabold uppercase text-slate-500 tracking-wider hidden sm:block">Year</span>
+              <input
+                type="number"
+                value={selectedBalanceYear}
+                onChange={(e) => handleBalanceYearChange(Number(e.target.value))}
+                min="2000"
+                max="2050"
+                className="px-3 py-1.5 w-24 rounded-full bg-white dark:bg-slate-800 border border-blue-400 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500/30 shadow-xs text-center"
+              />
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-              {loading ? (
-                [1,2,3,4].map((i) => (
-                  <div key={i} className="bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 min-h-[155px] animate-pulse">
-                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-3" />
-                    <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-1/2 mb-2" />
-                    <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-full" />
-                  </div>
-                ))
-              ) : entitlements.length === 0 ? (
-                <div className="col-span-4 text-center text-slate-400 text-sm font-semibold py-8">
-                  No leave balance found for {selectedBalanceYear}. Contact HR to allocate leave.
-                </div>
-              ) : (
-              entitlements.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 relative overflow-hidden shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between min-h-[155px]"
-                >
-                  {/* Subtle Background Accent Gradient Tint */}
-                  <div
-                    className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-300 pointer-events-none"
-                    style={{ backgroundColor: item.color }}
-                  />
-
-                  {/* Top Header: Full Name (No truncation!) & Colored Pill Code */}
-                  <div className="flex items-start justify-between gap-2 relative z-10">
-                    <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-tight min-w-0 pr-1">
-                      {item.name}
-                    </span>
-                    <span
-                      className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 shadow-2xs transition-transform group-hover:scale-105"
-                      style={{
-                        backgroundColor: `${item.color}15`,
-                        color: item.color,
-                        border: `1px solid ${item.color}30`
-                      }}
-                    >
-                      {item.code}
-                    </span>
-                  </div>
-
-                  {/* Body: Big Number Count & Glowing Circular Gauge */}
-                  <div className="flex items-center justify-between gap-2 my-2 relative z-10">
-                    <div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                          {item.remaining}
-                        </span>
-                      </div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 leading-none">
-                        Remaining
-                      </p>
-                      <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
-                        of <strong className="font-bold text-slate-700 dark:text-slate-300">{item.total}</strong> days
-                      </p>
-                    </div>
-
-                    {/* Circular Progress Gauge */}
-                    <div className="shrink-0 drop-shadow-xs group-hover:scale-105 transition-transform">
-                      <CircularProgress value={item.remaining} max={item.total} color={item.color} />
-                    </div>
-                  </div>
-
-                  {/* Bottom Accent Gradient Progress Bar */}
-                  <div className="w-full h-1.5 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 relative z-10 mt-1">
-                    <div
-                      className="h-full rounded-full transition-all duration-700 ease-out shadow-xs"
-                      style={{
-                        width: `${Math.min(100, Math.max(0, (item.remaining / item.total) * 100))}%`,
-                        backgroundColor: item.color,
-                        boxShadow: `0 0 10px ${item.color}80`
-                      }}
-                    />
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+            {loading ? (
+              [1,2,3,4].map((i) => (
+                <div key={i} className="bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 min-h-[155px] animate-pulse">
+                  <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-3" />
+                  <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-1/2 mb-2" />
+                  <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-full" />
                 </div>
               ))
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Recent Activity Timeline matching Image (4 Cols for non-CEO, 12 Cols for CEO) */}
-        <div className={`${user?.role === 'CEO' ? 'lg:col-span-12' : 'lg:col-span-4'} bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between`}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Recent Activity</h3>
-            <button
-              onClick={() => navigate(user?.role === 'EMPLOYEE' ? '/notifications' : '/audit-logs')}
-              className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-            >
-              View all
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {stats?.recentActivities && stats.recentActivities.length > 0 ? (
-              stats.recentActivities.map((act) => {
-                const { icon: IconComp, bg } = getActivityIcon(act.module, act.action);
-                return (
-                  <div
-                    key={act.id}
-                    onClick={() => navigate(user?.role === 'EMPLOYEE' ? '/notifications' : '/audit-logs')}
-                    className="flex items-start gap-3 p-1.5 -mx-1.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-                  >
-                    <div className={`w-8 h-8 rounded-full ${bg} text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs`}>
-                      <IconComp className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
-                        {act.title}
-                      </p>
-                      <p className="text-[11px] font-medium text-slate-400 truncate">
-                        {act.subtitle}
-                      </p>
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 shrink-0">
-                      {formatRelativeTime(act.createdAt)}
-                    </span>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="py-6 text-center text-slate-400 text-xs font-semibold">
-                No recent activity recorded yet.
+            ) : entitlements.length === 0 ? (
+              <div className="col-span-4 text-center text-slate-400 text-sm font-semibold py-8">
+                No leave balance found for {selectedBalanceYear}. Contact HR to allocate leave.
               </div>
+            ) : (
+            entitlements.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 rounded-3xl p-4 relative overflow-hidden shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between min-h-[155px]"
+              >
+                {/* Subtle Background Accent Gradient Tint */}
+                <div
+                  className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-300 pointer-events-none"
+                  style={{ backgroundColor: item.color }}
+                />
+
+                {/* Top Header: Full Name (No truncation!) & Colored Pill Code */}
+                <div className="flex items-start justify-between gap-2 relative z-10">
+                  <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-tight min-w-0 pr-1">
+                    {item.name}
+                  </span>
+                  <span
+                    className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 shadow-2xs transition-transform group-hover:scale-105"
+                    style={{
+                      backgroundColor: `${item.color}15`,
+                      color: item.color,
+                      border: `1px solid ${item.color}30`
+                    }}
+                  >
+                    {item.code}
+                  </span>
+                </div>
+
+                {/* Body: Big Number Count & Glowing Circular Gauge */}
+                <div className="flex items-center justify-between gap-2 my-2 relative z-10">
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        {item.remaining}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 leading-none">
+                      Remaining
+                    </p>
+                    <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                      of <strong className="font-bold text-slate-700 dark:text-slate-300">{item.total}</strong> days
+                    </p>
+                  </div>
+
+                  {/* Circular Progress Gauge */}
+                  <div className="shrink-0 drop-shadow-xs group-hover:scale-105 transition-transform">
+                    <CircularProgress value={item.remaining} max={item.total} color={item.color} />
+                  </div>
+                </div>
+
+                {/* Bottom Accent Gradient Progress Bar */}
+                <div className="w-full h-1.5 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 relative z-10 mt-1">
+                  <div
+                    className="h-full rounded-full transition-all duration-700 ease-out shadow-xs"
+                    style={{
+                      width: `${Math.min(100, Math.max(0, (item.remaining / item.total) * 100))}%`,
+                      backgroundColor: item.color,
+                      boxShadow: `0 0 10px ${item.color}80`
+                    }}
+                  />
+                </div>
+              </div>
+            ))
             )}
           </div>
         </div>
-
-      </div>
+      )}
 
       {/* ================= ROW 4: MONTHLY TREND + LEAVE DISTRIBUTION (CEO, HR, ADMIN, TEAM_LEAD ONLY) + UPCOMING HOLIDAYS ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
