@@ -144,17 +144,24 @@ export const AttendanceTimelineModal = ({ isOpen, onClose, liveItem }) => {
   }
 
   // Calculate stats
+  const lastEvent = rawTimeline[rawTimeline.length - 1];
+  const isActiveSession = (lastEvent?.type === 'CLOCK_IN' || lastEvent?.type === 'LUNCH_IN') && !attendance.clockOut;
+
   const firstClockIn = rawTimeline.find(t => t.type === 'CLOCK_IN')?.timestamp || liveItem.clockInTime || attendance.clockIn;
-  const lastClockOut = [...rawTimeline].reverse().find(t => t.type === 'CLOCK_OUT' || t.type === 'FORCE_CHECKOUT')?.timestamp || liveItem.clockOutTime || attendance.clockOut;
+  const lastClockOut = isActiveSession 
+    ? null 
+    : ([...rawTimeline].reverse().find(t => t.type === 'CLOCK_OUT' || t.type === 'FORCE_CHECKOUT')?.timestamp || liveItem.clockOutTime || attendance.clockOut);
   const totalHoursNum = liveItem.totalHours || attendance.totalHours || 0;
 
-  const formattedHours = totalHoursNum ? (() => {
-    const h = Math.floor(totalHoursNum);
-    const m = Math.round((totalHoursNum - h) * 60);
-    if (h === 0) return `${m}m`;
-    if (m === 0) return `${h}h`;
-    return `${h}h ${m}m`;
-  })() : (firstClockIn && !lastClockOut ? '⏱ Active' : '—');
+  const formattedHours = isActiveSession 
+    ? '⏱ Active' 
+    : (totalHoursNum ? (() => {
+        const h = Math.floor(totalHoursNum);
+        const m = Math.round((totalHoursNum - h) * 60);
+        if (h === 0) return `${m}m`;
+        if (m === 0) return `${h}h`;
+        return `${h}h ${m}m`;
+      })() : (firstClockIn && !lastClockOut ? '⏱ Active' : '—'));
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-lg">

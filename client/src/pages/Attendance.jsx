@@ -289,8 +289,18 @@ export const Attendance = () => {
     return events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   };
 
+  const isLogActiveSession = (log) => {
+    if (!log || !log.clockIn) return false;
+    if (log.clockOut) return false;
+    const timeline = getDetailLogTimeline(log);
+    if (timeline.length === 0) return true;
+    const lastEvent = timeline[timeline.length - 1];
+    return lastEvent.type === 'CLOCK_IN' || lastEvent.type === 'LUNCH_IN';
+  };
+
   const getEffectiveLogoutTime = (log) => {
     if (!log) return null;
+    if (isLogActiveSession(log)) return null;
     const timeline = getDetailLogTimeline(log);
     const lastCheckout = [...timeline].reverse().find((e) => e.type === 'CLOCK_OUT' || e.type === 'FORCE_CHECKOUT');
     return lastCheckout?.timestamp || log.clockOut || null;
@@ -307,6 +317,7 @@ export const Attendance = () => {
 
   const getAllLogoutTimes = (log) => {
     if (!log) return '--';
+    if (isLogActiveSession(log)) return '--';
     const timeline = getDetailLogTimeline(log);
     const logoutEvents = timeline.filter((e) => e.type === 'CLOCK_OUT' || e.type === 'FORCE_CHECKOUT');
     if (logoutEvents.length === 0) return log.clockOut ? formatClockTime(log.clockOut) : '--';
@@ -316,6 +327,7 @@ export const Attendance = () => {
 
   const formatWorkDuration = (log) => {
     if (!log || !log.clockIn) return '--';
+    if (isLogActiveSession(log)) return 'In Progress ⏱️';
     const effectiveLogout = getEffectiveLogoutTime(log);
     if (!effectiveLogout && !log.clockOut) return 'In Progress ⏱️';
 
