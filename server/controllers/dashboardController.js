@@ -39,102 +39,120 @@ const buildMonthlyTrend = async (matchQuery = {}, trendYear) => {
 };
 
 const fetchRecentActivities = async (query = {}, limit = 5) => {
-  let auditLogs = await AuditLog.find(query)
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .lean();
+  try {
+    const userQuery = query.user ? { user: query.user } : {};
 
-  // If no user-filtered logs found, fallback to all recent AuditLog entries
-  if ((!auditLogs || auditLogs.length === 0) && query.user) {
-    auditLogs = await AuditLog.find({})
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
-  }
-
-  // If still empty, synthesize recent activity from Attendance and LeaveRequest records
-  if (!auditLogs || auditLogs.length === 0) {
-    const [recentAttendance, recentLeaves] = await Promise.all([
-      Attendance.find({})
-        .populate('user', 'firstName lastName employeeId')
+    const [auditLogs, attendanceDocs, leaveDocs] = await Promise.all([
+      AuditLog.find(query).sort({ createdAt: -1 }).limit(10).lean(),
+      Attendance.find(userQuery)
+        .populate('user', 'firstName lastName employeeId role email')
         .sort({ updatedAt: -1, clockIn: -1 })
-        .limit(limit)
+        .limit(10)
         .lean(),
-      LeaveRequest.find({})
-        .populate('user', 'firstName lastName employeeId')
+      LeaveRequest.find(userQuery)
+        .populate('user', 'firstName lastName employeeId role email')
         .sort({ updatedAt: -1, createdAt: -1 })
-        .limit(limit)
+        .limit(10)
         .lean()
     ]);
 
-    const combined = [];
-    (recentAttendance || []).forEach((att) => {
-      const name = att.user ? `${att.user.firstName || ''} ${att.user.lastName || ''}`.trim() : 'Employee';
-      const actionStr = att.clockOut ? 'Clock Out' : (att.notes?.includes('Force checked out') ? 'Force Checkout' : 'Clock In');
-      combined.push({
-        id: att._id,
-        title: actionStr,
-        subtitle: `${name || 'User'} • ${att.workLocation === 'WFH' ? 'WFH' : 'Office'}`,
-        module: 'ATTENDANCE',
-        action: actionStr.toUpperCase().replace(' ', '_'),
-        createdAt: att.updatedAt || att.clockIn || new Date()
+    const realActivities = [];
+
+    // 1. Real Audit Logs
+    (auditLogs || []).forEach(log => {
+      const titleStr = log.action ? log.action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Activity Logged';
+      realActivities.push({
+        id: `audit-${log._id}`,
+        title: titleStr,
+        subtitle: log.userName ? `${log.userName} • ${log.details || log.module}` : (log.details || log.module || 'System Action'),
+        module: log.module || 'SYSTEM',
+        action: log.action || 'LOGGED',
+        createdAt: log.createdAt || new Date()
       });
     });
 
-    (recentLeaves || []).forEach((l) => {
-      const name = l.user ? `${l.user.firstName || ''} ${l.user.lastName || ''}`.trim() : 'Employee';
-      combined.push({
-        id: l._id,
-        title: `Leave Request (${l.status || 'Submitted'})`,
-        subtitle: `${name || 'User'} • Leave Application`,
-        module: 'LEAVE',
-        action: (l.status || 'SUBMITTED').toUpperCase(),
-        createdAt: l.updatedAt || l.createdAt || new Date()
-      });
-    });
+    // 2. Real Attendance Timeline Events (Clock Ins, Force Checkouts, Lunch Events)
+    (attendanceDocs || []).forEach(att => {
+      const u = att.user || {};
+      const name = u.firstName ? `${u.firstName} ${u.lastName || ''}`.trim() : 'Employee';
 
-    if (combined.length > 0) {
-      return combined
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, limit);
-    }
+      const timelineArr = Array.isArray(att.timeline) && att.timeline.length > 0
+        ? att.timeline
+        : [];
 
-    return [
-      {
-        id: 'act-1',
-        title: 'Clock In Verified',
-        subtitle: 'Attendance • Real-time Punch Active',
-        module: 'ATTENDANCE',
-        action: 'CLOCK_IN',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'act-2',
-        title: 'Leave Quotas Synchronized',
-        subtitle: 'System • Annual Leave Balance Active',
-        module: 'LEAVE',
-        action: 'SYSTEM_SYNC',
-        createdAt: new Date(Date.now() - 3600000).toISOString()
-      },
-      {
-        id: 'act-3',
-        title: 'Security Face Lock Active',
-        subtitle: 'Security • Biometric Lock Registered',
-        module: 'EMPLOYEE',
-        action: 'PROFILE_VERIFIED',
-        createdAt: new Date(Date.now() - 7200000).toISOString()
+      if (timelineArr.length > 0) {
+        timelineArr.forEach(t => {
+          let actTitle = 'Clock In';
+          if (t.type === 'CLOCK_OUT') actTitle = 'Clock Out';
+          else if (t.type === 'FORCE_CHECKOUT') actTitle = 'Force Checkout';
+          else if (t.type === 'LUNCH_OUT') actTitle = 'Lunch Out';
+          else if (t.type === 'LUNCH_IN') actTitle = 'Lunch In';
+
+          realActivities.push({
+            id: `att-${att._id}-${t.type}-${new Date(t.timestamp).getTime()}`,
+            title: actTitle,
+            subtitle: `${name} • ${t.note || (t.workLocation === 'WFH' ? 'WFH' : 'Office')}`,
+            module: 'ATTENDANCE',
+            action: t.type,
+            createdAt: t.timestamp || att.updatedAt || att.clockIn
+          });
+        });
+      } else {
+        if (att.clockIn) {
+          realActivities.push({
+            id: `att-${att._id}-in`,
+            title: 'Clock In',
+            subtitle: `${name} • ${att.workLocation === 'WFH' ? 'WFH' : 'Office'}`,
+            module: 'ATTENDANCE',
+            action: 'CLOCK_IN',
+            createdAt: att.clockIn
+          });
+        }
+        if (att.clockOut) {
+          realActivities.push({
+            id: `att-${att._id}-out`,
+            title: 'Clock Out',
+            subtitle: `${name} • Completed work session`,
+            module: 'ATTENDANCE',
+            action: 'CLOCK_OUT',
+            createdAt: att.clockOut
+          });
+        }
       }
-    ];
-  }
+    });
 
-  return auditLogs.map((log) => ({
-    id: log._id,
-    title: log.action ? log.action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Activity Logged',
-    subtitle: log.userName ? `${log.userName} • ${log.details || log.module}` : log.details || log.module,
-    module: log.module,
-    action: log.action,
-    createdAt: log.createdAt
-  }));
+    // 3. Real Leave Requests
+    (leaveDocs || []).forEach(l => {
+      const u = l.user || {};
+      const name = u.firstName ? `${u.firstName} ${u.lastName || ''}`.trim() : 'Employee';
+      realActivities.push({
+        id: `leave-${l._id}`,
+        title: `Leave ${l.status ? l.status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Request'}`,
+        subtitle: `${name} • ${l.reason || 'Applied for leave'}`,
+        module: 'LEAVE',
+        action: l.status || 'SUBMITTED',
+        createdAt: l.updatedAt || l.createdAt
+      });
+    });
+
+    // Deduplicate identical timeline events
+    const uniqueMap = new Map();
+    realActivities.forEach(item => {
+      const key = `${item.title}_${item.subtitle}_${new Date(item.createdAt).toISOString().substring(0, 16)}`;
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, item);
+      }
+    });
+
+    const sortedList = Array.from(uniqueMap.values())
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, limit);
+
+    return sortedList;
+  } catch (err) {
+    console.error('[fetchRecentActivities Error]', err);
+    return [];
+  }
 };
 
 export const getDashboardStats = asyncHandler(async (req, res, next) => {

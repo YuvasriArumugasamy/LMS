@@ -747,37 +747,8 @@ export const Dashboard = () => {
           </div>
 
           <div className="space-y-4">
-            {(() => {
-              const acts = (stats?.recentActivities && stats.recentActivities.length > 0)
-                ? stats.recentActivities
-                : [
-                    {
-                      id: 'act-1',
-                      title: 'Clock In Verified',
-                      subtitle: 'Attendance • Real-time Punch Active',
-                      module: 'ATTENDANCE',
-                      action: 'CLOCK_IN',
-                      createdAt: new Date().toISOString()
-                    },
-                    {
-                      id: 'act-2',
-                      title: 'Leave Quotas Synchronized',
-                      subtitle: 'System • Annual Leave Balance Active',
-                      module: 'LEAVE',
-                      action: 'SYSTEM_SYNC',
-                      createdAt: new Date(Date.now() - 3600000).toISOString()
-                    },
-                    {
-                      id: 'act-3',
-                      title: 'Security Face Lock Active',
-                      subtitle: 'Security • Biometric Lock Registered',
-                      module: 'EMPLOYEE',
-                      action: 'PROFILE_VERIFIED',
-                      createdAt: new Date(Date.now() - 7200000).toISOString()
-                    }
-                  ];
-
-              return acts.map((act) => {
+            {stats?.recentActivities && stats.recentActivities.length > 0 ? (
+              stats.recentActivities.map((act) => {
                 const { icon: IconComp, bg } = getActivityIcon(act.module, act.action);
                 return (
                   <div
@@ -801,8 +772,12 @@ export const Dashboard = () => {
                     </span>
                   </div>
                 );
-              });
-            })()}
+              })
+            ) : (
+              <div className="py-6 text-center text-slate-400 text-xs font-semibold">
+                No recent activity recorded yet.
+              </div>
+            )}
           </div>
         </div>
 
