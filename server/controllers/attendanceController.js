@@ -168,6 +168,7 @@ export const clockIn = asyncHandler(async (req, res, next) => {
       }
     }
     existingAttendance.clockOut = undefined;
+    existingAttendance.totalHours = undefined;
     if (workLocation) existingAttendance.workLocation = workLocation;
 
     const timeLogStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
@@ -238,6 +239,7 @@ export const clockIn = asyncHandler(async (req, res, next) => {
           }
         }
         duplicateDoc.clockOut = undefined;
+        duplicateDoc.totalHours = undefined;
         if (workLocation) duplicateDoc.workLocation = workLocation;
 
         const timeLogStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
