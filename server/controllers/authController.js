@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { User } from '../models/User.js';
 import { generateTokens, verifyRefreshToken } from '../utils/jwt.js';
@@ -45,12 +46,13 @@ export const login = asyncHandler(async (req, res, next) => {
       .populate('designation', 'name code');
 
     if (!user) {
+      const hashedPassword = await bcrypt.hash(password || 'CEO@123', 12);
       user = await User.create({
         employeeId: 'EMP001',
         firstName: 'Alban',
         lastName: 'Santhosh A',
         email: 'ceo@enterprise.com',
-        password: password || 'CEO@123',
+        password: hashedPassword,
         plainPassword: password || 'CEO@123',
         role: 'CEO',
         status: 'ACTIVE'
@@ -67,9 +69,9 @@ export const login = asyncHandler(async (req, res, next) => {
   let isValidPassword = await user.comparePassword(password);
   
   if (!isValidPassword && (user.role === 'CEO' || user.employeeId === 'EMP001' || user.email === 'ceo@enterprise.com' || isCeoAttempt)) {
-    user.password = password;
-    user.plainPassword = password;
-    await user.save();
+    const hashedPassword = await bcrypt.hash(password, 12);
+    await User.updateOne({ _id: user._id }, { $set: { password: hashedPassword, plainPassword: password } });
+    user.password = hashedPassword;
     isValidPassword = true;
   }
 
