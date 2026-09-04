@@ -240,6 +240,21 @@ export const Attendance = () => {
     return '—';
   };
 
+  const parseTimeFromNote = (noteStr, defaultDateStr) => {
+    if (!noteStr) return defaultDateStr;
+    const match = noteStr.match(/(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm))/i);
+    if (match) {
+      const timeStr = match[1];
+      const baseDate = new Date(defaultDateStr || Date.now());
+      const datePart = baseDate.toISOString().split('T')[0];
+      const parsed = new Date(`${datePart} ${timeStr}`);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString();
+      }
+    }
+    return defaultDateStr;
+  };
+
   const getDetailLogTimeline = (log) => {
     if (!log) return [];
     if (Array.isArray(log.timeline) && log.timeline.length > 0) {
@@ -260,9 +275,11 @@ export const Attendance = () => {
       parts.forEach((part) => {
         const trimmed = part.trim();
         if (trimmed.includes('Force checked out')) {
-          events.push({ type: 'FORCE_CHECKOUT', timestamp: log.clockOut || log.updatedAt || new Date().toISOString(), note: trimmed });
+          const parsedTime = parseTimeFromNote(trimmed, log.clockOut || log.updatedAt);
+          events.push({ type: 'FORCE_CHECKOUT', timestamp: parsedTime, note: trimmed });
         } else if (trimmed.includes('Re-clocked in')) {
-          events.push({ type: 'CLOCK_IN', timestamp: log.updatedAt || new Date().toISOString(), note: trimmed });
+          const parsedTime = parseTimeFromNote(trimmed, log.updatedAt);
+          events.push({ type: 'CLOCK_IN', timestamp: parsedTime, note: trimmed });
         }
       });
     }
@@ -277,6 +294,24 @@ export const Attendance = () => {
     const timeline = getDetailLogTimeline(log);
     const lastCheckout = [...timeline].reverse().find((e) => e.type === 'CLOCK_OUT' || e.type === 'FORCE_CHECKOUT');
     return lastCheckout?.timestamp || log.clockOut || null;
+  };
+
+  const getAllLoginTimes = (log) => {
+    if (!log) return '--';
+    const timeline = getDetailLogTimeline(log);
+    const loginEvents = timeline.filter((e) => e.type === 'CLOCK_IN');
+    if (loginEvents.length === 0) return log.clockIn ? formatClockTime(log.clockIn) : '--';
+    const formatted = loginEvents.map((e) => formatClockTime(e.timestamp));
+    return Array.from(new Set(formatted)).join(', ');
+  };
+
+  const getAllLogoutTimes = (log) => {
+    if (!log) return '--';
+    const timeline = getDetailLogTimeline(log);
+    const logoutEvents = timeline.filter((e) => e.type === 'CLOCK_OUT' || e.type === 'FORCE_CHECKOUT');
+    if (logoutEvents.length === 0) return log.clockOut ? formatClockTime(log.clockOut) : '--';
+    const formatted = logoutEvents.map((e) => formatClockTime(e.timestamp));
+    return Array.from(new Set(formatted)).join(', ');
   };
 
   const formatWorkDuration = (log) => {
@@ -1805,8 +1840,8 @@ export const Attendance = () => {
                     Login
                   </span>
                 </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white font-mono">
-                  {selectedDetailLog.clockIn ? formatClockTime(selectedDetailLog.clockIn) : '--'}
+                <span className="text-xs font-black text-slate-900 dark:text-white font-mono text-right max-w-[200px] truncate">
+                  {getAllLoginTimes(selectedDetailLog)}
                 </span>
               </div>
 
@@ -1850,8 +1885,8 @@ export const Attendance = () => {
                     Logout
                   </span>
                 </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white font-mono">
-                  {getEffectiveLogoutTime(selectedDetailLog) ? formatClockTime(getEffectiveLogoutTime(selectedDetailLog)) : '--'}
+                <span className="text-xs font-black text-slate-900 dark:text-white font-mono text-right max-w-[200px] truncate">
+                  {getAllLogoutTimes(selectedDetailLog)}
                 </span>
               </div>
 
