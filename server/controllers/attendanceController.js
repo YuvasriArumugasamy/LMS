@@ -151,6 +151,21 @@ export const clockIn = asyncHandler(async (req, res, next) => {
     if (existingAttendance.clockOut) {
       const gapMs = now - new Date(existingAttendance.clockOut);
       existingAttendance.extraBreakMs = (existingAttendance.extraBreakMs || 0) + gapMs;
+
+      // Ensure the checkout event is preserved in timeline array before resetting clockOut
+      if (!existingAttendance.timeline) existingAttendance.timeline = [];
+      const hasCheckoutInTimeline = existingAttendance.timeline.some(
+        (t) => t.type === 'CLOCK_OUT' || t.type === 'FORCE_CHECKOUT'
+      );
+      if (!hasCheckoutInTimeline) {
+        const isForce = existingAttendance.notes?.includes('Force checked out');
+        existingAttendance.timeline.push({
+          type: isForce ? 'FORCE_CHECKOUT' : 'CLOCK_OUT',
+          timestamp: existingAttendance.clockOut,
+          workLocation: existingAttendance.workLocation,
+          note: isForce ? existingAttendance.notes : undefined
+        });
+      }
     }
     existingAttendance.clockOut = undefined;
     if (workLocation) existingAttendance.workLocation = workLocation;
@@ -177,7 +192,7 @@ export const clockIn = asyncHandler(async (req, res, next) => {
 
   // 3. First check-in of the day for this user
   try {
-    const initialNote = notes || (isSunday ? 'Sunday Special Over Duty (OD)' : '');
+    const initialNote = notes || (isSunday ? 'Sunday Special Over Duty (OD)' : 'First Clock In of the day');
     const attendance = await Attendance.create({
       user: userId,
       date: start,
@@ -207,6 +222,20 @@ export const clockIn = asyncHandler(async (req, res, next) => {
         if (duplicateDoc.clockOut) {
           const gapMs = now - new Date(duplicateDoc.clockOut);
           duplicateDoc.extraBreakMs = (duplicateDoc.extraBreakMs || 0) + gapMs;
+
+          if (!duplicateDoc.timeline) duplicateDoc.timeline = [];
+          const hasCheckoutInTimeline = duplicateDoc.timeline.some(
+            (t) => t.type === 'CLOCK_OUT' || t.type === 'FORCE_CHECKOUT'
+          );
+          if (!hasCheckoutInTimeline) {
+            const isForce = duplicateDoc.notes?.includes('Force checked out');
+            duplicateDoc.timeline.push({
+              type: isForce ? 'FORCE_CHECKOUT' : 'CLOCK_OUT',
+              timestamp: duplicateDoc.clockOut,
+              workLocation: duplicateDoc.workLocation,
+              note: isForce ? duplicateDoc.notes : undefined
+            });
+          }
         }
         duplicateDoc.clockOut = undefined;
         if (workLocation) duplicateDoc.workLocation = workLocation;

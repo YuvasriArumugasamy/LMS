@@ -40,15 +40,21 @@ export const AttendanceTimelineModal = ({ isOpen, onClose, liveItem }) => {
 
   // Build unified timeline entries
   let rawTimeline = [];
+  const timelineArr = (Array.isArray(attendance?.timeline) && attendance.timeline.length > 0)
+    ? attendance.timeline
+    : (Array.isArray(liveItem?.timeline) && liveItem.timeline.length > 0)
+      ? liveItem.timeline
+      : [];
 
-  if (Array.isArray(attendance.timeline) && attendance.timeline.length > 0) {
-    rawTimeline = [...attendance.timeline].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  if (timelineArr.length > 0) {
+    rawTimeline = [...timelineArr];
   } else {
-    // Fallback parser for legacy records
-    if (liveItem.clockInTime || attendance.clockIn) {
+    // Fallback parser for records without structured timeline array
+    const clockInTime = liveItem.clockInTime || attendance.clockIn;
+    if (clockInTime) {
       rawTimeline.push({
         type: 'CLOCK_IN',
-        timestamp: liveItem.clockInTime || attendance.clockIn,
+        timestamp: clockInTime,
         workLocation: liveItem.workLocation || attendance.workLocation || 'IN_OFFICE',
         note: 'First Clock In of the day'
       });
@@ -70,30 +76,51 @@ export const AttendanceTimelineModal = ({ isOpen, onClose, liveItem }) => {
       });
     }
 
-    // Check for re-clock in notes string
-    if (attendance.notes && typeof attendance.notes === 'string' && attendance.notes.includes('Re-clocked in')) {
-      const parts = attendance.notes.split('|');
+    // Parse all events recorded in notes (Force checked out, Re-clocked in, etc.)
+    const notesStr = attendance.notes || liveItem.notes || '';
+    if (notesStr && typeof notesStr === 'string') {
+      const parts = notesStr.split('|');
       parts.forEach(part => {
-        if (part.includes('Re-clocked in')) {
+        const trimmed = part.trim();
+        if (trimmed.includes('Force checked out')) {
+          rawTimeline.push({
+            type: 'FORCE_CHECKOUT',
+            timestamp: liveItem.clockOutTime || attendance.clockOut || attendance.updatedAt || new Date().toISOString(),
+            workLocation: liveItem.workLocation || attendance.workLocation,
+            note: trimmed
+          });
+        } else if (trimmed.includes('Re-clocked in')) {
           rawTimeline.push({
             type: 'CLOCK_IN',
             timestamp: attendance.updatedAt || new Date().toISOString(),
             workLocation: liveItem.workLocation || attendance.workLocation,
-            note: part.trim()
+            note: trimmed
           });
         }
       });
     }
 
-    if (liveItem.clockOutTime || attendance.clockOut) {
+    if ((liveItem.clockOutTime || attendance.clockOut) && !rawTimeline.some(t => t.type === 'FORCE_CHECKOUT' || t.type === 'CLOCK_OUT')) {
       rawTimeline.push({
-        type: attendance.notes?.includes('Force checked out') ? 'FORCE_CHECKOUT' : 'CLOCK_OUT',
+        type: 'CLOCK_OUT',
         timestamp: liveItem.clockOutTime || attendance.clockOut,
         workLocation: liveItem.workLocation || attendance.workLocation,
-        note: attendance.notes?.includes('Force checked out') ? attendance.notes : undefined
+        note: notesStr?.includes('Force checked out') ? notesStr : undefined
       });
     }
   }
+
+  // Deduplicate and sort chronologically
+  const uniqueTimeline = [];
+  const seenKeys = new Set();
+  rawTimeline.forEach(item => {
+    const key = `${item.type}_${new Date(item.timestamp).getTime()}_${item.note || ''}`;
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      uniqueTimeline.push(item);
+    }
+  });
+  rawTimeline = uniqueTimeline.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
   // Interleave Break duration gaps between events
   const displayTimeline = [];
@@ -101,11 +128,11 @@ export const AttendanceTimelineModal = ({ isOpen, onClose, liveItem }) => {
     const current = rawTimeline[i];
     displayTimeline.push(current);
 
-    // If current is Clock Out or Lunch Out and next is Clock In or Lunch In, add a gap element
+    // If current is Clock Out, Force Checkout or Lunch Out and next is Clock In or Lunch In, add a gap element
     if (i < rawTimeline.length - 1) {
       const next = rawTimeline[i + 1];
       const gapStr = calculateGapString(current.timestamp, next.timestamp);
-      if (gapStr && (current.type === 'CLOCK_OUT' || current.type === 'LUNCH_OUT')) {
+      if (gapStr && (current.type === 'CLOCK_OUT' || current.type === 'FORCE_CHECKOUT' || current.type === 'LUNCH_OUT')) {
         displayTimeline.push({
           type: 'BREAK_GAP',
           gapDuration: gapStr,
@@ -117,8 +144,8 @@ export const AttendanceTimelineModal = ({ isOpen, onClose, liveItem }) => {
   }
 
   // Calculate stats
-  const firstClockIn = rawTimeline.find(t => t.type === 'CLOCK_IN')?.timestamp || liveItem.clockInTime;
-  const lastClockOut = [...rawTimeline].reverse().find(t => t.type === 'CLOCK_OUT' || t.type === 'FORCE_CHECKOUT')?.timestamp || liveItem.clockOutTime;
+  const firstClockIn = rawTimeline.find(t => t.type === 'CLOCK_IN')?.timestamp || liveItem.clockInTime || attendance.clockIn;
+  const lastClockOut = [...rawTimeline].reverse().find(t => t.type === 'CLOCK_OUT' || t.type === 'FORCE_CHECKOUT')?.timestamp || liveItem.clockOutTime || attendance.clockOut;
   const totalHoursNum = liveItem.totalHours || attendance.totalHours || 0;
 
   const formattedHours = totalHoursNum ? (() => {
