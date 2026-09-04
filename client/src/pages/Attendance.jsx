@@ -257,45 +257,71 @@ export const Attendance = () => {
 
   const getDetailLogTimeline = (log) => {
     if (!log) return [];
+    let events = [];
     if (Array.isArray(log.timeline) && log.timeline.length > 0) {
-      return [...log.timeline].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      events = [...log.timeline];
+    } else {
+      if (log.clockIn) {
+        events.push({ type: 'CLOCK_IN', timestamp: log.clockIn, note: 'First Clock In of the day' });
+      }
+      if (log.lunchOut) {
+        events.push({ type: 'LUNCH_OUT', timestamp: log.lunchOut });
+      }
+      if (log.lunchIn) {
+        events.push({ type: 'LUNCH_IN', timestamp: log.lunchIn });
+      }
+      if (log.notes && typeof log.notes === 'string') {
+        const parts = log.notes.split('|');
+        parts.forEach((part) => {
+          const trimmed = part.trim();
+          if (trimmed.includes('Force checked out')) {
+            const parsedTime = parseTimeFromNote(trimmed, log.clockOut || log.updatedAt);
+            events.push({ type: 'FORCE_CHECKOUT', timestamp: parsedTime, note: trimmed });
+          } else if (trimmed.includes('Re-clocked in')) {
+            const parsedTime = parseTimeFromNote(trimmed, log.updatedAt);
+            events.push({ type: 'CLOCK_IN', timestamp: parsedTime, note: trimmed });
+          }
+        });
+      }
+      if (log.clockOut && !events.some((e) => e.type === 'CLOCK_OUT' || e.type === 'FORCE_CHECKOUT')) {
+        events.push({ type: 'CLOCK_OUT', timestamp: log.clockOut });
+      }
     }
-    const events = [];
-    if (log.clockIn) {
-      events.push({ type: 'CLOCK_IN', timestamp: log.clockIn, note: 'First Clock In of the day' });
-    }
-    if (log.lunchOut) {
-      events.push({ type: 'LUNCH_OUT', timestamp: log.lunchOut });
-    }
-    if (log.lunchIn) {
-      events.push({ type: 'LUNCH_IN', timestamp: log.lunchIn });
-    }
-    if (log.notes && typeof log.notes === 'string') {
-      const parts = log.notes.split('|');
-      parts.forEach((part) => {
-        const trimmed = part.trim();
-        if (trimmed.includes('Force checked out')) {
-          const parsedTime = parseTimeFromNote(trimmed, log.clockOut || log.updatedAt);
-          events.push({ type: 'FORCE_CHECKOUT', timestamp: parsedTime, note: trimmed });
-        } else if (trimmed.includes('Re-clocked in')) {
-          const parsedTime = parseTimeFromNote(trimmed, log.updatedAt);
-          events.push({ type: 'CLOCK_IN', timestamp: parsedTime, note: trimmed });
-        }
-      });
-    }
-    if (log.clockOut && !events.some((e) => e.type === 'CLOCK_OUT' || e.type === 'FORCE_CHECKOUT')) {
-      events.push({ type: 'CLOCK_OUT', timestamp: log.clockOut });
-    }
-    return events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    const typeOrder = { 'CLOCK_IN': 1, 'LUNCH_OUT': 2, 'LUNCH_IN': 3, 'FORCE_CHECKOUT': 4, 'CLOCK_OUT': 5 };
+    return events.sort((a, b) => {
+      const diff = new Date(a.timestamp) - new Date(b.timestamp);
+      if (diff !== 0) return diff;
+      
+      const aIsReclock = a.note?.includes('Re-clocked in');
+      const bIsReclock = b.note?.includes('Re-clocked in');
+      if (aIsReclock && !bIsReclock) return 1;
+      if (bIsReclock && !aIsReclock) return -1;
+
+      return (typeOrder[a.type] || 0) - (typeOrder[b.type] || 0);
+    });
   };
 
   const isLogActiveSession = (log) => {
-    if (!log || !log.clockIn) return false;
-    if (log.clockOut) return false;
+    if (!log || !log.clockIn || log.isSyntheticAbsent || log.status === 'ABSENT' || log.status === 'WEEK_OFF') return false;
+    
+    // Check if the log belongs to today
+    const logDateStr = getLocalDateString(log.clockIn || log.date);
+    const todayStr = getLocalDateString(new Date());
+    const isTodayDoc = logDateStr === todayStr;
+
+    // If clockOut is missing or undefined for today's record, it is definitely an active session!
+    if (isTodayDoc && !log.clockOut) return true;
+
+    // Otherwise check timeline's latest event
     const timeline = getDetailLogTimeline(log);
-    if (timeline.length === 0) return true;
-    const lastEvent = timeline[timeline.length - 1];
-    return lastEvent.type === 'CLOCK_IN' || lastEvent.type === 'LUNCH_IN';
+    if (timeline.length > 0) {
+      const lastEvent = timeline[timeline.length - 1];
+      if (lastEvent.type === 'CLOCK_IN' || lastEvent.type === 'LUNCH_IN') {
+        return true;
+      }
+    }
+    return false;
   };
 
   const getEffectiveLogoutTime = (log) => {
