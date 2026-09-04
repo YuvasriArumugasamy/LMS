@@ -1110,7 +1110,8 @@ export const Attendance = () => {
                 return (
                   <div
                     key={emp._id}
-                    className={`rounded-3xl border p-4 sm:p-5 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 space-y-4 ${cardStyle}`}
+                    onClick={() => setTimelineModalItem(item)}
+                    className={`rounded-3xl border p-4 sm:p-5 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 space-y-4 cursor-pointer ${cardStyle}`}
                   >
                     {/* Background watermark illustration for Logged Out / Logged In cards */}
                     {(isCheckedOut || isCheckedIn) && (
@@ -1142,15 +1143,6 @@ export const Attendance = () => {
                       </div>
 
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setTimelineModalItem(item)}
-                          className="px-2 py-1 rounded-full text-[10px] font-black bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-200 dark:hover:bg-purple-900 transition-all flex items-center gap-1 shadow-2xs hover:scale-105"
-                          title="View Full Daily Activity Log Timeline"
-                        >
-                          <Clock className="w-3 h-3 text-purple-600 dark:text-purple-400 stroke-[2.5]" />
-                          <span>Timeline</span>
-                        </button>
                         <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black shrink-0 shadow-2xs tracking-wide ${badgeStyle}`}>
                           {(!isCheckedOut) && <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />}
                           <span>{badgeText}</span>
@@ -1223,7 +1215,7 @@ export const Attendance = () => {
 
                     {/* Force Checkout Action Bar */}
                     {canForceCheckout && (
-                      <div className="pt-2.5 border-t border-slate-100/80 dark:border-slate-800/80 relative z-10">
+                      <div className="pt-2.5 border-t border-slate-100/80 dark:border-slate-800/80 relative z-10" onClick={(e) => e.stopPropagation()}>
                         {forceCheckoutUserId === emp._id ? (
                           <div className="space-y-2">
                             <input
