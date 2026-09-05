@@ -1084,6 +1084,10 @@ export const Attendance = () => {
 
                 const canForceCheckout = isCheckedIn || isOnLunch;
 
+                const displayClockIn = (Array.isArray(item.timeline) && item.timeline.length > 0)
+                  ? ([...item.timeline].reverse().find(t => t.type === 'CLOCK_IN')?.timestamp || item.clockInTime)
+                  : (item.clockInTime || item.lastClockInTime);
+
                 // Card background & border style matching Image 1
                 let cardStyle = `${palette.cardBg} ${palette.leftBorder}`;
                 let badgeStyle = palette.badge;
@@ -1160,7 +1164,7 @@ export const Attendance = () => {
                         <div className="min-w-0">
                           <span className="text-[9px] font-extrabold text-purple-600/80 dark:text-purple-300/80 uppercase tracking-wider block leading-none">Clock In</span>
                           <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
-                            {item.clockInTime ? new Date(item.clockInTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase() : '—'}
+                            {displayClockIn ? new Date(displayClockIn).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase() : '—'}
                           </span>
                         </div>
                       </div>

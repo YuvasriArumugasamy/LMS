@@ -623,6 +623,24 @@ export const getLiveStatus = asyncHandler(async (req, res, next) => {
             then: { $arrayElemAt: ['$attendanceArray.timeline', -1] },
             else: null
           }
+        },
+        lastClockInEvent: {
+          $cond: {
+            if: { $and: [{ $isArray: '$attendanceArray.timeline' }, { $gt: [{ $size: '$attendanceArray.timeline' }, 0] }] },
+            then: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: '$attendanceArray.timeline',
+                    as: 't',
+                    cond: { $eq: ['$$t.type', 'CLOCK_IN'] }
+                  }
+                },
+                -1
+              ]
+            },
+            else: null
+          }
         }
       }
     },
@@ -689,7 +707,21 @@ export const getLiveStatus = asyncHandler(async (req, res, next) => {
         },
         attendance: '$attendanceArray',
         statusLabel: 1,
-        clockInTime: '$attendanceArray.clockIn',
+        clockInTime: {
+          $cond: {
+            if: '$lastClockInEvent.timestamp',
+            then: '$lastClockInEvent.timestamp',
+            else: '$attendanceArray.clockIn'
+          }
+        },
+        firstClockInTime: '$attendanceArray.clockIn',
+        lastClockInTime: {
+          $cond: {
+            if: '$lastClockInEvent.timestamp',
+            then: '$lastClockInEvent.timestamp',
+            else: '$attendanceArray.clockIn'
+          }
+        },
         clockOutTime: '$attendanceArray.clockOut',
         lunchOutTime: '$attendanceArray.lunchOut',
         lunchInTime: '$attendanceArray.lunchIn',
