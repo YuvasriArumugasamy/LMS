@@ -21,6 +21,7 @@ export const EmployeeDetailsModal = ({
   const [loading, setLoading] = useState(false);
   const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
   const [faceSubmitting, setFaceSubmitting] = useState(false);
+  const [managers, setManagers] = useState([]);
   const [editForm, setEditForm] = useState({
     firstName: '',
     lastName: '',
