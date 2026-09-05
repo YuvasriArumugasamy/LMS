@@ -176,7 +176,7 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
           <UserAvatar user={user} size="w-8 h-8 text-xs shrink-0" />
           <div className="hidden sm:block text-left pr-1">
             <p className="text-xs font-bold text-slate-900 dark:text-white leading-none capitalize">
-              {user?.role === 'CEO' ? 'CEO' : `${user?.firstName || ''} ${user?.lastName || ''}`.replace(/\d+/g, '').replace(/([a-z])([A-Z])/g, '$1 $2').trim() || 'User'}
+              {`${user?.firstName || ''} ${user?.lastName || ''}`.replace(/\d+/g, '').replace(/([a-z])([A-Z])/g, '$1 $2').trim() || 'User'}
             </p>
             <p className="text-[10px] text-slate-400 font-medium mt-0.5 uppercase tracking-wider">
               {user?.designation?.name || (user?.role === 'ADMIN' ? 'Admin' : user?.role === 'TEAM_LEAD' ? 'Team Lead' : user?.role === 'EMPLOYEE' ? 'Employee' : user?.role?.replace('_', ' '))}

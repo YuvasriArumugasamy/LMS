@@ -166,37 +166,43 @@ export const clockIn = asyncHandler(async (req, res, next) => {
           note: isForce ? existingAttendance.notes : undefined
         });
       }
-    if (existingAttendance.lunchOut && !existingAttendance.lunchIn) {
-      existingAttendance.lunchIn = now;
+      if (existingAttendance.lunchOut && !existingAttendance.lunchIn) {
+        existingAttendance.lunchIn = now;
+        if (!existingAttendance.timeline) existingAttendance.timeline = [];
+        existingAttendance.timeline.push({
+          type: 'LUNCH_IN',
+          timestamp: now,
+          workLocation: existingAttendance.workLocation,
+          note: 'Auto lunch-in on re-clocking in'
+        });
+      }
+
+      existingAttendance.clockOut = undefined;
+      existingAttendance.totalHours = undefined;
+      if (workLocation) existingAttendance.workLocation = workLocation;
+
+      const timeLogStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
+      const newNote = `Re-clocked in at ${timeLogStr} IST`;
+      existingAttendance.notes = existingAttendance.notes ? `${existingAttendance.notes} | ${newNote}` : newNote;
+
       if (!existingAttendance.timeline) existingAttendance.timeline = [];
       existingAttendance.timeline.push({
-        type: 'LUNCH_IN',
+        type: 'CLOCK_IN',
         timestamp: now,
-        workLocation: existingAttendance.workLocation,
-        note: 'Auto lunch-in on re-clocking in'
+        workLocation: workLocation || existingAttendance.workLocation,
+        note: newNote
+      });
+
+      await existingAttendance.save();
+      return res.status(200).json({
+        status: 'success',
+        message: 'Checked in successfully.',
+        data: { attendance: existingAttendance }
       });
     }
 
-    existingAttendance.clockOut = undefined;
-    existingAttendance.totalHours = undefined;
-    if (workLocation) existingAttendance.workLocation = workLocation;
-
-    const timeLogStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
-    const newNote = `Re-clocked in at ${timeLogStr} IST`;
-    existingAttendance.notes = existingAttendance.notes ? `${existingAttendance.notes} | ${newNote}` : newNote;
-
-    if (!existingAttendance.timeline) existingAttendance.timeline = [];
-    existingAttendance.timeline.push({
-      type: 'CLOCK_IN',
-      timestamp: now,
-      workLocation: workLocation || existingAttendance.workLocation,
-      note: newNote
-    });
-
-    await existingAttendance.save();
     return res.status(200).json({
       status: 'success',
-      message: 'Checked in successfully.',
       data: { attendance: existingAttendance }
     });
   }
@@ -247,37 +253,43 @@ export const clockIn = asyncHandler(async (req, res, next) => {
               note: isForce ? duplicateDoc.notes : undefined
             });
           }
-        if (duplicateDoc.lunchOut && !duplicateDoc.lunchIn) {
-          duplicateDoc.lunchIn = now;
+          if (duplicateDoc.lunchOut && !duplicateDoc.lunchIn) {
+            duplicateDoc.lunchIn = now;
+            if (!duplicateDoc.timeline) duplicateDoc.timeline = [];
+            duplicateDoc.timeline.push({
+              type: 'LUNCH_IN',
+              timestamp: now,
+              workLocation: duplicateDoc.workLocation,
+              note: 'Auto lunch-in on re-clocking in'
+            });
+          }
+
+          duplicateDoc.clockOut = undefined;
+          duplicateDoc.totalHours = undefined;
+          if (workLocation) duplicateDoc.workLocation = workLocation;
+
+          const timeLogStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
+          const newNote = `Re-clocked in at ${timeLogStr} IST`;
+          duplicateDoc.notes = duplicateDoc.notes ? `${duplicateDoc.notes} | ${newNote}` : newNote;
+
           if (!duplicateDoc.timeline) duplicateDoc.timeline = [];
           duplicateDoc.timeline.push({
-            type: 'LUNCH_IN',
+            type: 'CLOCK_IN',
             timestamp: now,
-            workLocation: duplicateDoc.workLocation,
-            note: 'Auto lunch-in on re-clocking in'
+            workLocation: workLocation || duplicateDoc.workLocation,
+            note: newNote
+          });
+
+          await duplicateDoc.save();
+          return res.status(200).json({
+            status: 'success',
+            message: 'Checked in successfully.',
+            data: { attendance: duplicateDoc }
           });
         }
 
-        duplicateDoc.clockOut = undefined;
-        duplicateDoc.totalHours = undefined;
-        if (workLocation) duplicateDoc.workLocation = workLocation;
-
-        const timeLogStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
-        const newNote = `Re-clocked in at ${timeLogStr} IST`;
-        duplicateDoc.notes = duplicateDoc.notes ? `${duplicateDoc.notes} | ${newNote}` : newNote;
-
-        if (!duplicateDoc.timeline) duplicateDoc.timeline = [];
-        duplicateDoc.timeline.push({
-          type: 'CLOCK_IN',
-          timestamp: now,
-          workLocation: workLocation || duplicateDoc.workLocation,
-          note: newNote
-        });
-
-        await duplicateDoc.save();
         return res.status(200).json({
           status: 'success',
-          message: 'Checked in successfully.',
           data: { attendance: duplicateDoc }
         });
       }
