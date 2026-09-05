@@ -179,7 +179,7 @@ export const Navbar = ({ onToggleSidebar, sidebarOpen }) => {
               {`${user?.firstName || ''} ${user?.lastName || ''}`.replace(/\d+/g, '').replace(/([a-z])([A-Z])/g, '$1 $2').trim() || 'User'}
             </p>
             <p className="text-[10px] text-slate-400 font-medium mt-0.5 uppercase tracking-wider">
-              {user?.designation?.name || (user?.role === 'ADMIN' ? 'Admin' : user?.role === 'TEAM_LEAD' ? 'Team Lead' : user?.role === 'EMPLOYEE' ? 'Employee' : user?.role?.replace('_', ' '))}
+              {user?.role === 'CEO' ? 'CEO' : (user?.designation?.name || (user?.role === 'ADMIN' ? 'Admin' : user?.role === 'TEAM_LEAD' ? 'Team Lead' : user?.role === 'EMPLOYEE' ? 'Employee' : user?.role?.replace('_', ' ')))}
             </p>
           </div>
         </div>

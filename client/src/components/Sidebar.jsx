@@ -227,7 +227,7 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="inline-block px-1.5 py-0.5 text-[9px] font-black rounded-md bg-blue-600/10 text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                  {user?.designation?.name || getRoleLabel(role)}
+                  {user?.role === 'CEO' ? 'CEO' : (user?.designation?.name || getRoleLabel(role))}
                 </span>
               </div>
             </div>
