@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Modal } from './Modal';
 import { UserAvatar } from './UserAvatar';
 import { StatusBadge } from './Badge';
@@ -69,9 +69,9 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
   const currentTurnLabel = approvalChain[currentStepIndex]?.label || 'CEO Approval';
 
   const isRejectedOrCancelled = ['TEAM_LEAD_REJECTED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED', 'CANCELLED'].includes(leave.status);
-  // Final approved: EMPLOYEE → ADMIN_APPROVED, others → CEO_APPROVED
-  const isFinalApproved = (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || 
-                           (applicantRole !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
+  // Final approved: EMPLOYEE → ADMIN_APPROVED or CEO_APPROVED, others → CEO_APPROVED
+  const isFinalApproved = leave.status === 'CEO_APPROVED' || 
+                           (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED');
 
   const canCancel = isOwner && !['CANCELLED', 'CEO_APPROVED', 'HR_REJECTED', 'ADMIN_REJECTED', 'CEO_REJECTED'].includes(leave.status) &&
     !(applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED');
@@ -372,7 +372,7 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
                 onClick={handleApproveAction}
                 className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none w-full sm:w-auto"
               >
-                <CheckCircle2 className="w-4 h-4" /> Approve Leave
+                <CheckCircle2 className="w-4 h-4" /> {currentUser?.role === 'CEO' ? 'Approve & Finalize (CEO Direct)' : 'Approve Leave'}
               </button>
             </div>
           </div>

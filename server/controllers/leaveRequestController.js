@@ -309,8 +309,17 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
     return next(new AppError(`This leave request is already finalized or rejected (${leave.status.replace(/_/g, ' ')}).`, 400));
   }
 
-  // Sequential Approval Flow Implementation based on Applicant Role
-  if (applicantRole === 'EMPLOYEE') {
+  // CEO Direct Executive Override: CEO approval immediately grants final approval (bypassing remaining steps if Admin/HR is absent)
+  if (reviewerRole === 'CEO') {
+    leave.status = 'CEO_APPROVED';
+    leave.approvalFlow.push({
+      reviewer: req.user._id,
+      reviewerRole: 'CEO',
+      action: 'CEO_APPROVE',
+      comments: comments || 'Direct final executive approval granted by CEO.',
+      timestamp: now
+    });
+  } else if (applicantRole === 'EMPLOYEE') {
     // Sequential Flow: TL -> HR -> Admin (ADMIN) — Final for Employee, no CEO
     if (leave.status === 'PENDING' || leave.status === 'ESCALATED_TO_HR') {
       if (!['TEAM_LEAD', 'CEO'].includes(reviewerRole)) {
@@ -454,7 +463,7 @@ export const approveLeave = asyncHandler(async (req, res, next) => {
   }
 
   // Deduct from Pending and add to Used ONLY when leave reaches final approved status
-  const isFinalApproval = (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || (applicantRole !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
+  const isFinalApproval = leave.status === 'CEO_APPROVED' || (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED');
 
   if (isFinalApproval) {
     const currentYear = new Date(leave.fromDate).getFullYear();
@@ -611,7 +620,7 @@ export const cancelLeave = asyncHandler(async (req, res, next) => {
 
   // ✅ NEW: Allow cancellation even after approval, but notify HR
   const applicantRole = leave.user?.role || req.user.role;
-  const isFinalApproved = (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED') || (applicantRole !== 'EMPLOYEE' && leave.status === 'CEO_APPROVED');
+  const isFinalApproved = leave.status === 'CEO_APPROVED' || (applicantRole === 'EMPLOYEE' && leave.status === 'ADMIN_APPROVED');
   const isPartiallyApproved = ['TEAM_LEAD_APPROVED', 'HR_APPROVED', 'ADMIN_APPROVED'].includes(leave.status);
   const previousStatus = leave.status;
 
