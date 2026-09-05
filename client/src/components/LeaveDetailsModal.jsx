@@ -330,7 +330,7 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
                 </span>
               ) : isMyTurn ? (
                 <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
-                  <Clock className="w-3 h-3 text-blue-600" /> Action Required: {currentTurnLabel}
+                  <Clock className="w-3 h-3 text-blue-600" /> Action Required: {currentUser?.role === 'CEO' ? 'CEO Direct Final Approval' : currentTurnLabel}
                 </span>
               ) : (
                 <span className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
@@ -372,7 +372,7 @@ export const LeaveDetailsModal = ({ isOpen, onClose, leave, currentUser, onAppro
                 onClick={handleApproveAction}
                 className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none w-full sm:w-auto"
               >
-                <CheckCircle2 className="w-4 h-4" /> {currentUser?.role === 'CEO' ? 'Approve & Finalize (CEO Direct)' : 'Approve Leave'}
+                <CheckCircle2 className="w-4 h-4" /> {currentUser?.role === 'CEO' ? 'Approve & Finalize (CEO Direct)' : (currentUser?.role === 'ADMIN' && applicantRole === 'EMPLOYEE' && leave.status === 'HR_APPROVED') ? 'Approve & Finalize (Admin)' : 'Approve Leave'}
               </button>
             </div>
           </div>
