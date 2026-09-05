@@ -111,30 +111,48 @@ export const Notifications = () => {
   };
 
   const handleTestNotification = async () => {
+    setPushMessage("🚀 Test Notification Triggered! Check your device popups & list.");
+    setTimeout(() => setPushMessage(''), 5000);
+
+    // Insert an immediate test notification item for instant visual feedback
+    const testItem = {
+      _id: 'test-' + Date.now(),
+      title: "🚀 Test Notification",
+      message: "Push & In-App notifications are working properly on your device!",
+      type: 'SYSTEM',
+      isRead: true,
+      createdAt: new Date().toISOString()
+    };
+    setNotifications(prev => [testItem, ...prev]);
+    setTotal(prev => prev + 1);
+
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
-        // Fix: Use getRegistration() instead of ready to avoid hanging if SW is not fully installed
         const registration = await navigator.serviceWorker.getRegistration();
         if (registration && registration.active) {
-          registration.showNotification("🚀 LCM Test Notification", {
-            body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
+          await registration.showNotification("🚀 LCM Test Notification", {
+            body: "This is a test notification. Push notifications are working on your device!",
             icon: "/vite.svg"
           });
         } else {
-          // Fallback immediately to standard Notification
           new Notification("🚀 LCM Test Notification", {
-            body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
+            body: "This is a test notification. Push notifications are working on your device!",
             icon: "/vite.svg"
           });
         }
       } catch (err) {
-        new Notification("🚀 LCM Test Notification", {
-          body: "This is a test notification. If you see this, push notifications are working perfectly on your device!",
-          icon: "/vite.svg"
-        });
+        console.error('Test notification error:', err);
+        try {
+          new Notification("🚀 LCM Test Notification", {
+            body: "This is a test notification. Push notifications are working on your device!",
+            icon: "/vite.svg"
+          });
+        } catch (e) {
+          console.error('Fallback notification error:', e);
+        }
       }
     } else {
-      alert("Please click 'Enable Push Notifications' first and allow permissions!");
+      alert("Please click 'Enable Push' first and allow notification permissions!");
     }
   };
 
