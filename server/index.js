@@ -37,7 +37,7 @@ import attendanceRoutes from './routes/attendanceRoutes.js';
 import dailyReportRoutes from './routes/dailyReportRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import { checkEmergencyEscalations } from './services/escalationService.js';
-import { updateEarnedLeaveToPaidLeave, updateCeoName } from './utils/seed.js';
+import { runAutoCheckoutJob } from './services/autoCheckoutService.js';
 
 const app = express();
 
@@ -47,10 +47,7 @@ enableQueryLogging(mongoose);
 
 // Database Connection (Only run top-level connection on non-Vercel environments)
 if (process.env.VERCEL !== '1') {
-  connectDB().then(() => {
-    updateEarnedLeaveToPaidLeave();
-    updateCeoName();
-  }).catch((err) => {
+  connectDB().catch((err) => {
     console.error('[DB Init Error]', err.message);
   });
 }
@@ -210,13 +207,19 @@ app.get('*', (req, res) => {
 // Global Error Handler
 app.use(globalErrorHandler);
 
-// Emergency Leave Escalation Cron/Background Service (Checks every 5 minutes - optimized from 30s)
+// Emergency Leave Escalation & 7 PM Auto Check-Out Background Service
 const ESCALATION_INTERVAL = Number(process.env.ESCALATION_CHECK_INTERVAL_MS) || 300000; // Default: 5 minutes
 if (process.env.VERCEL !== '1') {
   setInterval(() => {
     checkEmergencyEscalations();
   }, ESCALATION_INTERVAL);
   console.log(`🚨 [Emergency Escalation] Active - checking every ${ESCALATION_INTERVAL / 1000}s`);
+
+  // 7:00 PM IST Auto Check-Out Background Service (Checks every 60 seconds)
+  setInterval(() => {
+    runAutoCheckoutJob();
+  }, 60000);
+  console.log(`⏰ [7:00 PM Auto Check-Out] Active - checking every 60s`);
 
   // Render Keep-Alive Service: Pings public URL every 10 minutes to prevent cold sleep
   const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL || 'https://lcattendancesystem.onrender.com';

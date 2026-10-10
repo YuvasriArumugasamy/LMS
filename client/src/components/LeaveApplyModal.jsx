@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import api from '../services/api';
-import { AlertCircle, Zap, Calendar, FileText, Phone, Paperclip } from 'lucide-react';
+import { AlertCircle, Zap, Calendar, FileText, Phone, Paperclip, Clock } from 'lucide-react';
 
 export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], balance }) => {
   const [leaveType, setLeaveType] = useState('');
@@ -9,6 +9,9 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
   const [toDate, setToDate] = useState('');
   const [isHalfDay, setIsHalfDay] = useState(false);
   const [halfDayType, setHalfDayType] = useState('FIRST_HALF');
+  const [isPermission, setIsPermission] = useState(false);
+  const [permissionHours, setPermissionHours] = useState('2');
+  const [permissionTimeSlot, setPermissionTimeSlot] = useState('');
   const [isEmergency, setIsEmergency] = useState(false);
   const [reason, setReason] = useState('');
   const [contactNumber, setContactNumber] = useState('');
@@ -32,6 +35,9 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
       if (start <= end) {
         if (isHalfDay) {
           setDaysCount(0.5);
+        } else if (isPermission) {
+          const hrs = Number(permissionHours) || 2;
+          setDaysCount(Math.round((hrs / 8) * 1000) / 1000);
         } else {
           const diffTime = Math.abs(end - start);
           const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
@@ -43,7 +49,7 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
         setError('From Date cannot be later than To Date.');
       }
     }
-  }, [fromDate, toDate, isHalfDay]);
+  }, [fromDate, toDate, isHalfDay, isPermission, permissionHours]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,8 +76,11 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
         leaveType,
         fromDate,
         toDate,
-        isHalfDay,
-        halfDayType: isHalfDay ? halfDayType : 'NONE',
+        isHalfDay: isPermission ? false : isHalfDay,
+        halfDayType: (isHalfDay && !isPermission) ? halfDayType : 'NONE',
+        isPermission,
+        permissionHours: isPermission ? Number(permissionHours) : 0,
+        permissionTimeSlot: isPermission ? permissionTimeSlot : '',
         isEmergency,
         reason,
         contactNumber,
@@ -87,6 +96,9 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
       setAttachmentUrl('');
       setIsEmergency(false);
       setIsHalfDay(false);
+      setIsPermission(false);
+      setPermissionHours('2');
+      setPermissionTimeSlot('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit leave application.');
     } finally {
@@ -165,33 +177,106 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
           </div>
         </div>
 
-        {/* Half Day & Duration */}
-        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isHalfDay}
-              onChange={(e) => setIsHalfDay(e.target.checked)}
-              className="w-4 h-4 text-primary rounded focus:ring-primary"
-            />
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Apply as Half Day</span>
-          </label>
+        {/* Leave Duration Options (Half Day & Hourly Permission) */}
+        <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Half Day Checkbox */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isHalfDay}
+                onChange={(e) => {
+                  const val = e.target.checked;
+                  setIsHalfDay(val);
+                  if (val) setIsPermission(false);
+                }}
+                className="w-4 h-4 text-primary rounded focus:ring-primary"
+              />
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Apply as Half Day</span>
+            </label>
 
+            {/* Permission Checkbox */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isPermission}
+                onChange={(e) => {
+                  const val = e.target.checked;
+                  setIsPermission(val);
+                  if (val) setIsHalfDay(false);
+                }}
+                className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+              />
+              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" /> Apply for Permission (Hours)
+              </span>
+            </label>
+
+            <div className="text-right">
+              <span className="text-xs text-slate-400 font-semibold uppercase">
+                {isPermission ? 'Duration: ' : 'Total Days: '}
+              </span>
+              <span className="text-sm font-extrabold text-primary">
+                {isPermission ? `${permissionHours} Hour${Number(permissionHours) > 1 ? 's' : ''}` : daysCount}
+              </span>
+            </div>
+          </div>
+
+          {/* Half Day Selection */}
           {isHalfDay && (
-            <select
-              value={halfDayType}
-              onChange={(e) => setHalfDayType(e.target.value)}
-              className="p-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-semibold text-slate-900 dark:text-white outline-none"
-            >
-              <option value="FIRST_HALF">First Half (Morning)</option>
-              <option value="SECOND_HALF">Second Half (Afternoon)</option>
-            </select>
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center gap-3">
+              <span className="text-xs font-bold text-slate-500">Half Day Session:</span>
+              <select
+                value={halfDayType}
+                onChange={(e) => setHalfDayType(e.target.value)}
+                className="p-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-primary flex-1"
+              >
+                <option value="FIRST_HALF">First Half (Morning)</option>
+                <option value="SECOND_HALF">Second Half (Afternoon)</option>
+              </select>
+            </div>
           )}
 
-          <div className="text-right">
-            <span className="text-xs text-slate-400 font-semibold uppercase">Total Days: </span>
-            <span className="text-sm font-extrabold text-primary">{daysCount}</span>
-          </div>
+          {/* Permission Hours & Time Slot Options */}
+          {isPermission && (
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+                    Permission Hours *
+                  </label>
+                  <select
+                    value={permissionHours}
+                    onChange={(e) => setPermissionHours(e.target.value)}
+                    className="w-full p-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 cursor-pointer"
+                  >
+                    <option value="1">1 Hour</option>
+                    <option value="2">2 Hours</option>
+                    <option value="3">3 Hours</option>
+                    <option value="4">4 Hours</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+                    Permission Timing / Slot (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={permissionTimeSlot}
+                    onChange={(e) => setPermissionTimeSlot(e.target.value)}
+                    placeholder="Enter permission timing / slot..."
+                    className="w-full p-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-900/60 text-[11px] text-indigo-700 dark:text-indigo-300 font-bold flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 shrink-0" />
+                <span>Permission requested: {permissionHours} Hour{Number(permissionHours) > 1 ? 's' : ''} {permissionTimeSlot ? `(${permissionTimeSlot})` : ''}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Emergency Leave Toggle */}

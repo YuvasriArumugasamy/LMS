@@ -18,6 +18,8 @@ import {
   Building2,
   FileCheck2,
   CalendarCheck,
+  UserCheck,
+  LogIn,
   Plus,
   Clock,
   CheckCircle2,
@@ -403,10 +405,10 @@ export const Dashboard = () => {
       )}
 
       {/* ================= ROW 1: WELCOME BANNER + QUICK ACTIONS ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         
         {/* Welcome Banner matching Original Design with Distinct Border (8 Cols) */}
-        <div className="lg:col-span-8 relative rounded-3xl bg-[#EEF4FF] dark:bg-slate-900/90 border-2 border-blue-200 dark:border-slate-700 p-6 sm:p-7 flex flex-col justify-between overflow-hidden shadow-md shadow-blue-500/10 min-h-[220px]">
+        <div className="xl:col-span-8 relative rounded-3xl bg-[#EEF4FF] dark:bg-slate-900/90 border-2 border-blue-200 dark:border-slate-700 p-6 sm:p-7 flex flex-col justify-between overflow-hidden shadow-md shadow-blue-500/10 min-h-[220px]">
           
           {/* Seamless Original Background Image (Always Visible on Phone Size & Desktop) */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-3xl">
@@ -532,7 +534,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Quick Actions Card Widget matching Image (4 Cols) */}
-        <div className="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
+        <div className="xl:col-span-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Quick Actions</h3>
             <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
@@ -643,10 +645,10 @@ export const Dashboard = () => {
             <button onClick={() => navigate('/reports')} className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline">View all</button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <MetricCard title="TOTAL EMPLOYEES" value={stats?.cards?.totalEmployees ?? 0} icon={Users} color="primary" trend="+8.2% This Month" bgImage={blueBgCard} onClick={() => navigate('/employees')} />
-            <MetricCard title="DEPARTMENTS" value={stats?.cards?.totalDepartments ?? 0} icon={Building2} color="secondary" trend="+2 New This Month" bgImage={purpleBgCard} onClick={() => navigate('/departments')} />
-            <MetricCard title="PENDING APPROVALS" value={stats?.cards?.pendingLeaves ?? stats?.cards?.pendingHrApprovals ?? stats?.cards?.pendingRequests ?? 0} icon={Clock} color="warning" trend="+2 Since Yesterday" bgImage={orangeBgCard} onClick={() => navigate('/leaves?status=PENDING')} />
-            <MetricCard title="EMPLOYEES ON LEAVE" value={stats?.cards?.employeesOnLeaveToday ?? stats?.cards?.teamOnLeaveTodayCount ?? 0} icon={CalendarCheck} color="success" trend="+5.4% This Month" bgImage={greenBgCard} onClick={() => navigate('/leaves?status=APPROVED')} />
+            <MetricCard title="TOTAL EMPLOYEES" value={stats?.cards?.totalEmployees ?? 0} icon={Users} color="primary" trend={stats?.cards?.trends?.totalEmployees || (stats?.cards?.totalEmployees > 0 ? "Active Workforce" : "No Employees")} bgImage={blueBgCard} onClick={() => navigate('/employees')} />
+            <MetricCard title="TODAY LOGGED IN" value={stats?.cards?.todayLoggedIn ?? 0} icon={UserCheck} color="secondary" trend={stats?.cards?.trends?.todayLoggedIn || `${Math.round(((stats?.cards?.todayLoggedIn || 0) / (stats?.cards?.totalEmployees || 1)) * 100)}% Present Today`} bgImage={purpleBgCard} onClick={() => navigate('/attendance?tab=live')} />
+            <MetricCard title="PENDING APPROVALS" value={stats?.cards?.pendingLeaves ?? stats?.cards?.pendingHrApprovals ?? stats?.cards?.pendingRequests ?? 0} icon={Clock} color="warning" trend={stats?.cards?.trends?.pendingLeaves || ((stats?.cards?.pendingLeaves || 0) > 0 ? `${stats?.cards?.pendingLeaves} Pending Review` : "All Caught Up")} bgImage={orangeBgCard} onClick={() => navigate('/leaves?status=PENDING')} />
+            <MetricCard title="EMPLOYEES ON LEAVE" value={stats?.cards?.employeesOnLeaveToday ?? stats?.cards?.teamOnLeaveTodayCount ?? 0} icon={CalendarCheck} color="success" trend={stats?.cards?.trends?.employeesOnLeaveToday || `${stats?.cards?.employeesOnLeaveToday ?? 0} On Leave Today`} bgImage={greenBgCard} onClick={() => navigate('/leaves?status=APPROVED')} />
           </div>
         </div>
       )}
@@ -752,11 +754,11 @@ export const Dashboard = () => {
       )}
 
       {/* ================= ROW 4: MONTHLY TREND + LEAVE DISTRIBUTION (CEO, HR, ADMIN, TEAM_LEAD ONLY) + UPCOMING HOLIDAYS ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         
         {/* Left Side: 2 Analytics Charts Grid (CEO, ADMIN, HR, TEAM_LEAD ONLY) */}
         {(user?.role === 'CEO' || user?.role === 'ADMIN' || user?.role === 'HR' || user?.role === 'TEAM_LEAD') && (
-          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-12 gap-6">
+          <div className="xl:col-span-8 grid grid-cols-1 md:grid-cols-12 gap-6">
             
             {/* Monthly Leave Trend Area Chart matching Image (7 Cols) */}
             <div className="md:col-span-7 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs">
@@ -853,7 +855,7 @@ export const Dashboard = () => {
         )}
 
         {/* Upcoming Holidays Widget matching Image */}
-        <div className={`${(user?.role === 'CEO' || user?.role === 'ADMIN' || user?.role === 'HR' || user?.role === 'TEAM_LEAD') ? 'lg:col-span-4' : 'lg:col-span-12'} bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between`}>
+        <div className={`${(user?.role === 'CEO' || user?.role === 'ADMIN' || user?.role === 'HR' || user?.role === 'TEAM_LEAD') ? 'xl:col-span-4' : 'xl:col-span-12'} bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between`}>
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Upcoming Holidays</h3>

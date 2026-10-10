@@ -3,6 +3,7 @@ import { User } from '../models/User.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/appError.js';
 import { decryptFaceDescriptor } from '../utils/encryption.js';
+import { runAutoCheckoutJob } from '../services/autoCheckoutService.js';
 
 // Get today's start and end date in IST (Asia/Kolkata timezone)
 const getTodayDateRange = () => {
@@ -465,6 +466,9 @@ export const clockOut = asyncHandler(async (req, res, next) => {
 export const getTodayAttendance = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
 
+  // Auto-checkout check if current time is past 7:00 PM IST
+  await runAutoCheckoutJob();
+
   const latest = await Attendance.findOne({ user: userId }).sort({ date: -1, createdAt: -1 });
   const attendance = (latest && (!latest.clockOut || isTodayInIST(latest.date) || isTodayInIST(latest.clockIn))) ? latest : null;
 
@@ -487,18 +491,22 @@ export const getAttendanceLogs = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { month, year, status } = req.query;
 
-  const currentYear = Number(year) || new Date().getFullYear();
-  const currentMonth = Number(month) || new Date().getMonth() + 1;
+  let query = {};
 
-  // Build IST-aware month start and end dates
-  const monthStr = String(currentMonth).padStart(2, '0');
-  const lastDay = new Date(currentYear, currentMonth, 0).getDate();
-  const startDate = new Date(`${currentYear}-${monthStr}-01T00:00:00.000+05:30`);
-  const endDate = new Date(`${currentYear}-${monthStr}-${String(lastDay).padStart(2, '0')}T23:59:59.999+05:30`);
-
-  let query = {
-    date: { $gte: startDate, $lte: endDate }
-  };
+  if (month && year) {
+    const currentYear = Number(year);
+    const currentMonth = Number(month);
+    const monthStr = String(currentMonth).padStart(2, '0');
+    const lastDay = new Date(currentYear, currentMonth, 0).getDate();
+    const startDate = new Date(`${currentYear}-${monthStr}-01T00:00:00.000+05:30`);
+    const endDate = new Date(`${currentYear}-${monthStr}-${String(lastDay).padStart(2, '0')}T23:59:59.999+05:30`);
+    query.date = { $gte: startDate, $lte: endDate };
+  } else {
+    // Preserve full 90-day attendance history so previous months (Last Month / Past Months) are preserved when month is omitted
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    query.date = { $gte: ninetyDaysAgo };
+  }
 
   if (status) {
     if (status === 'WFH') {
@@ -621,8 +629,7 @@ export const getLiveStatus = asyncHandler(async (req, res, next) => {
                   {
                     $or: [
                       { $and: [{ $gte: ['$date', todayStart] }, { $lte: ['$date', todayEnd] }] },
-                      { $eq: ['$clockOut', null] },
-                      { $eq: ['$clockOut', '$$REMOVE'] }
+                      { $and: [{ $gte: ['$clockIn', todayStart] }, { $lte: ['$clockIn', todayEnd] }] }
                     ]
                   }
                 ]

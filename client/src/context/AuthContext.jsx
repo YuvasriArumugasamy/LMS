@@ -19,7 +19,6 @@ export const AuthProvider = ({ children }) => {
           setUser(res.data.data.user);
           localStorage.setItem('elms_user', JSON.stringify(res.data.data.user));
         } catch (error) {
-          console.error('[Auth Check Error]', error);
           logout();
         }
       }
@@ -42,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.post('/auth/logout');
     } catch (error) {
-      console.error('[Logout API error]', error);
+      // Silently handle logout error
     } finally {
       localStorage.removeItem('elms_access_token');
       localStorage.removeItem('elms_refresh_token');
