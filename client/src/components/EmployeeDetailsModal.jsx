@@ -161,8 +161,16 @@ export const EmployeeDetailsModal = ({
     setFaceSubmitting(true);
     try {
       await api.post(`/employees/${employee._id}/face-lock`, { faceDescriptor });
-      alert(`✅ Face Lock successfully set up for ${employee.firstName} ${employee.lastName}!`);
+      if (employee) {
+        employee.isFaceRegistered = true;
+      }
+      if (user?._id === employee._id || employee.role === 'CEO') {
+        const updatedUser = { ...user, isFaceRegistered: true };
+        localStorage.setItem('elms_user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+      }
       setIsFaceModalOpen(false);
+      alert(`✅ Face Lock successfully set up for ${employee.firstName} ${employee.lastName}!`);
       if (onUpdateSuccess) onUpdateSuccess();
       onClose();
     } catch (err) {
@@ -179,6 +187,14 @@ export const EmployeeDetailsModal = ({
     setLoading(true);
     try {
       await api.delete(`/employees/${employee._id}/face-lock`);
+      if (employee) {
+        employee.isFaceRegistered = false;
+      }
+      if (user?._id === employee._id || employee.role === 'CEO') {
+        const updatedUser = { ...user, isFaceRegistered: false };
+        localStorage.setItem('elms_user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+      }
       alert(`✅ Face Lock pattern removed for ${employee.firstName}.`);
       if (onUpdateSuccess) onUpdateSuccess();
       onClose();
