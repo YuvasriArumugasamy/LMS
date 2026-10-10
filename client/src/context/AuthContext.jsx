@@ -27,8 +27,15 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
+  const login = async (email, password, faceDescriptor = null) => {
+    const payload = { email, password };
+    if (faceDescriptor) payload.faceDescriptor = faceDescriptor;
+    const res = await api.post('/auth/login', payload);
+
+    if (res.data?.status === 'face_verification_required' || res.data?.requireFace) {
+      return res.data;
+    }
+
     const { user, accessToken, refreshToken } = res.data.data;
     localStorage.setItem('elms_access_token', accessToken);
     localStorage.setItem('elms_refresh_token', refreshToken);
