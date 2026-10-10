@@ -6,6 +6,7 @@ import { Holiday } from '../models/Holiday.js';
 import { AuditLog } from '../models/AuditLog.js';
 import { Attendance } from '../models/Attendance.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { runAutoCheckoutJob } from '../services/autoCheckoutService.js';
 
 // Build real monthly leave trend for specified year
 const buildMonthlyTrend = async (matchQuery = {}, trendYear) => {
@@ -201,7 +202,10 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
     const todayStart = new Date(`${istDateStr}T00:00:00.000+05:30`);
     const todayEnd = new Date(`${istDateStr}T23:59:59.999+05:30`);
 
-    const [employeeDeptStats, leaveStats, leavesToday, monthlyTrend, recentActivities, todayAttUsers, pendingTodayCount] = await Promise.all([
+    // Ensure auto check-out runs before fetching stats if past checkout time
+    await runAutoCheckoutJob();
+
+    const [employeeDeptStats, leaveStats, leavesToday, monthlyTrend, recentActivities, todayAttDocs, pendingTodayCount] = await Promise.all([
       Promise.all([
         User.countDocuments({ isDeleted: false, status: 'ACTIVE', role: { $ne: 'CEO' } }),
         Department.countDocuments({ isDeleted: false }),
@@ -240,13 +244,13 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
       }).populate('user', 'firstName lastName employeeId department profileImage'),
       buildMonthlyTrend({}, trendYear),
       fetchRecentActivities({}, 5),
-      Attendance.distinct('user', {
+      Attendance.find({
         user: { $in: Array.from(activeStaffIds) },
         $or: [
           { date: { $gte: todayStart, $lte: todayEnd } },
           { clockIn: { $gte: todayStart, $lte: todayEnd } }
         ]
-      }),
+      }).select('user clockIn clockOut timeline date createdAt').sort({ date: -1, createdAt: -1 }),
       LeaveRequest.countDocuments({
         status: { $in: ['PENDING', 'ESCALATED_TO_HR', 'TEAM_LEAD_APPROVED'] },
         createdAt: { $gte: today },
@@ -257,15 +261,47 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
 
     const [totalEmployees, totalDepartments, totalManagers, newEmployeesThisMonth] = employeeDeptStats;
     const leaveCounts = leaveStats[0] || { pending: 0, approved: 0, rejected: 0 };
-    const todayLoggedIn = (todayAttUsers || []).length;
 
+    // Group attendances by user to get the latest state for each employee today
+    const latestAttMap = new Map();
+    (todayAttDocs || []).forEach(att => {
+      const uId = att.user?.toString();
+      if (uId && !latestAttMap.has(uId)) {
+        latestAttMap.set(uId, att);
+      }
+    });
+
+    let activeLoggedInCount = 0;
+    const totalPresentCount = latestAttMap.size;
+
+    latestAttMap.forEach(att => {
+      let isActive = false;
+      if (Array.isArray(att.timeline) && att.timeline.length > 0) {
+        const lastTimeline = att.timeline[att.timeline.length - 1];
+        if (lastTimeline) {
+          if (['CLOCK_IN', 'LUNCH_IN'].includes(lastTimeline.type)) {
+            isActive = true;
+          } else if (['CLOCK_OUT', 'FORCE_CHECKOUT'].includes(lastTimeline.type)) {
+            isActive = false;
+          } else if (lastTimeline.type === 'LUNCH_OUT') {
+            isActive = false;
+          }
+        }
+      } else {
+        isActive = Boolean(att.clockIn && !att.clockOut);
+      }
+      if (isActive) {
+        activeLoggedInCount++;
+      }
+    });
+
+    const todayLoggedIn = activeLoggedInCount;
     const empCount = totalEmployees || 1;
-    const loginPct = Math.min(100, Math.round((todayLoggedIn / empCount) * 100));
     const leavePct = Math.min(100, Math.round((leavesToday.length / empCount) * 100));
 
     const trends = {
       totalEmployees: newEmployeesThisMonth > 0 ? `+${newEmployeesThisMonth} New This Month` : `Active Workforce`,
-      todayLoggedIn: `${loginPct}% Present Today`,
+      todayLoggedIn: `${activeLoggedInCount} Active Now • ${totalPresentCount} Present Today`,
       pendingLeaves: leaveCounts.pending > 0 ? (pendingTodayCount > 0 ? `+${pendingTodayCount} New Today` : `${leaveCounts.pending} Pending Review`) : `All Caught Up`,
       employeesOnLeaveToday: `${leavesToday.length} On Leave Today (${leavePct}%)`
     };
@@ -277,6 +313,8 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
           totalEmployees,
           totalDepartments,
           todayLoggedIn,
+          activeLoggedIn: activeLoggedInCount,
+          totalPresentToday: totalPresentCount,
           totalManagers,
           pendingLeaves: leaveCounts.pending,
           pendingHrApprovals: leaveCounts.pending,
