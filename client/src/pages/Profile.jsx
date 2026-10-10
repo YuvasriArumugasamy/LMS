@@ -22,15 +22,38 @@ const ExecutiveFaceLockSection = ({ user, setUser }) => {
     try {
       setFaceSubmitting(true);
       setMsg({ text: '', type: '' });
-      await api.post('/auth/register-face', { faceDescriptor: capturedDescriptor });
-      
-      const updatedUser = { ...user, isFaceRegistered: true };
-      localStorage.setItem('elms_user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      setIsFaceModalOpen(false);
-      setMsg({ text: '✅ CEO Biometric Face ID successfully registered and activated! Future logins will require live face verification.', type: 'success' });
+
+      // Support array directly
+      const payload = { faceDescriptor: capturedDescriptor };
+      let saved = false;
+
+      // 1. Try dedicated executive auth route
+      try {
+        await api.post('/auth/register-face', payload);
+        saved = true;
+      } catch (authErr) {
+        console.warn('POST /auth/register-face failed, trying /employees/:id/face-lock fallback:', authErr);
+        // 2. Resilient fallback: Try existing employee face-lock route
+        const targetId = user?._id || user?.id;
+        if (targetId) {
+          await api.post(`/employees/${targetId}/face-lock`, payload);
+          saved = true;
+        } else {
+          throw authErr;
+        }
+      }
+
+      if (saved) {
+        const updatedUser = { ...user, isFaceRegistered: true };
+        localStorage.setItem('elms_user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setIsFaceModalOpen(false);
+        setMsg({ text: '✅ CEO Biometric Face ID successfully registered and activated! Future logins will require live face verification.', type: 'success' });
+      }
     } catch (err) {
-      setMsg({ text: err.response?.data?.message || 'Failed to save biometric scan.', type: 'error' });
+      console.error('[Face ID Registration Error]', err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to save biometric scan.';
+      setMsg({ text: errMsg, type: 'error' });
     } finally {
       setFaceSubmitting(false);
     }
@@ -41,13 +64,27 @@ const ExecutiveFaceLockSection = ({ user, setUser }) => {
     try {
       setRemoving(true);
       setMsg({ text: '', type: '' });
-      await api.delete('/auth/remove-face');
+
+      try {
+        await api.delete('/auth/remove-face');
+      } catch (authErr) {
+        console.warn('DELETE /auth/remove-face failed, trying /employees/:id/face-lock fallback:', authErr);
+        const targetId = user?._id || user?.id;
+        if (targetId) {
+          await api.delete(`/employees/${targetId}/face-lock`);
+        } else {
+          throw authErr;
+        }
+      }
+
       const updatedUser = { ...user, isFaceRegistered: false };
       localStorage.setItem('elms_user', JSON.stringify(updatedUser));
       setUser(updatedUser);
       setMsg({ text: 'Face ID successfully removed.', type: 'info' });
     } catch (err) {
-      setMsg({ text: err.response?.data?.message || 'Failed to remove biometric data.', type: 'error' });
+      console.error('[Face ID Removal Error]', err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to remove biometric data.';
+      setMsg({ text: errMsg, type: 'error' });
     } finally {
       setRemoving(false);
     }

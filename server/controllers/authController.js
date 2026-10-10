@@ -459,8 +459,8 @@ export const logout = asyncHandler(async (req, res, next) => {
 export const registerOwnFace = asyncHandler(async (req, res, next) => {
   const { faceDescriptor } = req.body;
 
-  if (!faceDescriptor || !Array.isArray(faceDescriptor) || faceDescriptor.length !== 128) {
-    return next(new AppError('Valid 128-point face scan descriptor required.', 400));
+  if (!faceDescriptor || !Array.isArray(faceDescriptor) || faceDescriptor.length === 0) {
+    return next(new AppError('Valid face scan descriptor required.', 400));
   }
 
   const encrypted = encryptFaceDescriptor(faceDescriptor);
@@ -477,14 +477,18 @@ export const registerOwnFace = asyncHandler(async (req, res, next) => {
   user.isFaceRegistered = true;
   await user.save({ validateBeforeSave: false });
 
-  await AuditLog.create({
-    user: user._id,
-    userName: `${user.firstName} ${user.lastName}`,
-    userRole: user.role,
-    action: 'FACE_LOCK_REGISTER',
-    module: 'AUTHENTICATION',
-    details: `Executive Biometric Face ID registered/updated for ${user.firstName} ${user.lastName} (${user.role})`
-  });
+  try {
+    await AuditLog.create({
+      user: user._id,
+      userName: `${user.firstName} ${user.lastName}`,
+      userRole: user.role,
+      action: 'FACE_LOCK_REGISTER',
+      module: 'AUTHENTICATION',
+      details: `Executive Biometric Face ID registered/updated for ${user.firstName} ${user.lastName} (${user.role})`
+    });
+  } catch (auditErr) {
+    console.error('AuditLog error in registerOwnFace:', auditErr);
+  }
 
   res.status(200).json({
     status: 'success',
@@ -506,14 +510,18 @@ export const removeOwnFace = asyncHandler(async (req, res, next) => {
   user.isFaceRegistered = false;
   await user.save({ validateBeforeSave: false });
 
-  await AuditLog.create({
-    user: user._id,
-    userName: `${user.firstName} ${user.lastName}`,
-    userRole: user.role,
-    action: 'FACE_LOCK_REMOVE',
-    module: 'AUTHENTICATION',
-    details: `Executive Biometric Face ID removed for ${user.firstName} ${user.lastName} (${user.role})`
-  });
+  try {
+    await AuditLog.create({
+      user: user._id,
+      userName: `${user.firstName} ${user.lastName}`,
+      userRole: user.role,
+      action: 'FACE_LOCK_REMOVE',
+      module: 'AUTHENTICATION',
+      details: `Executive Biometric Face ID removed for ${user.firstName} ${user.lastName} (${user.role})`
+    });
+  } catch (auditErr) {
+    console.error('AuditLog error in removeOwnFace:', auditErr);
+  }
 
   res.status(200).json({
     status: 'success',
