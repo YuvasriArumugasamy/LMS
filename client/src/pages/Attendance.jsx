@@ -363,6 +363,11 @@ export const Attendance = () => {
   const isLogActiveSession = (log) => {
     if (!log || !log.clockIn || log.isSyntheticAbsent || log.status === 'ABSENT' || log.status === 'WEEK_OFF') return false;
     
+    // An active session can ONLY be from today in IST
+    const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+    const logDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(log.clockIn || log.date));
+    if (todayStr !== logDateStr) return false;
+
     // If clockOut is missing or undefined, it is an active session!
     if (!log.clockOut) return true;
 
@@ -432,7 +437,7 @@ export const Attendance = () => {
 
   const formatClockTime = (timeStr) => {
     if (!timeStr) return '--';
-    return new Date(timeStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    return new Date(timeStr).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
   };
 
   const getLocalDateString = (dateVal) => {
@@ -1064,13 +1069,13 @@ export const Attendance = () => {
 
               <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight mt-0.5 truncate">
                 {getLatestClockInTimestamp(todayAttendance)
-                  ? `Logged In at ${new Date(getLatestClockInTimestamp(todayAttendance)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                  ? `Logged In at ${new Date(getLatestClockInTimestamp(todayAttendance)).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' })}`
                   : 'Not Logged In Yet'}
               </h3>
 
               {todayAttendance?.clockOut && (
                 <p className="text-xs font-semibold text-emerald-500 mt-0.5 truncate">
-                  Logged Out at {new Date(todayAttendance.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ({formatWorkDuration(todayAttendance)} worked)
+                  Logged Out at {new Date(todayAttendance.clockOut).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' })} ({formatWorkDuration(todayAttendance)} worked)
                 </p>
               )}
             </div>
@@ -1290,7 +1295,7 @@ export const Attendance = () => {
                         <div className="min-w-0">
                           <span className="text-[9px] font-extrabold text-purple-600/80 dark:text-purple-300/80 uppercase tracking-wider block leading-none">Clock In</span>
                           <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
-                            {displayClockIn ? new Date(displayClockIn).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase() : '—'}
+                            {displayClockIn ? new Date(displayClockIn).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).toLowerCase() : '—'}
                           </span>
                         </div>
                       </div>
@@ -1303,7 +1308,7 @@ export const Attendance = () => {
                         <div className="min-w-0">
                           <span className="text-[9px] font-extrabold text-orange-600/80 dark:text-orange-300/80 uppercase tracking-wider block leading-none">Clock Out</span>
                           <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block mt-0.5">
-                            {item.clockOutTime ? new Date(item.clockOutTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase() : '—'}
+                            {item.clockOutTime ? new Date(item.clockOutTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).toLowerCase() : '—'}
                           </span>
                         </div>
                       </div>

@@ -77,49 +77,6 @@ export const login = asyncHandler(async (req, res, next) => {
       .populate('reportingManager', 'firstName lastName email');
   }
 
-  const isCeoLogin =
-    isCeoLoginAttempt ||
-    lowerSearch === 'ceo@enterprise.com' ||
-    lowerSearch === 'ceo@lifechangersind.com' ||
-    lowerSearch === 'ceo' ||
-    searchInput.toUpperCase() === 'EMP001';
-
-  const isAdminLogin =
-    lowerSearch === 'admin@enterprise.com' ||
-    lowerSearch === 'admin' ||
-    searchInput.toUpperCase() === 'ADM001';
-
-  // Auto-provision CEO or Admin account if not found in DB
-  if (!user) {
-    if (isCeoLogin) {
-      user = await User.create({
-        employeeId: 'EMP001',
-        firstName: 'Executive',
-        lastName: 'CEO',
-        email: 'ceo@enterprise.com',
-        username: 'ceo',
-        password: password,
-        plainPassword: password,
-        role: 'CEO',
-        status: 'ACTIVE'
-      });
-      user = await User.findById(user._id).select('+password');
-    } else if (isAdminLogin) {
-      user = await User.create({
-        employeeId: 'ADM001',
-        firstName: 'System',
-        lastName: 'Admin',
-        email: 'admin@enterprise.com',
-        username: 'admin',
-        password: password,
-        plainPassword: password,
-        role: 'ADMIN',
-        status: 'ACTIVE'
-      });
-      user = await User.findById(user._id).select('+password');
-    }
-  }
-
   if (!user) {
     return next(new AppError('Invalid username or password. Please verify your credentials.', 401));
   }
@@ -176,12 +133,12 @@ export const login = asyncHandler(async (req, res, next) => {
     const distance = Math.sqrt(sum);
     console.log(`[CEO Login Face Verification] User: ${user.email}, Distance: ${distance.toFixed(4)}`);
 
-    if (isNaN(distance) || distance > 0.40) {
-      console.log(`[CEO Login Face FAILED] Distance ${distance.toFixed(4)} exceeds threshold 0.40`);
+    if (isNaN(distance) || distance > 0.30) {
+      console.log(`[CEO Login Face FAILED] Distance ${distance.toFixed(4)} exceeds threshold 0.30`);
       return next(new AppError('Biometric verification failed. Face does not match registered CEO profile.', 401));
     }
 
-    console.log(`[CEO Login Face SUCCESS] Distance ${distance.toFixed(4)} within threshold 0.40`);
+    console.log(`[CEO Login Face SUCCESS] Distance ${distance.toFixed(4)} within threshold 0.30`);
   }
 
   const { accessToken, refreshToken } = generateTokens(user);

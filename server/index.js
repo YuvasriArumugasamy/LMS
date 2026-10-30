@@ -75,9 +75,14 @@ const allowedOrigins = [
   'https://employeelogin.lifechangersind.com',
   'https://lcattendancesystem.onrender.com',
   'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
   'http://localhost:4173',
   'http://192.168.43.194:5173', // Local network access for mobile
-  'http://192.168.43.194:4173'
+  'http://192.168.43.194:4173',
+  'http://10.191.49.145:5173',  // Added for your network
+  'http://10.191.49.145:5174',  // Added for your network
+  'http://10.191.49.145:4173'   // Added for your network
 ];
 
 app.use(
@@ -221,18 +226,6 @@ if (process.env.VERCEL !== '1') {
   }, 60000);
   console.log(`⏰ [7:00 PM Auto Check-Out] Active - checking every 60s`);
 
-  // Render Keep-Alive Service: Pings public URL every 10 minutes to prevent cold sleep
-  const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL || 'https://lcattendancesystem.onrender.com';
-  setInterval(async () => {
-    try {
-      const res = await fetch(`${KEEP_ALIVE_URL}/api/health`);
-      if (res.ok) {
-        console.log(`[Keep-Alive] Ping sent to ${KEEP_ALIVE_URL}/api/health at ${new Date().toLocaleTimeString()}`);
-      }
-    } catch (err) {
-      console.warn(`[Keep-Alive Warning]`, err.message);
-    }
-  }, 10 * 60 * 1000); // Every 10 minutes
 }
 
 const PORT = process.env.PORT || 5000;

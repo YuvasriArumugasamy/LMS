@@ -106,7 +106,7 @@ const formatRelativeTime = (dateInput) => {
 
   const isToday = date.toDateString() === now.toDateString();
   if (isToday) {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
   }
 
   const yesterday = new Date(now);
@@ -118,7 +118,7 @@ const formatRelativeTime = (dateInput) => {
   const diffInDays = Math.floor(diffInSeconds / 86400);
   if (diffInDays < 7) return `${diffInDays} days ago`;
 
-  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' });
 };
 
 export const Dashboard = () => {
@@ -270,12 +270,7 @@ export const Dashboard = () => {
         }))
       );
     } else {
-      setEditDistributionData([
-        { id: 'cl', name: 'Casual Leave', code: 'CL', maxDays: 18, colorBadge: '#2563EB' },
-        { id: 'sl', name: 'Sick Leave', code: 'SL', maxDays: 12, colorBadge: '#EF4444' },
-        { id: 'pl', name: 'Paid Leave', code: 'PL', maxDays: 30, colorBadge: '#22C55E' },
-        { id: 'eml', name: 'Emergency Leave', code: 'EML', maxDays: 10, colorBadge: '#F59E0B' }
-      ]);
+      setEditDistributionData([]);
     }
     setIsEditDistributionModalOpen(true);
   };
@@ -320,9 +315,7 @@ export const Dashboard = () => {
     leaves: item.leaves !== undefined ? item.leaves : (item.count !== undefined ? item.count : 10)
   }));
 
-  const totalDaysAllTypes = leaveTypes.length > 0
-    ? leaveTypes.reduce((sum, lt) => sum + (lt.maxDays || 0), 0)
-    : 42;
+  const totalDaysAllTypes = leaveTypes.reduce((sum, lt) => sum + (lt.maxDays || 0), 0);
 
   const pieData = leaveTypes.length > 0
     ? leaveTypes.map((lt) => {
@@ -336,12 +329,7 @@ export const Dashboard = () => {
           color: lt.colorBadge || (cleanCode === 'CL' ? '#2563EB' : cleanCode === 'SL' ? '#EF4444' : (cleanCode === 'PL') ? '#22C55E' : '#F59E0B')
         };
       })
-    : [
-        { name: 'Casual Leave', value: 29, maxDays: 12, color: '#2563EB' },
-        { name: 'Paid Leave', value: 36, maxDays: 15, color: '#22C55E' },
-        { name: 'Emergency Leave', value: 12, maxDays: 5, color: '#F59E0B' },
-        { name: 'Sick Leave', value: 24, maxDays: 10, color: '#EF4444' }
-      ];
+    : [];
 
   const entitlements = balance?.allocations && balance.allocations.length > 0
     ? balance.allocations.map((alloc) => ({
@@ -820,35 +808,43 @@ export const Dashboard = () => {
                 )}
               </div>
 
-              <div className="relative w-full h-36 flex items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={pieData} innerRadius={42} outerRadius={60} paddingAngle={3} dataKey="value">
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+              {pieData.length > 0 ? (
+                <>
+                  <div className="relative w-full h-36 flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={pieData} innerRadius={42} outerRadius={60} paddingAngle={3} dataKey="value">
+                          {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
 
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Total</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{totalDaysAllTypes}</span>
-                  <span className="text-[9px] font-bold text-slate-400">Leaves</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px]">
-                {pieData.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 truncate">
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                      <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">{item.name}</span>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Total</span>
+                      <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{totalDaysAllTypes}</span>
+                      <span className="text-[9px] font-bold text-slate-400">Leaves</span>
                     </div>
-                    <span className="font-black text-slate-900 dark:text-white shrink-0">{item.maxDays} Days</span>
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px]">
+                    {pieData.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                          <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">{item.name}</span>
+                        </div>
+                        <span className="font-black text-slate-900 dark:text-white shrink-0">{item.maxDays} Days</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-center text-sm font-medium text-slate-400 py-10">
+                  No leave types have been created yet.
+                </div>
+              )}
             </div>
 
           </div>

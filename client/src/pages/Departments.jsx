@@ -102,7 +102,7 @@ const HexagonDepartmentCard = ({ dept, index, onDelete }) => {
 
   const deptName = dept.name || preset?.name || 'Department';
   const deptCode = dept.code || preset?.code || 'DEPT';
-  const descriptionText = dept.description || preset?.description || 'Enterprise department unit structure';
+  const descriptionText = dept.description || preset?.description || '';
   const displayEmployeeCount = (typeof dept.employeeCount === 'number')
     ? dept.employeeCount
     : (preset?.defaultCount ?? 0);

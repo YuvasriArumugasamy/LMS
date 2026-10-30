@@ -45,8 +45,14 @@ export const runAutoCheckoutJob = async () => {
     // 1. Any record from a PAST DAY (< todayStartIST) is immediately auto-closed
     // 2. Today's records are auto-closed if current time is at or past target time
     const query = isPastTargetHour
-      ? { clockIn: { $ne: null }, $or: [{ clockOut: null }, { clockOut: { $exists: false } }] }
-      : { clockIn: { $ne: null, $lt: todayStartIST }, $or: [{ clockOut: null }, { clockOut: { $exists: false } }] };
+      ? { 
+          clockIn: { $ne: null }, 
+          $or: [{ clockOut: null }, { clockOut: { $exists: false } }]
+        }
+      : { 
+          clockIn: { $ne: null, $lt: todayStartIST }, 
+          $or: [{ clockOut: null }, { clockOut: { $exists: false } }]
+        };
 
     const openAttendances = await Attendance.find(query).populate('user', 'firstName lastName email role');
 

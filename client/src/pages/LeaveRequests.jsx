@@ -209,7 +209,9 @@ export const LeaveRequests = () => {
                     {new Date(leave.toDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </p>
                   <p className="text-[10px] sm:text-[11px] font-extrabold text-primary md:text-right">
-                    {leave.daysCount} Day{leave.daysCount > 1 ? 's' : ''}
+                    {leave.isPermission
+                      ? `${leave.permissionHours || 2} Hour${(leave.permissionHours || 2) !== 1 ? 's' : ''}`
+                      : `${leave.daysCount} Day${leave.daysCount > 1 ? 's' : ''}`}
                   </p>
                 </div>
 

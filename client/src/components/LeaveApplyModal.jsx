@@ -10,8 +10,9 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
   const [isHalfDay, setIsHalfDay] = useState(false);
   const [halfDayType, setHalfDayType] = useState('FIRST_HALF');
   const [isPermission, setIsPermission] = useState(false);
-  const [permissionHours, setPermissionHours] = useState('2');
-  const [permissionTimeSlot, setPermissionTimeSlot] = useState('');
+  const [permissionHours, setPermissionHours] = useState('');
+  const [permissionStartTime, setPermissionStartTime] = useState('');
+  const [permissionEndTime, setPermissionEndTime] = useState('');
   const [isEmergency, setIsEmergency] = useState(false);
   const [reason, setReason] = useState('');
   const [contactNumber, setContactNumber] = useState('');
@@ -20,6 +21,23 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
   const [daysCount, setDaysCount] = useState(0);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const permissionTimeSlot = permissionStartTime && permissionEndTime
+    ? `${permissionStartTime} - ${permissionEndTime}`
+    : '';
+
+  const updatePermissionTimes = (startTime, endTime) => {
+    setPermissionStartTime(startTime);
+    setPermissionEndTime(endTime);
+    if (startTime && endTime) {
+      const [startHours, startMinutes] = startTime.split(':').map(Number);
+      const [endHours, endMinutes] = endTime.split(':').map(Number);
+      const duration = ((endHours * 60 + endMinutes) - (startHours * 60 + startMinutes)) / 60;
+      setPermissionHours(duration > 0 ? String(Math.round(duration * 100) / 100) : '0');
+    } else {
+      setPermissionHours('0');
+    }
+  };
 
   useEffect(() => {
     if (leaveTypes.length > 0 && !leaveType) {
@@ -55,6 +73,10 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
     e.preventDefault();
     if (!fromDate || !toDate || !reason) {
       setError('Please fill in all required fields.');
+      return;
+    }
+    if (isPermission && (!permissionStartTime || !permissionEndTime || Number(permissionHours) <= 0)) {
+      setError('Please select a valid permission start and end time.');
       return;
     }
     if (daysCount <= 0) {
@@ -97,8 +119,9 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
       setIsEmergency(false);
       setIsHalfDay(false);
       setIsPermission(false);
-      setPermissionHours('2');
-      setPermissionTimeSlot('');
+      setPermissionHours('');
+      setPermissionStartTime('');
+      setPermissionEndTime('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit leave application.');
     } finally {
@@ -217,7 +240,9 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
                 {isPermission ? 'Duration: ' : 'Total Days: '}
               </span>
               <span className="text-sm font-extrabold text-primary">
-                {isPermission ? `${permissionHours} Hour${Number(permissionHours) > 1 ? 's' : ''}` : daysCount}
+                {isPermission
+                  ? (permissionHours ? `${permissionHours} Hour${Number(permissionHours) !== 1 ? 's' : ''}` : '--')
+                  : daysCount}
               </span>
             </div>
           </div>
@@ -243,37 +268,39 @@ export const LeaveApplyModal = ({ isOpen, onClose, onSuccess, leaveTypes = [], b
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                    Permission Hours *
+                    Permission Start Time *
                   </label>
-                  <select
-                    value={permissionHours}
-                    onChange={(e) => setPermissionHours(e.target.value)}
-                    className="w-full p-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 cursor-pointer"
-                  >
-                    <option value="1">1 Hour</option>
-                    <option value="2">2 Hours</option>
-                    <option value="3">3 Hours</option>
-                    <option value="4">4 Hours</option>
-                  </select>
+                  <input
+                    type="time"
+                    value={permissionStartTime}
+                    onChange={(e) => updatePermissionTimes(e.target.value, permissionEndTime)}
+                    className="w-full p-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500"
+                    required={isPermission}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                    Permission Timing / Slot (Optional)
+                    Permission End Time *
                   </label>
                   <input
-                    type="text"
-                    value={permissionTimeSlot}
-                    onChange={(e) => setPermissionTimeSlot(e.target.value)}
-                    placeholder="Enter permission timing / slot..."
+                    type="time"
+                    value={permissionEndTime}
+                    onChange={(e) => updatePermissionTimes(permissionStartTime, e.target.value)}
+                    min={permissionStartTime || undefined}
                     className="w-full p-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all"
+                    required={isPermission}
                   />
                 </div>
               </div>
 
               <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-900/60 text-[11px] text-indigo-700 dark:text-indigo-300 font-bold flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 shrink-0" />
-                <span>Permission requested: {permissionHours} Hour{Number(permissionHours) > 1 ? 's' : ''} {permissionTimeSlot ? `(${permissionTimeSlot})` : ''}</span>
+                <span>
+                  {permissionHours
+                    ? `Permission requested: ${permissionHours} Hour${Number(permissionHours) !== 1 ? 's' : ''} (${permissionTimeSlot})`
+                    : 'Select start and end times to calculate permission duration.'}
+                </span>
               </div>
             </div>
           )}
