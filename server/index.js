@@ -69,9 +69,10 @@ app.use(async (req, res, next) => {
 // Essential Middleware
 app.use(helmet());
 
-// CORS — allow configured frontend URL + Vercel preview deployments + Local Network
+// CORS — allow configured frontend URL + Vercel preview deployments + Render deployments + Local Network
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
+  'https://lms-nkhe.onrender.com',
   'https://employeelogin.lifechangersind.com',
   'https://lcattendancesystem.onrender.com',
   'http://localhost:5173',
@@ -90,10 +91,11 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
-      // Allow exact match or any Vercel preview subdomain
+      // Allow exact match or any Vercel/Render subdomain
       const isAllowed =
         allowedOrigins.includes(origin) ||
-        /^https:\/\/.*\.vercel\.app$/.test(origin);
+        /^https:\/\/.*\.vercel\.app$/.test(origin) ||
+        /^https:\/\/.*\.onrender\.com$/.test(origin);
       if (isAllowed) {
         callback(null, true);
       } else {
