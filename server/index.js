@@ -67,11 +67,17 @@ app.use(async (req, res, next) => {
 });
 
 // Essential Middleware
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
 
 // CORS — allow configured frontend URL + Vercel preview deployments + Render deployments + Local Network
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173',
+  process.env.FRONTEND_URL,
   'https://lms-nkhe.onrender.com',
   'https://employeelogin.lifechangersind.com',
   'https://lcattendancesystem.onrender.com',
@@ -79,27 +85,31 @@ const allowedOrigins = [
   'http://localhost:5174',
   'http://localhost:5175',
   'http://localhost:4173',
-  'http://192.168.43.194:5173', // Local network access for mobile
+  'http://192.168.43.194:5173',
   'http://192.168.43.194:4173',
-  'http://10.191.49.145:5173',  // Added for your network
-  'http://10.191.49.145:5174',  // Added for your network
-  'http://10.191.49.145:4173'   // Added for your network
-];
+  'http://10.191.49.145:5173',
+  'http://10.191.49.145:5174',
+  'http://10.191.49.145:4173'
+].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, Postman)
+      // Allow requests with no origin (mobile apps, curl, Postman, same-origin asset loads)
       if (!origin) return callback(null, true);
-      // Allow exact match or any Vercel/Render subdomain
+
       const isAllowed =
         allowedOrigins.includes(origin) ||
-        /^https:\/\/.*\.vercel\.app$/.test(origin) ||
-        /^https:\/\/.*\.onrender\.com$/.test(origin);
+        /\.onrender\.com$/.test(origin) ||
+        /\.vercel\.app$/.test(origin) ||
+        /localhost/.test(origin) ||
+        /127\.0\.0\.1/.test(origin);
+
       if (isAllowed) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS: Origin '${origin}' not allowed.`));
+        // Never throw 500 error on CORS failure; just do not reflect the header
+        callback(null, false);
       }
     },
     credentials: true
