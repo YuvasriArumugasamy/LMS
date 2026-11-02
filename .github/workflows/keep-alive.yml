@@ -13,4 +13,4 @@ jobs:
       - name: Ping Render Health Check
         run: |
           echo "Pinging Render backend..."
-          curl -s -f "https://lcattendancesystem-sj6t.onrender.com/api/health" || echo "Ping attempted"
+          curl -s -f "https://lms-nkhe.onrender.com/api/health" || echo "Ping attempted"

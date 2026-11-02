@@ -11,7 +11,7 @@ const isLocalhost = typeof window !== 'undefined' && (
 
 const rawApiUrl = isLocalhost
   ? (import.meta.env.VITE_API_URL || '/api')
-  : (import.meta.env.VITE_API_URL || 'https://lcattendancesystem-sj6t.onrender.com/api');
+  : (import.meta.env.VITE_API_URL || 'https://lms-nkhe.onrender.com/api');
 
 const api = axios.create({
   baseURL: rawApiUrl,
