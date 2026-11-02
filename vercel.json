@@ -12,7 +12,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "destination": "https://lcattendancesystem-sj6t.onrender.com/api/$1"
     },
     {
       "source": "/((?!api/|assets/|favicon\\.ico).*)",

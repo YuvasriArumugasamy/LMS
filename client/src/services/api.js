@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-// When running in production (e.g. Render/Vercel), always use relative '/api' to avoid Mixed Content & localhost issues
+// Local development uses the Vite proxy or configured local API.
+// Hosted frontend deployments use the configured Render API URL.
 const isLocalhost = typeof window !== 'undefined' && (
   window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1' ||
@@ -10,7 +11,7 @@ const isLocalhost = typeof window !== 'undefined' && (
 
 const rawApiUrl = isLocalhost
   ? (import.meta.env.VITE_API_URL || '/api')
-  : '/api';
+  : (import.meta.env.VITE_API_URL || 'https://lcattendancesystem-sj6t.onrender.com/api');
 
 const api = axios.create({
   baseURL: rawApiUrl,
