@@ -158,11 +158,20 @@ app.use(doubleCsrfProtection);
 
 // Serve React Frontend (Static Files from client/dist)
 import { existsSync } from 'fs';
-const clientDistPath = path.join(__dirname, '..', 'client', 'dist');
-if (existsSync(clientDistPath)) {
+const clientDistCandidates = [
+  path.join(__dirname, 'public'),
+  path.join(__dirname, '..', 'client', 'dist'),
+  path.join(process.cwd(), 'public'),
+  path.join(process.cwd(), '..', 'client', 'dist')
+];
+const clientDistPath = clientDistCandidates.find((candidate) =>
+  existsSync(path.join(candidate, 'index.html'))
+);
+if (clientDistPath) {
   app.use(express.static(clientDistPath));
+  console.log(`[Static] Frontend build found: ${clientDistPath}`);
 } else {
-  console.warn('[Static] client/dist not found — run npm run build first');
+  console.warn('[Static] API-only mode — frontend build not found');
 }
 
 // Health Check API
@@ -211,8 +220,8 @@ app.use('/api/settings', settingsRoutes);
 
 // React Router SPA - All non-API routes serve index.html
 app.get('*', (req, res) => {
-  const indexPath = path.join(clientDistPath, 'index.html');
-  if (existsSync(indexPath)) {
+  const indexPath = clientDistPath ? path.join(clientDistPath, 'index.html') : null;
+  if (indexPath && existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
     res.status(503).json({
