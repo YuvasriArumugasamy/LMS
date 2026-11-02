@@ -156,25 +156,15 @@ app.get('/api/csrf-token', (req, res) => {
 app.use(doubleCsrfProtection);
 */
 
-// Serve React Frontend (Static Files from client/dist)
-import { existsSync } from 'fs';
-const clientDistCandidates = [
-  path.join(__dirname, 'public'),
-  path.join(__dirname, '..', 'client', 'dist'),
-  path.join(process.cwd(), 'public'),
-  path.join(process.cwd(), '..', 'client', 'dist')
-];
-const clientDistPath = clientDistCandidates.find((candidate) =>
-  existsSync(path.join(candidate, 'index.html'))
-);
-if (clientDistPath) {
-  app.use(express.static(clientDistPath));
-  console.log(`[Static] Frontend build found: ${clientDistPath}`);
-} else {
-  console.warn('[Static] API-only mode — frontend build not found');
-}
-
 // Health Check API
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'LC Attendance System API is running',
+    health: '/api/health'
+  });
+});
+
 app.get('/api/health', async (req, res) => {
   let dbName = mongoose.connection?.name || 'disconnected';
   let host = mongoose.connection?.host || 'none';
@@ -218,17 +208,12 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/daily-reports', dailyReportRoutes);
 app.use('/api/settings', settingsRoutes);
 
-// React Router SPA - All non-API routes serve index.html
+// Backend-only service: never serve frontend routes
 app.get('*', (req, res) => {
-  const indexPath = clientDistPath ? path.join(clientDistPath, 'index.html') : null;
-  if (indexPath && existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(503).json({
-      status: 'error',
-      message: 'Frontend not built. Run: npm run build'
-    });
-  }
+  res.status(404).json({
+    status: 'error',
+    message: 'API route not found'
+  });
 });
 
 // Global Error Handler
